@@ -5,92 +5,2019 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#111827">
 <title>MaviRent v3</title>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f4f5f7;color:#17202a}
-button,input,select{font:inherit}.hidden{display:none!important}
-.auth{min-height:100vh;display:grid;place-items:center;padding:20px;background:#111827}.login{width:min(430px,100%);background:#fff;border-radius:20px;padding:26px;box-shadow:0 20px 60px #0005}.brand{font-size:28px;font-weight:900;margin-bottom:5px}.brand span{color:#9ca3af}.muted{color:#6b7280;font-size:13px}
-.role{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:18px 0}.role button{padding:12px;border:1px solid #d8dde4;background:#fff;border-radius:10px;cursor:pointer}.role button.sel{background:#111827;color:#fff}
-label{display:block;font-size:12px;color:#6b7280;margin:10px 0 5px}input,select{width:100%;padding:12px;border:1px solid #d7dce3;border-radius:9px;background:#fff}.primary{width:100%;margin-top:14px;padding:12px;border:0;border-radius:9px;background:#111827;color:#fff;font-weight:700;cursor:pointer}
-.demo{margin-top:14px;font-size:11px;color:#777;line-height:1.5}
-.app header{background:#111827;color:#fff;padding:16px;position:sticky;top:0;z-index:4}.bar{max-width:1050px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}.brand.small{font-size:22px;margin:0}.userbox{font-size:12px;text-align:right}.logout{margin-left:8px;background:#273244;color:#fff;border:0;border-radius:8px;padding:8px 10px;cursor:pointer}
-nav{max-width:1050px;margin:12px auto 0;display:flex;gap:6px;overflow:auto}nav button{border:0;background:#273244;color:#dbe1e8;border-radius:9px;padding:9px 11px;white-space:nowrap;cursor:pointer}nav button.active{background:#fff;color:#111827}
-main{max-width:1050px;margin:auto;padding:18px 14px 40px}.page{display:none}.page.active{display:block}.title{margin-bottom:15px}.title h1{margin:0;font-size:25px}.title p{margin:5px 0;color:#6b7280}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:#fff;border:1px solid #e3e6ea;border-radius:14px;padding:16px;margin-bottom:14px}.label{font-size:12px;color:#6b7280}.big{font-size:23px;font-weight:800;margin-top:6px}.green{color:#13844b}.red{color:#c93636}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{border:1px solid #d9dde3;background:#fff;border-radius:10px;padding:12px;text-align:left;font-weight:700;cursor:pointer}
-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}.primary.dark{width:auto;margin:0}.tablewrap{overflow:auto}.table{width:100%;border-collapse:collapse;font-size:13px}.table th,.table td{padding:10px 7px;border-bottom:1px solid #eceef1;text-align:left;white-space:nowrap}.badge{display:inline-block;padding:4px 8px;border-radius:20px;background:#eef1f5;font-size:11px}.paid{background:#e8f7ee;color:#11733f}.due{background:#fdeaea;color:#a72828}
-.notice{padding:11px;border-radius:10px;background:#eef2ff;color:#273244;font-size:13px;margin-bottom:14px}
-@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}form{grid-template-columns:1fr}.full{grid-column:auto}.userbox{font-size:10px}}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#f4f5f7;color:#17202a}
+button,input,select{font:inherit}
+.hidden{display:none!important}
+
+.auth{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:20px;
+  background:#111827
+}
+
+.login{
+  width:min(430px,100%);
+  background:#fff;
+  border-radius:20px;
+  padding:26px;
+  box-shadow:0 20px 60px #0005
+}
+
+.brand{
+  font-size:28px;
+  font-weight:900;
+  margin-bottom:5px
+}
+
+.brand span{color:#9ca3af}
+
+.muted{
+  color:#6b7280;
+  font-size:13px
+}
+
+.role{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+  margin:18px 0
+}
+
+.role button{
+  padding:12px;
+  border:1px solid #d8dde4;
+  background:#fff;
+  border-radius:10px;
+  cursor:pointer
+}
+
+.role button.sel{
+  background:#111827;
+  color:#fff
+}
+
+label{
+  display:block;
+  font-size:12px;
+  color:#6b7280;
+  margin:10px 0 5px
+}
+
+input,select{
+  width:100%;
+  padding:12px;
+  border:1px solid #d7dce3;
+  border-radius:9px;
+  background:#fff
+}
+
+.primary{
+  width:100%;
+  margin-top:14px;
+  padding:12px;
+  border:0;
+  border-radius:9px;
+  background:#111827;
+  color:#fff;
+  font-weight:700;
+  cursor:pointer
+}
+
+.secondary{
+  width:100%;
+  margin-top:9px;
+  padding:12px;
+  border:1px solid #d7dce3;
+  border-radius:9px;
+  background:#fff;
+  color:#111827;
+  font-weight:700;
+  cursor:pointer
+}
+
+.message{
+  margin-top:12px;
+  padding:10px;
+  border-radius:9px;
+  font-size:12px;
+  display:none
+}
+
+.message.error{
+  display:block;
+  background:#fdeaea;
+  color:#a72828
+}
+
+.message.success{
+  display:block;
+  background:#e8f7ee;
+  color:#11733f
+}
+
+.auth-links{
+  margin-top:14px;
+  text-align:center;
+  font-size:12px;
+  color:#6b7280
+}
+
+.auth-links button{
+  border:0;
+  background:none;
+  color:#111827;
+  font-weight:700;
+  cursor:pointer
+}
+
+.app header{
+  background:#111827;
+  color:#fff;
+  padding:16px;
+  position:sticky;
+  top:0;
+  z-index:4
+}
+
+.bar{
+  max-width:1050px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px
+}
+
+.brand.small{
+  font-size:22px;
+  margin:0
+}
+
+.userbox{
+  font-size:12px;
+  text-align:right
+}
+
+.logout{
+  margin-left:8px;
+  background:#273244;
+  color:#fff;
+  border:0;
+  border-radius:8px;
+  padding:8px 10px;
+  cursor:pointer
+}
+
+nav{
+  max-width:1050px;
+  margin:12px auto 0;
+  display:flex;
+  gap:6px;
+  overflow:auto
+}
+
+nav button{
+  border:0;
+  background:#273244;
+  color:#dbe1e8;
+  border-radius:9px;
+  padding:9px 11px;
+  white-space:nowrap;
+  cursor:pointer
+}
+
+nav button.active{
+  background:#fff;
+  color:#111827
+}
+
+main{
+  max-width:1050px;
+  margin:auto;
+  padding:18px 14px 40px
+}
+
+.page{display:none}
+.page.active{display:block}
+
+.title{margin-bottom:15px}
+.title h1{margin:0;font-size:25px}
+.title p{margin:5px 0;color:#6b7280}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px
+}
+
+.card{
+  background:#fff;
+  border:1px solid #e3e6ea;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:14px
+}
+
+.label{
+  font-size:12px;
+  color:#6b7280
+}
+
+.big{
+  font-size:23px;
+  font-weight:800;
+  margin-top:6px
+}
+
+.green{color:#13844b}
+.red{color:#c93636}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px
+}
+
+.btn{
+  border:1px solid #d9dde3;
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  text-align:left;
+  font-weight:700;
+  cursor:pointer
+}
+
+form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px
+}
+
+.full{grid-column:1/-1}
+
+.tablewrap{overflow:auto}
+
+.table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px
+}
+
+.table th,.table td{
+  padding:10px 7px;
+  border-bottom:1px solid #eceef1;
+  text-align:left;
+  white-space:nowrap
+}
+
+.badge{
+  display:inline-block;
+  padding:4px 8px;
+  border-radius:20px;
+  background:#eef1f5;
+  font-size:11px
+}
+
+.paid{
+  background:#e8f7ee;
+  color:#11733f
+}
+
+.due{
+  background:#fdeaea;
+  color:#a72828
+}
+
+.notice{
+  padding:11px;
+  border-radius:10px;
+  background:#eef2ff;
+  color:#273244;
+  font-size:13px;
+  margin-bottom:14px
+}
+
+.loading{
+  text-align:center;
+  padding:30px;
+  color:#6b7280
+}
+
+@media(max-width:700px){
+  .stats{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr}
+  form{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .userbox{font-size:10px}
+}
 </style>
 </head>
+
 <body>
+
+<!-- =========================================================
+     SUPABASE AUTHENTICATION
+     ========================================================= -->
+
 <div id="auth" class="auth">
+
   <div class="login">
+
     <div class="brand">Mavi<span>Rent</span></div>
-    <div class="muted">Rental management platform</div>
-    <div class="role">
-      <button id="landlordRole" class="sel" onclick="chooseRole('landlord')">🏢 Landlord</button>
-      <button id="tenantRole" onclick="chooseRole('tenant')">👤 Tenant</button>
+
+    <div class="muted">
+      Rental management platform
     </div>
+
+    <div class="role">
+      <button id="landlordRole" class="sel" onclick="chooseRole('landlord')">
+        🏢 Landlord
+      </button>
+
+      <button id="tenantRole" onclick="chooseRole('tenant')">
+        👤 Tenant
+      </button>
+    </div>
+
     <form id="loginForm">
-      <label>Email or phone</label><input id="loginId" required placeholder="e.g. landlord@example.com">
-      <label>Password</label><input id="loginPass" type="password" required placeholder="Password">
-      <button class="primary">Login</button>
+
+      <label>Email</label>
+
+      <input
+        id="loginEmail"
+        type="email"
+        required
+        placeholder="landlord@example.com"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="loginPass"
+        type="password"
+        required
+        placeholder="Password"
+      >
+
+      <button class="primary" type="submit">
+        Login
+      </button>
+
     </form>
-    <div class="demo"><b>Prototype login:</b> use any email/phone and password. Your selected role determines which dashboard you see. This v3 prototype keeps demo data in this browser; real secure cloud accounts come after deployment.</div>
+
+    <button id="signupButton" class="secondary" onclick="signup()">
+      Create account
+    </button>
+
+    <div id="authMessage" class="message"></div>
+
+    <div class="auth-links">
+      <button onclick="resetPassword()">
+        Forgot password?
+      </button>
+    </div>
+
   </div>
+
 </div>
+
+
+<!-- =========================================================
+     MAIN APPLICATION
+     ========================================================= -->
 
 <div id="app" class="app hidden">
+
 <header>
-<div class="bar"><div class="brand small">Mavi<span>Rent</span></div><div class="userbox"><span id="who"></span><button class="logout" onclick="logout()">Log out</button></div></div>
-<nav id="nav"></nav>
-</header><main id="main"></main>
+
+<div class="bar">
+
+<div class="brand small">
+Mavi<span>Rent</span>
 </div>
 
+<div class="userbox">
+<span id="who"></span>
+
+<button class="logout" onclick="logout()">
+Log out
+</button>
+
+</div>
+
+</div>
+
+<nav id="nav"></nav>
+
+</header>
+
+<main id="main"></main>
+
+</div>
+
+
 <script>
-const KEY='mavirent_v3_demo';
-let db=JSON.parse(localStorage.getItem(KEY)||'{"properties":[{"id":1,"name":"Mavi Court","location":"Ndejje","units":12,"rent":450000}],"tenants":[{"id":1,"name":"Sarah Nakato","phone":"0700123456","unit":"A04","rent":450000,"property":"Mavi Court","status":"Paid"}],"payments":[{"id":1,"date":"Today","tenant":"Sarah Nakato","unit":"A04","amount":450000,"method":"MTN Mobile Money"}],"repairs":[],"messages":[]}');
-let role='landlord', currentUser='';
-const money=n=>'UGX '+Number(n||0).toLocaleString('en-US');
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-function persist(){localStorage.setItem(KEY,JSON.stringify(db))}
-function chooseRole(r){role=r;landlordRole.classList.toggle('sel',r==='landlord');tenantRole.classList.toggle('sel',r==='tenant');loginId.placeholder=r==='landlord'?'e.g. landlord@example.com':'e.g. tenant@example.com'}
-loginForm.onsubmit=e=>{e.preventDefault();currentUser=loginId.value;auth.classList.add('hidden');app.classList.remove('hidden');buildNav();show(role==='landlord'?'dashboard':'tenantDashboard')};
-function logout(){app.classList.add('hidden');auth.classList.remove('hidden');loginForm.reset()}
+
+/* =========================================================
+   SUPABASE CONNECTION
+   ========================================================= */
+
+/* Your Supabase Project URL */
+const SUPABASE_URL =
+  'https://wborvbuqdiscoasnsrwda.supabase.co';
+
+
+/* Your Supabase publishable key */
+const SUPABASE_KEY =
+  'sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
+
+
+const { createClient } = window.supabase;
+
+const supabaseClient =
+  createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+/* =========================================================
+   APPLICATION VARIABLES
+   ========================================================= */
+
+let role = 'landlord';
+let currentUser = null;
+
+
+/* =========================================================
+   BASIC HELPERS
+   ========================================================= */
+
+const money = n =>
+  'UGX ' +
+  Number(n || 0).toLocaleString('en-US');
+
+
+const esc = s =>
+  String(s ?? '').replace(
+    /[&<>"']/g,
+    m => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#039;'
+    }[m])
+  );
+
+
+function showMessage(text,type='error'){
+
+  const box =
+    document.getElementById('authMessage');
+
+  box.textContent = text;
+
+  box.className =
+    'message ' + type;
+
+}
+
+
+/* =========================================================
+   ROLE SELECTION
+   ========================================================= */
+
+function chooseRole(r){
+
+  role = r;
+
+  document
+    .getElementById('landlordRole')
+    .classList.toggle(
+      'sel',
+      r === 'landlord'
+    );
+
+  document
+    .getElementById('tenantRole')
+    .classList.toggle(
+      'sel',
+      r === 'tenant'
+    );
+
+}
+
+
+/* =========================================================
+   REAL SUPABASE LOGIN
+   ========================================================= */
+
+document
+  .getElementById('loginForm')
+  .addEventListener(
+    'submit',
+    async function(e){
+
+      e.preventDefault();
+
+      const email =
+        document.getElementById(
+          'loginEmail'
+        ).value.trim();
+
+      const password =
+        document.getElementById(
+          'loginPass'
+        ).value;
+
+      showMessage(
+        'Logging in...',
+        'success'
+      );
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+
+      if(error){
+
+        showMessage(
+          error.message,
+          'error'
+        );
+
+        return;
+      }
+
+      currentUser = data.user;
+
+      await loadUser();
+
+    }
+  );
+
+
+/* =========================================================
+   CREATE REAL SUPABASE ACCOUNT
+   ========================================================= */
+
+async function signup(){
+
+  const email =
+    document.getElementById(
+      'loginEmail'
+    ).value.trim();
+
+  const password =
+    document.getElementById(
+      'loginPass'
+    ).value;
+
+  if(!email){
+
+    showMessage(
+      'Enter your email first.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(password.length < 6){
+
+    showMessage(
+      'Password must be at least 6 characters.',
+      'error'
+    );
+
+    return;
+  }
+
+  showMessage(
+    'Creating your account...',
+    'success'
+  );
+
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.auth.signUp({
+
+      email: email,
+
+      password: password,
+
+      options:{
+        data:{
+          role: role
+        }
+      }
+
+    });
+
+
+  if(error){
+
+    showMessage(
+      error.message,
+      'error'
+    );
+
+    return;
+  }
+
+
+  if(data.session){
+
+    currentUser = data.user;
+
+    await loadUser();
+
+  }else{
+
+    showMessage(
+      'Account created. Check your email to confirm your account, then log in.',
+      'success'
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   PASSWORD RESET
+   ========================================================= */
+
+async function resetPassword(){
+
+  const email =
+    document.getElementById(
+      'loginEmail'
+    ).value.trim();
+
+  if(!email){
+
+    showMessage(
+      'Enter your email first.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  const {
+    error
+  } =
+    await supabaseClient.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo:
+          window.location.origin
+      }
+    );
+
+
+  if(error){
+
+    showMessage(
+      error.message,
+      'error'
+    );
+
+    return;
+  }
+
+
+  showMessage(
+    'Password reset email sent.',
+    'success'
+  );
+
+}
+
+
+/* =========================================================
+   LOAD CURRENT USER
+   ========================================================= */
+
+async function loadUser(){
+
+  if(!currentUser){
+
+    const result =
+      await supabaseClient.auth.getUser();
+
+    currentUser =
+      result.data.user;
+  }
+
+
+  if(!currentUser){
+
+    return;
+  }
+
+
+  /*
+   * First try the role saved in Supabase Auth metadata.
+   */
+
+  let userRole =
+    currentUser.user_metadata?.role;
+
+
+  /*
+   * Then try the profiles table.
+   *
+   * This matches the profile system we created
+   * in your Supabase project.
+   */
+
+  try{
+
+    const {
+      data: profile
+    } =
+      await supabaseClient
+        .from('profiles')
+        .select('role')
+        .eq('id',currentUser.id)
+        .maybeSingle();
+
+
+    if(profile?.role){
+
+      userRole =
+        profile.role;
+
+    }
+
+  }catch(error){
+
+    console.log(
+      'Profile lookup:',
+      error
+    );
+
+  }
+
+
+  /*
+   * Use the saved account role.
+   */
+
+  if(
+    userRole === 'landlord' ||
+    userRole === 'tenant'
+  ){
+
+    role = userRole;
+
+  }
+
+
+  document
+    .getElementById('auth')
+    .classList.add('hidden');
+
+  document
+    .getElementById('app')
+    .classList.remove('hidden');
+
+
+  buildNav();
+
+
+  show(
+    role === 'landlord'
+      ? 'dashboard'
+      : 'tenantDashboard'
+  );
+
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+async function logout(){
+
+  await supabaseClient.auth.signOut();
+
+  currentUser = null;
+
+  document
+    .getElementById('app')
+    .classList.add('hidden');
+
+  document
+    .getElementById('auth')
+    .classList.remove('hidden');
+
+  document
+    .getElementById('loginForm')
+    .reset();
+
+}
+
+
+/* =========================================================
+   CHECK EXISTING SESSION
+   ========================================================= */
+
+async function checkSession(){
+
+  const {
+    data
+  } =
+    await supabaseClient.auth.getSession();
+
+
+  if(data.session){
+
+    currentUser =
+      data.session.user;
+
+    await loadUser();
+
+  }
+
+}
+
+
+checkSession();
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
 function buildNav(){
-who.textContent=(role==='landlord'?'Landlord: ':'Tenant: ')+currentUser;
-nav.innerHTML=role==='landlord'?`
-<button data-page="dashboard">🏠 Dashboard</button><button data-page="properties">🏘️ Properties</button><button data-page="tenants">👥 Tenants</button><button data-page="payments">💰 Payments</button><button data-page="repairs">🔧 Repairs</button><button data-page="reports">📊 Reports</button>`
-:`<button data-page="tenantDashboard">🏠 My Home</button><button data-page="myPayments">💰 My Payments</button><button data-page="myRepairs">🔧 Report Problem</button><button data-page="myProfile">👤 My Profile</button>`;
-nav.querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.page));
+
+  const email =
+    currentUser?.email || 'User';
+
+
+  document
+    .getElementById('who')
+    .textContent =
+      (role === 'landlord'
+        ? 'Landlord: '
+        : 'Tenant: ') +
+      email;
+
+
+  const nav =
+    document.getElementById('nav');
+
+
+  nav.innerHTML =
+    role === 'landlord'
+
+    ?
+
+`
+<button data-page="dashboard">
+🏠 Dashboard
+</button>
+
+<button data-page="properties">
+🏘️ Properties
+</button>
+
+<button data-page="tenants">
+👥 Tenants
+</button>
+
+<button data-page="payments">
+💰 Payments
+</button>
+
+<button data-page="repairs">
+🔧 Repairs
+</button>
+
+<button data-page="reports">
+📊 Reports
+</button>
+`
+
+    :
+
+`
+<button data-page="tenantDashboard">
+🏠 My Home
+</button>
+
+<button data-page="myPayments">
+💰 My Payments
+</button>
+
+<button data-page="myRepairs">
+🔧 Report Problem
+</button>
+
+<button data-page="myProfile">
+👤 My Profile
+</button>
+`;
+
+
+  nav
+    .querySelectorAll('button')
+    .forEach(
+      b =>
+        b.onclick =
+          () =>
+            show(
+              b.dataset.page
+            )
+    );
+
 }
-function show(id){main.innerHTML=role==='landlord'?landlordPage(id):tenantPage(id);nav.querySelectorAll('button').forEach(b=>b.classList.toggle('active',b.dataset.page===id));attachForms();window.scrollTo(0,0)}
+
+
+/* =========================================================
+   PAGE SWITCHING
+   ========================================================= */
+
+function show(id){
+
+  document
+    .getElementById('main')
+    .innerHTML =
+      role === 'landlord'
+        ? landlordPage(id)
+        : tenantPage(id);
+
+
+  document
+    .querySelectorAll(
+      '#nav button'
+    )
+    .forEach(
+      b =>
+        b.classList.toggle(
+          'active',
+          b.dataset.page === id
+        )
+    );
+
+
+  attachForms();
+
+  window.scrollTo(0,0);
+
+}
+
+
+/* =========================================================
+   LANDLORD DASHBOARD
+   ========================================================= */
+
 function landlordPage(id){
-let collected=db.payments.reduce((a,x)=>a+x.amount,0), expected=db.tenants.reduce((a,x)=>a+x.rent,0), outstanding=Math.max(0,expected-collected), units=db.properties.reduce((a,x)=>a+x.units,0), repairCost=db.repairs.reduce((a,x)=>a+(+x.cost||0),0);
-if(id==='dashboard')return `<section class="page active"><div class="title"><h1>Landlord Dashboard</h1><p>Private business overview — tenants cannot see this.</p></div><div class="stats"><div class="card"><div class="label">Properties</div><div class="big">${db.properties.length}</div></div><div class="card"><div class="label">Units</div><div class="big">${units}</div></div><div class="card"><div class="label">Collected</div><div class="big green">${money(collected)}</div></div><div class="card"><div class="label">Outstanding</div><div class="big red">${money(outstanding)}</div></div></div><div class="grid"><div class="card"><h3>Quick actions</h3><div class="actions"><button class="btn" onclick="show('properties')">＋ Add property</button><button class="btn" onclick="show('tenants')">＋ Add tenant</button><button class="btn" onclick="show('payments')">＋ Record payment</button><button class="btn" onclick="show('repairs')">🔧 Repair</button></div></div><div class="card"><h3>Business summary</h3><p class="label">Tenant accounts: ${db.tenants.length}</p><p class="label">Payments recorded: ${db.payments.length}</p><p class="label">Repair costs: ${money(repairCost)}</p></div></div></section>`;
-if(id==='properties')return `<section class="page active"><div class="title"><h1>Properties</h1><p>Only the landlord can see this.</p></div><div class="card"><h3>Add property</h3><form id="propertyForm"><input id="pn" placeholder="Property name" required><input id="pl" placeholder="Location" required><input id="pu" type="number" min="1" placeholder="Number of units" required><input id="pr" type="number" min="0" placeholder="Rent per unit (UGX)" required><button class="primary full">Save property</button></form></div><div class="card"><h3>Properties</h3>${propertyTable()}</div></section>`;
-if(id==='tenants')return `<section class="page active"><div class="title"><h1>Tenants</h1><p>Manage tenant accounts and tenancy details.</p></div><div class="card"><h3>Create tenant account</h3><form id="tenantForm"><input id="tn" placeholder="Tenant full name" required><input id="tp" placeholder="Phone / email" required><input id="tu" placeholder="Unit" required><input id="tr" type="number" placeholder="Monthly rent (UGX)" required><input id="tprop" placeholder="Property" required><button class="primary full">Create tenant</button></form></div><div class="card"><h3>Tenant accounts</h3>${tenantTable()}</div></section>`;
-if(id==='payments')return `<section class="page active"><div class="title"><h1>Payments</h1><p>Record rent received.</p></div><div class="card"><h3>Record payment</h3><form id="paymentForm"><input id="pt" placeholder="Tenant" required><input id="pu2" placeholder="Unit" required><input id="pa" type="number" min="1" placeholder="Amount (UGX)" required><select id="pm"><option>MTN Mobile Money</option><option>Airtel Money</option><option>Bank</option><option>Cash</option></select><button class="primary full">Save payment</button></form></div><div class="card"><h3>History</h3>${paymentTable()}</div></section>`;
-if(id==='repairs')return `<section class="page active"><div class="title"><h1>Maintenance</h1><p>Manage repairs reported by tenants.</p></div><div class="card"><h3>Add repair</h3><form id="repairForm"><input id="ru" placeholder="Unit" required><input id="ri" placeholder="Problem" required><input id="rc" type="number" placeholder="Cost (UGX)"><select id="rs"><option>Pending</option><option>In progress</option><option>Completed</option></select><button class="primary full">Save repair</button></form></div><div class="card"><h3>Requests</h3>${repairTable()}</div></section>`;
-return `<section class="page active"><div class="title"><h1>Reports</h1><p>Private financial and occupancy information.</p></div><div class="stats"><div class="card"><div class="label">Monthly rent scheduled</div><div class="big">${money(expected)}</div></div><div class="card"><div class="label">Collected</div><div class="big green">${money(collected)}</div></div><div class="card"><div class="label">Outstanding</div><div class="big red">${money(outstanding)}</div></div><div class="card"><div class="label">Occupancy</div><div class="big">${units?Math.round(db.tenants.length/units*100):0}%</div></div></div></section>`;
+
+  if(id === 'dashboard'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Landlord Dashboard
+</h1>
+
+<p>
+Private business overview.
+</p>
+
+</div>
+
+
+<div class="notice">
+
+🔒 This area is for your landlord account.
+
+</div>
+
+
+<div class="stats">
+
+<div class="card">
+
+<div class="label">
+Properties
+</div>
+
+<div class="big">
+0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Units
+</div>
+
+<div class="big">
+0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Collected
+</div>
+
+<div class="big green">
+UGX 0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Outstanding
+</div>
+
+<div class="big red">
+UGX 0
+</div>
+
+</div>
+
+</div>
+
+
+<div class="grid">
+
+<div class="card">
+
+<h3>
+Quick actions
+</h3>
+
+
+<div class="actions">
+
+<button
+class="btn"
+onclick="show('properties')">
+＋ Add property
+</button>
+
+
+<button
+class="btn"
+onclick="show('tenants')">
+＋ Add tenant
+</button>
+
+
+<button
+class="btn"
+onclick="show('payments')">
+＋ Record payment
+</button>
+
+
+<button
+class="btn"
+onclick="show('repairs')">
+🔧 Repair
+</button>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Account
+</h3>
+
+<p class="label">
+${esc(currentUser?.email || '')}
+</p>
+
+<p class="label">
+Role: Landlord
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  if(id === 'properties'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Properties
+</h1>
+
+<p>
+Manage your rental properties.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Add property
+</h3>
+
+
+<form id="propertyForm">
+
+<input
+id="pn"
+placeholder="Property name"
+required
+>
+
+
+<input
+id="pl"
+placeholder="Location"
+required
+>
+
+
+<input
+id="pu"
+type="number"
+min="1"
+placeholder="Number of units"
+required
+>
+
+
+<input
+id="pr"
+type="number"
+min="0"
+placeholder="Rent per unit (UGX)"
+required
+>
+
+
+<button
+class="primary full">
+Save property
+</button>
+
+</form>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Properties
+</h3>
+
+<p class="label">
+Properties will be connected to your Supabase database next.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  if(id === 'tenants'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Tenants
+</h1>
+
+<p>
+Manage tenant accounts.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Create tenant account
+</h3>
+
+
+<form id="tenantForm">
+
+<input
+id="tn"
+placeholder="Tenant full name"
+required
+>
+
+
+<input
+id="tp"
+placeholder="Phone / email"
+required
+>
+
+
+<input
+id="tu"
+placeholder="Unit"
+required
+>
+
+
+<input
+id="tr"
+type="number"
+placeholder="Monthly rent (UGX)"
+required
+>
+
+
+<input
+id="tprop"
+placeholder="Property"
+required
+>
+
+
+<button
+class="primary full">
+Create tenant
+</button>
+
+</form>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Tenant accounts
+</h3>
+
+<p class="label">
+Tenant records will be loaded from Supabase.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  if(id === 'payments'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Payments
+</h1>
+
+<p>
+Record rent received.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Record payment
+</h3>
+
+
+<form id="paymentForm">
+
+<input
+id="pt"
+placeholder="Tenant"
+required
+>
+
+
+<input
+id="pu2"
+placeholder="Unit"
+required
+>
+
+
+<input
+id="pa"
+type="number"
+min="1"
+placeholder="Amount (UGX)"
+required
+>
+
+
+<select id="pm">
+
+<option>
+MTN Mobile Money
+</option>
+
+<option>
+Airtel Money
+</option>
+
+<option>
+Bank
+</option>
+
+<option>
+Cash
+</option>
+
+</select>
+
+
+<button
+class="primary full">
+Save payment
+</button>
+
+</form>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Payment history
+</h3>
+
+<p class="label">
+Payments will be loaded from Supabase.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  if(id === 'repairs'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Maintenance
+</h1>
+
+<p>
+Manage repairs reported by tenants.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Add repair
+</h3>
+
+
+<form id="repairForm">
+
+<input
+id="ru"
+placeholder="Unit"
+required
+>
+
+
+<input
+id="ri"
+placeholder="Problem"
+required
+>
+
+
+<input
+id="rc"
+type="number"
+placeholder="Cost (UGX)"
+>
+
+
+<select id="rs">
+
+<option>
+Pending
+</option>
+
+<option>
+In progress
+</option>
+
+<option>
+Completed
+</option>
+
+</select>
+
+
+<button
+class="primary full">
+Save repair
+</button>
+
+</form>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Requests
+</h3>
+
+<p class="label">
+Maintenance records will be loaded from Supabase.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Reports
+</h1>
+
+<p>
+Private financial and occupancy information.
+</p>
+
+</div>
+
+
+<div class="stats">
+
+<div class="card">
+
+<div class="label">
+Monthly rent scheduled
+</div>
+
+<div class="big">
+UGX 0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Collected
+</div>
+
+<div class="big green">
+UGX 0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Outstanding
+</div>
+
+<div class="big red">
+UGX 0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Occupancy
+</div>
+
+<div class="big">
+0%
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+`;
+
 }
-function propertyTable(){return `<div class="tablewrap"><table class="table"><tr><th>Property</th><th>Location</th><th>Units</th><th>Rent</th><th></th></tr>${db.properties.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.location)}</td><td>${x.units}</td><td>${money(x.rent)}</td><td><button onclick="del('properties',${x.id})">Delete</button></td></tr>`).join('')||'<tr><td colspan="5">No properties.</td></tr>'}</table></div>`}
-function tenantTable(){return `<div class="tablewrap"><table class="table"><tr><th>Name</th><th>Contact</th><th>Unit</th><th>Rent</th><th>Property</th></tr>${db.tenants.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.phone)}</td><td>${esc(x.unit)}</td><td>${money(x.rent)}</td><td>${esc(x.property)}</td></tr>`).join('')||'<tr><td colspan="5">No tenants.</td></tr>'}</table></div>`}
-function paymentTable(){return `<div class="tablewrap"><table class="table"><tr><th>Date</th><th>Tenant</th><th>Unit</th><th>Amount</th><th>Method</th></tr>${db.payments.slice().reverse().map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.tenant)}</td><td>${esc(x.unit)}</td><td>${money(x.amount)}</td><td>${esc(x.method)}</td></tr>`).join('')||'<tr><td colspan="5">No payments.</td></tr>'}</table></div>`}
-function repairTable(){return `<div class="tablewrap"><table class="table"><tr><th>Unit</th><th>Problem</th><th>Cost</th><th>Status</th></tr>${db.repairs.slice().reverse().map(x=>`<tr><td>${esc(x.unit)}</td><td>${esc(x.problem)}</td><td>${money(x.cost)}</td><td><span class="badge">${esc(x.status)}</span></td></tr>`).join('')||'<tr><td colspan="4">No repairs.</td></tr>'}</table></div>`}
+
+
+/* =========================================================
+   TENANT DASHBOARD
+   ========================================================= */
+
 function tenantPage(id){
-let t=db.tenants[0]||{name:'Demo Tenant',unit:'A04',rent:450000,property:'Mavi Court',status:'Paid',phone:'0700123456'};
-if(id==='tenantDashboard')return `<section class="page active"><div class="title"><h1>Welcome, ${esc(t.name)} 👋</h1><p>This is your private tenant account.</p></div><div class="notice">🔒 You can only see information belonging to your tenancy. Landlord financial reports and other tenants are hidden.</div><div class="stats"><div class="card"><div class="label">My property</div><div class="big" style="font-size:18px">${esc(t.property)}</div></div><div class="card"><div class="label">My unit</div><div class="big">${esc(t.unit)}</div></div><div class="card"><div class="label">Monthly rent</div><div class="big">${money(t.rent)}</div></div><div class="card"><div class="label">Current status</div><div class="big green">${esc(t.status)}</div></div></div><div class="card"><h3>Quick actions</h3><div class="actions"><button class="btn" onclick="show('myPayments')">💰 View my payments</button><button class="btn" onclick="show('myRepairs')">🔧 Report a problem</button><button class="btn" onclick="show('myProfile')">👤 My profile</button></div></div></section>`;
-if(id==='myPayments')return `<section class="page active"><div class="title"><h1>My Payments</h1><p>Your own rent payment history.</p></div><div class="card">${paymentTable()}</div></section>`;
-if(id==='myRepairs')return `<section class="page active"><div class="title"><h1>Report a Problem</h1><p>Send a maintenance request to your landlord.</p></div><div class="card"><form id="tenantRepairForm"><input id="tru" value="${esc(t.unit)}" readonly><input id="tri" placeholder="What needs fixing?" required><button class="primary full">Submit request</button></form></div><div class="card"><h3>My requests</h3>${repairTable()}</div></section>`;
-return `<section class="page active"><div class="title"><h1>My Profile</h1><p>Your private tenancy information.</p></div><div class="card"><p><b>Name:</b> ${esc(t.name)}</p><p><b>Contact:</b> ${esc(t.phone)}</p><p><b>Property:</b> ${esc(t.property)}</p><p><b>Unit:</b> ${esc(t.unit)}</p><p><b>Monthly rent:</b> ${money(t.rent)}</p></div></section>`;
+
+  if(id === 'tenantDashboard'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Welcome 👋
+</h1>
+
+<p>
+This is your private tenant account.
+</p>
+
+</div>
+
+
+<div class="notice">
+
+🔒 You can only see information belonging to your tenancy.
+
+</div>
+
+
+<div class="stats">
+
+<div class="card">
+
+<div class="label">
+My property
+</div>
+
+<div class="big">
+Not assigned
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+My unit
+</div>
+
+<div class="big">
+Not assigned
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Monthly rent
+</div>
+
+<div class="big">
+UGX 0
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="label">
+Current status
+</div>
+
+<div class="big">
+Pending
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h3>
+Quick actions
+</h3>
+
+
+<div class="actions">
+
+<button
+class="btn"
+onclick="show('myPayments')">
+💰 View my payments
+</button>
+
+
+<button
+class="btn"
+onclick="show('myRepairs')">
+🔧 Report a problem
+</button>
+
+
+<button
+class="btn"
+onclick="show('myProfile')">
+👤 My profile
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  if(id === 'myPayments'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+My Payments
+</h1>
+
+<p>
+Your own rent payment history.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<p class="label">
+Your payment records will appear here.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  if(id === 'myRepairs'){
+
+    return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+Report a Problem
+</h1>
+
+<p>
+Send a maintenance request to your landlord.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<form id="tenantRepairForm">
+
+<input
+id="tru"
+placeholder="Unit"
+required
+>
+
+
+<input
+id="tri"
+placeholder="What needs fixing?"
+required
+>
+
+
+<button
+class="primary full">
+Submit request
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+`;
+
+  }
+
+
+  return `
+
+<section class="page active">
+
+<div class="title">
+
+<h1>
+My Profile
+</h1>
+
+<p>
+Your private account information.
+</p>
+
+</div>
+
+
+<div class="card">
+
+<p>
+<b>Email:</b>
+${esc(currentUser?.email || '')}
+</p>
+
+<p>
+<b>Role:</b>
+Tenant
+</p>
+
+</div>
+
+</section>
+
+`;
+
 }
+
+
+/* =========================================================
+   FORM HANDLERS
+   ========================================================= */
+
 function attachForms(){
-let f=document.getElementById('propertyForm');if(f)f.onsubmit=e=>{e.preventDefault();db.properties.push({id:Date.now(),name:pn.value,location:pl.value,units:+pu.value,rent:+pr.value});persist();show('properties')};
-f=document.getElementById('tenantForm');if(f)f.onsubmit=e=>{e.preventDefault();db.tenants.push({id:Date.now(),name:tn.value,phone:tp.value,unit:tu.value,rent:+tr.value,property:tprop.value,status:'Due'});persist();show('tenants')};
-f=document.getElementById('paymentForm');if(f)f.onsubmit=e=>{e.preventDefault();db.payments.push({id:Date.now(),date:new Date().toLocaleDateString('en-UG'),tenant:pt.value,unit:pu2.value,amount:+pa.value,method:pm.value});persist();show('payments')};
-f=document.getElementById('repairForm');if(f)f.onsubmit=e=>{e.preventDefault();db.repairs.push({id:Date.now(),unit:ru.value,problem:ri.value,cost:+rc.value||0,status:rs.value});persist();show('repairs')};
-f=document.getElementById('tenantRepairForm');if(f)f.onsubmit=e=>{e.preventDefault();db.repairs.push({id:Date.now(),unit:tru.value,problem:tri.value,cost:0,status:'Pending'});persist();show('myRepairs')};
+
+  /*
+   * These forms currently confirm that the interface works.
+   *
+   * The next step is connecting each one directly to
+   * your Supabase tables:
+   *
+   * properties
+   * units
+   * tenants
+   * payments
+   * maintenance
+   * expenses
+   * receipts
+   *
+   * We should do that table-by-table so we don't break
+   * your RLS policies.
+   */
+
+
+  let f =
+    document.getElementById(
+      'propertyForm'
+    );
+
+
+  if(f){
+
+    f.onsubmit =
+      async e => {
+
+        e.preventDefault();
+
+        alert(
+          'Property form is ready. We will connect it to Supabase next.'
+        );
+
+      };
+
+  }
+
+
+  f =
+    document.getElementById(
+      'tenantForm'
+    );
+
+
+  if(f){
+
+    f.onsubmit =
+      async e => {
+
+        e.preventDefault();
+
+        alert(
+          'Tenant form is ready. We will connect it to Supabase next.'
+        );
+
+      };
+
+  }
+
+
+  f =
+    document.getElementById(
+      'paymentForm'
+    );
+
+
+  if(f){
+
+    f.onsubmit =
+      async e => {
+
+        e.preventDefault();
+
+        alert(
+          'Payment form is ready. We will connect it to Supabase next.'
+        );
+
+      };
+
+  }
+
+
+  f =
+    document.getElementById(
+      'repairForm'
+    );
+
+
+  if(f){
+
+    f.onsubmit =
+      async e => {
+
+        e.preventDefault();
+
+        alert(
+          'Maintenance form is ready. We will connect it to Supabase next.'
+        );
+
+      };
+
+  }
+
+
+  f =
+    document.getElementById(
+      'tenantRepairForm'
+    );
+
+
+  if(f){
+
+    f.onsubmit =
+      async e => {
+
+        e.preventDefault();
+
+        alert(
+          'Maintenance request is ready. We will connect it to Supabase next.'
+        );
+
+      };
+
+  }
+
 }
-function del(type,id){if(confirm('Delete this record?')){db[type]=db[type].filter(x=>x.id!==id);persist();show(type==='properties'?'properties':'tenants')}}
+
+
+/* =========================================================
+   SUPABASE AUTH STATE
+   ========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+  async (event,session) => {
+
+    if(session){
+
+      currentUser =
+        session.user;
+
+    }
+
+  }
+);
+
 </script>
+
 </body>
 </html>
