@@ -103,7 +103,7 @@ main{padding:20px 14px 50px}.title{margin-bottom:15px}.title h1{margin:0;font-si
 const SUPABASE_URL='https://wborvbuqdiscoasnsrwa.supabase.co';
 const SUPABASE_KEY='sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-let role='landlord',user=null,profile=null,cache={properties:[],units:[],tenants:[],payments:[],maintenance_requests:[],expenses:[],receipts:[]};
+let role='landlord',user=null,profile=null,appLoading=false,cache={properties:[],units:[],tenants:[],payments:[],maintenance_requests:[],expenses:[],receipts:[]};
 
 const $=id=>document.getElementById(id);
 const money=n=>'UGX '+Number(n||0).toLocaleString('en-US');
@@ -125,30 +125,93 @@ async function resetPassword(){
 }
 $('loginForm').onsubmit=async e=>{e.preventDefault();msg('Logging in...','success');const {data,error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)return msg(error.message);user=data.user;await loadApp()};
 async function loadApp(){
+ if(!user||appLoading)return;
+ appLoading=true;
  const p=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
  if(p.error)return msg(p.error.message);
  profile=p.data;
  role=profile?.role||user.user_metadata?.role||role;
- $('auth').classList.add('hidden');$('app').classList.remove('hidden');await refresh();buildNav();show(role==='landlord'?'dashboard':'home');
+ $('auth').classList.add('hidden');$('app').classList.remove('hidden');await refresh();buildNav();show(role==='landlord'?'dashboard':'home');appLoading=false;
 }
 async function logout(){await sb.auth.signOut();user=null;profile=null;$('app').classList.add('hidden');$('auth').classList.remove('hidden');$('loginForm').reset()}
 async function refresh(){
  if(!user)return;
- const tables=['properties','units','tenants','payments','maintenance_requests','expenses','receipts'];
- for(const t of tables){
-   let q=sb.from(t).select('*');
-   if(role==='landlord')q=q.eq('landlord_id',user.id);
-   else if(t==='tenants')q=q.eq('profile_id',user.id);
-   else continue;
-   const r=await q.order('created_at',{ascending:false});
-   cache[t]=r.data||[];
+ cache={properties:[],units:[],tenants:[],payments:[],maintenance_requests:[],expenses:[],receipts:[]};
+
+ if(role==='landlord'){
+   const p=await sb.from('properties').select('*').eq('landlord_id',user.id).order('created_at',{ascending:false});
+   if(p.error)return showDbError('properties',p.error);
+   cache.properties=p.data||[];
+
+   const propertyIds=cache.properties.map(x=>x.id);
+   if(propertyIds.length){
+     const u=await sb.from('units').select('*').in('property_id',propertyIds).order('created_at',{ascending:false});
+     if(u.error)return showDbError('units',u.error);
+     cache.units=u.data||[];
+   }
+
+   for(const [table,column] of [
+     ['tenants','landlord_id'],
+     ['payments','landlord_id'],
+     ['maintenance_requests','landlord_id'],
+     ['expenses','landlord_id'],
+     ['receipts','landlord_id']
+   ]){
+     let r=await sb.from(table).select('*').eq(column,user.id).order('created_at',{ascending:false});
+     if(r.error)r=await sb.from(table).select('*').eq(column,user.id);
+     if(r.error)return showDbError(table,r.error);
+     cache[table]=r.data||[];
+   }
+ }else{
+   const t=await sb.from('tenants').select('*').eq('profile_id',user.id);
+   if(t.error)return showDbError('tenants',t.error);
+   cache.tenants=t.data||[];
+
+   const tenantIds=cache.tenants.map(x=>x.id);
+   const unitIds=[...new Set(cache.tenants.map(x=>x.unit_id).filter(Boolean))];
+
+   if(unitIds.length){
+     const u=await sb.from('units').select('*').in('id',unitIds);
+     if(u.error)return showDbError('units',u.error);
+     cache.units=u.data||[];
+
+     const propertyIds=[...new Set(cache.units.map(x=>x.property_id).filter(Boolean))];
+     if(propertyIds.length){
+       const p=await sb.from('properties').select('*').in('id',propertyIds);
+       if(p.error)return showDbError('properties',p.error);
+       cache.properties=p.data||[];
+     }
+   }
+
+   if(tenantIds.length){
+     const payment=await sb.from('payments').select('*').in('tenant_id',tenantIds);
+     if(payment.error)return showDbError('payments',payment.error);
+     cache.payments=payment.data||[];
+
+     const maint=await sb.from('maintenance_requests').select('*').in('tenant_id',tenantIds);
+     if(maint.error)return showDbError('maintenance_requests',maint.error);
+     cache.maintenance_requests=maint.data||[];
+
+     const receipts=await sb.from('receipts').select('*').in('tenant_id',tenantIds);
+     if(receipts.error)return showDbError('receipts',receipts.error);
+     cache.receipts=receipts.data||[];
+   }
+ }
+}
+function showDbError(table,error){
+ console.error('MavRent database error:',table,error);
+ const text=error?.message||String(error);
+ if($('main')){
+   $('main').insertAdjacentHTML('afterbegin',`<div class="notice" style="background:#fff0f0;color:#8f2222">Database error in <b>${esc(table)}</b>: ${esc(text)}</div>`);
+ }else{
+   msg(`Database error in ${table}: ${text}`);
  }
 }
 function buildNav(){
  $('who').textContent=(role==='landlord'?'Landlord: ':'Tenant: ')+(user?.email||'');
  $('nav').innerHTML=role==='landlord'?`
  <button data-p="dashboard">🏠 Dashboard</button><button data-p="properties">🏘️ Properties</button><button data-p="units">🚪 Units</button><button data-p="tenants">👥 Tenants</button><button data-p="payments">💰 Payments</button><button data-p="maintenance">🔧 Maintenance</button><button data-p="expenses">🧾 Expenses</button><button data-p="receipts">🧾 Receipts</button><button data-p="reports">📊 Reports</button>`
- :`<button data-p="home">🏠 My Home</button><button data-p="myPayments">💰 My Payments</button><button data-p="myMaintenance">🔧 Maintenance</button><button data-p="myProfile">👤 My Profile</button>`;
+ :`<button data-p="home">🏠 My Home</button><button data-p="myPayments">💰 My Payments</button><button data-p="myMaintenance">🔧 Maintenance</button><button data-p="myReceipts">🧾 My Receipts</button><button data-p="myProfile">👤 My Profile</button>`;
  document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>show(b.dataset.p));
 }
 async function show(id){await refresh();$('main').innerHTML=role==='landlord'?landlord(id):tenant(id);document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.p===id));attach();window.scrollTo(0,0)}
@@ -173,10 +236,33 @@ function page(title,sub,form,tbl){return `<section><div class="title"><h1>${titl
 function table(head,rows,fn){return `<div class="tablewrap"><table class="table"><tr>${head.map(h=>`<th>${h}</th>`).join('')}</tr>${rows.map(fn).join('')||`<tr><td colspan="${head.length}">No records yet.</td></tr>`}</table></div>`}
 function tenant(id){
  const t=cache.tenants[0];
- if(id==='home')return `<section><div class="title"><h1>My Home 👋</h1><p>Your private tenancy information.</p></div><div class="notice">🔒 Other tenants and landlord financial information are hidden.</div>${t?`<div class="stats"><div class="card"><div class="label">Unit</div><div class="big">${esc(cache.units.find(u=>u.id===t.unit_id)?.unit_number||'')}</div></div><div class="card"><div class="label">Monthly rent</div><div class="big">${money(t.rent_amount)}</div></div><div class="card"><div class="label">Due day</div><div class="big">${t.rent_due_day}</div></div><div class="card"><div class="label">Status</div><div class="big green">${esc(t.status)}</div></div></div>`:'<div class="card">Your landlord has not assigned a unit to your account yet.</div>'}</section>`;
- if(id==='myPayments')return page('My Payments','Your own payment history.','',table(['Date','Amount','Method','Reference'],cache.payments.filter(p=>p.tenant_id===t?.id),x=>`<tr><td>${x.payment_date}</td><td>${money(x.amount)}</td><td>${esc(x.payment_method)}</td><td>${esc(x.transaction_reference)}</td></tr>`));
- if(id==='myMaintenance')return page('Report a Problem','Send a maintenance request to your landlord.',`<form id="tenantMaintForm" class="formgrid"><input id="ttitle" placeholder="Problem title" required><textarea id="tdesc" class="full" placeholder="Describe the problem" required></textarea><button class="primary full">Submit request</button></form>`,table(['Title','Status','Date'],cache.maintenance_requests.filter(m=>m.tenant_id===t?.id),x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.status)}</td><td>${new Date(x.created_at).toLocaleDateString()}</td></tr>`));
- return `<section><div class="title"><h1>My Profile</h1><p>Your account information.</p></div><div class="card"><p><b>Email:</b> ${esc(user.email)}</p><p><b>Role:</b> Tenant</p><p><b>Profile ID:</b> ${esc(user.id)}</p><p class="label">Give your Profile ID to your landlord so they can assign your tenant account.</p></div></section>`;
+ if(id==='home'){
+   const unit=t?cache.units.find(u=>u.id===t.unit_id):null;
+   const property=unit?cache.properties.find(p=>p.id===unit.property_id):null;
+   return `<section><div class="title"><h1>My Home 👋</h1><p>Your private tenancy information.</p></div>
+   <div class="notice">🔒 Other tenants and landlord financial information are hidden.</div>
+   ${t?`<div class="stats">
+   <div class="card"><div class="label">Property</div><div class="big">${esc(property?.name||'—')}</div></div>
+   <div class="card"><div class="label">Unit</div><div class="big">${esc(unit?.unit_number||'—')}</div></div>
+   <div class="card"><div class="label">Monthly rent</div><div class="big">${money(t.rent_amount)}</div></div>
+   <div class="card"><div class="label">Due day</div><div class="big">${t.rent_due_day}</div></div></div>
+   <div class="card"><p><b>Tenancy status:</b> <span class="badge">${esc(t.status)}</span></p>
+   <p><b>Move-in:</b> ${esc(t.move_in_date||'Not set')}</p></div>`
+   :'<div class="card">Your landlord has not assigned a unit to your account yet.</div>'}</section>`;
+ }
+ if(id==='myPayments')return page('My Payments','Your own payment history.','',
+   table(['Date','Amount','Method','Reference'],cache.payments.filter(p=>p.tenant_id===t?.id),
+   x=>`<tr><td>${esc(x.payment_date)}</td><td>${money(x.amount)}</td><td>${esc(x.payment_method)}</td><td>${esc(x.transaction_reference||'—')}</td></tr>`));
+ if(id==='myMaintenance')return page('Report a Problem','Send a maintenance request to your landlord.',
+   `<form id="tenantMaintForm" class="formgrid"><input id="ttitle" placeholder="Problem title" required><textarea id="tdesc" class="full" placeholder="Describe the problem" required><\/textarea><button class="primary full">Submit request</button></form>`,
+   table(['Title','Status','Date'],cache.maintenance_requests.filter(m=>m.tenant_id===t?.id),
+   x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.status)}</td><td>${x.created_at?new Date(x.created_at).toLocaleDateString():'—'}</td></tr>`));
+ if(id==='myReceipts')return page('My Receipts','Receipts issued for your payments.','',
+   table(['Receipt number','Payment','Issued'],cache.receipts.filter(r=>r.tenant_id===t?.id),
+   x=>`<tr><td>${esc(x.receipt_number)}</td><td>${money(cache.payments.find(p=>p.id===x.payment_id)?.amount||0)}</td><td>${x.issued_at?new Date(x.issued_at).toLocaleString():'—'}</td></tr>`));
+ return `<section><div class="title"><h1>My Profile</h1><p>Your account information.</p></div><div class="card">
+ <p><b>Email:</b> ${esc(user.email)}</p><p><b>Role:</b> Tenant</p><p><b>Profile ID:</b> ${esc(user.id)}</p>
+ <p class="label">Give your Profile ID to your landlord so they can assign your tenant account.</p></div></section>`;
 }
 function attach(){
  let f=$('propertyForm');if(f)f.onsubmit=async e=>{e.preventDefault();const r=await sb.from('properties').insert({landlord_id:user.id,name:$('pname').value,location:$('ploc').value,description:$('pdesc').value});if(r.error)return alert(r.error.message);show('properties')};
@@ -186,7 +272,7 @@ function attach(){
  f=$('maintForm');if(f)f.onsubmit=async e=>{e.preventDefault();const r=await sb.from('maintenance_requests').insert({tenant_id:$('mtenant').value,landlord_id:user.id,unit_id:$('munit').value,title:$('mtitle').value,description:$('mdesc').value,status:$('mstatus').value,repair_cost:+$('mcost').value||0,landlord_notes:$('mnotes').value||null});if(r.error)return alert(r.error.message);show('maintenance')};
  f=$('expenseForm');if(f)f.onsubmit=async e=>{e.preventDefault();const r=await sb.from('expenses').insert({landlord_id:user.id,property_id:$('eprop').value||null,unit_id:$('eunit').value||null,amount:+$('eamount').value,category:$('ecat').value,description:$('edesc').value,expense_date:$('edate').value});if(r.error)return alert(r.error.message);show('expenses')};
  f=$('receiptForm');if(f)f.onsubmit=async e=>{e.preventDefault();const p=cache.payments.find(x=>x.id===$('rpayment').value);if(!p)return alert('Select a payment.');const r=await sb.from('receipts').insert({payment_id:p.id,tenant_id:p.tenant_id,landlord_id:user.id,receipt_number:$('rnumber').value.trim()});if(r.error)return alert(r.error.message);show('receipts')};
- f=$('tenantMaintForm');if(f)f.onsubmit=async e=>{e.preventDefault();if(!tSafe())return;const t=cache.tenants[0],unit=cache.units.find(u=>u.id===t.unit_id);const r=await sb.from('maintenance_requests').insert({tenant_id:t.id,landlord_id:t.landlord_id,unit_id:t.unit_id,title:$('ttitle').value,description:$('tdesc').value,status:'pending',repair_cost:0});if(r.error)return alert(r.error.message);show('myMaintenance')};
+ f=$('tenantMaintForm');if(f)f.onsubmit=async e=>{e.preventDefault();if(!tSafe())return;const t=cache.tenants[0];const r=await sb.from('maintenance_requests').insert({tenant_id:t.id,landlord_id:t.landlord_id,unit_id:t.unit_id,title:$('ttitle').value,description:$('tdesc').value,status:'pending',repair_cost:0});if(r.error)return alert(r.error.message);show('myMaintenance')};
 }
 function tSafe(){return cache.tenants.length>0}
 async function del(table,id,page){if(!confirm('Delete this record?'))return;const r=await sb.from(table).delete().eq('id',id);if(r.error)return alert(r.error.message);show(page)}
