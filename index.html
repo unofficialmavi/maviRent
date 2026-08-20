@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111827">
-<title>MavRent v3</title>
+<title>MavRent v4</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -21,11 +21,6 @@ body{
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 .hidden{display:none!important}
-
-
-/* =========================================================
-   BLUE GLASS LOGIN
-========================================================= */
 
 .auth{
   min-height:100vh;
@@ -74,12 +69,11 @@ button{cursor:pointer}
   color:#fff;
   border:1px solid rgba(255,255,255,.28);
   border-radius:26px;
-  background:
-    linear-gradient(
-      145deg,
-      rgba(255,255,255,.20),
-      rgba(255,255,255,.07)
-    );
+  background:linear-gradient(
+    145deg,
+    rgba(255,255,255,.20),
+    rgba(255,255,255,.07)
+  );
   backdrop-filter:blur(22px);
   -webkit-backdrop-filter:blur(22px);
   box-shadow:
@@ -116,17 +110,11 @@ button{cursor:pointer}
   background:rgba(255,255,255,.08);
   color:#fff;
   border-radius:13px;
-  transition:.2s;
-}
-
-.role button:hover{
-  background:rgba(255,255,255,.15);
 }
 
 .role .sel{
   background:rgba(255,255,255,.88);
   color:#0869d7;
-  box-shadow:0 8px 24px rgba(0,110,255,.22);
 }
 
 label{
@@ -135,12 +123,6 @@ label{
   color:rgba(255,255,255,.82);
   margin:12px 0 6px;
 }
-
-
-/* =========================================================
-   LOGIN INPUTS
-   These stay white/light glass because they belong to login.
-========================================================= */
 
 .login input,
 .login select,
@@ -152,20 +134,11 @@ label{
   background:rgba(255,255,255,.10);
   color:#fff;
   outline:none;
-  caret-color:#fff;
 }
 
 .login input::placeholder,
 .login textarea::placeholder{
   color:rgba(255,255,255,.58);
-  opacity:1;
-}
-
-.login input:focus,
-.login select:focus,
-.login textarea:focus{
-  border-color:#69c9ff;
-  box-shadow:0 0 0 3px rgba(48,170,255,.16);
 }
 
 .login select option{
@@ -211,13 +184,11 @@ textarea{
 .error{
   background:rgba(255,70,70,.16);
   color:#ffd5d5;
-  border:1px solid rgba(255,130,130,.25);
 }
 
 .success{
   background:rgba(70,255,160,.14);
   color:#d8ffeb;
-  border:1px solid rgba(100,255,180,.22);
 }
 
 .auth-links{
@@ -233,11 +204,6 @@ textarea{
   font-weight:700;
   color:#8bd6ff;
 }
-
-
-/* =========================================================
-   MAIN MAVRENT APPLICATION
-========================================================= */
 
 header{
   background:#111827;
@@ -338,13 +304,8 @@ main{
   margin-top:6px;
 }
 
-.green{
-  color:#13844b;
-}
-
-.red{
-  color:#c93636;
-}
+.green{color:#13844b}
+.red{color:#c93636}
 
 .grid{
   display:grid;
@@ -384,12 +345,6 @@ main{
   grid-column:1/-1;
 }
 
-
-/* =========================================================
-   IMPORTANT FIX:
-   MAVRENT DASHBOARD FORM INPUT TEXT IS NOW DARK/VISIBLE
-========================================================= */
-
 #app input,
 #app select,
 #app textarea{
@@ -398,62 +353,34 @@ main{
   border:1px solid #d9dde3;
   border-radius:12px;
   background:#fff;
-  color:#17202a !important;
-  caret-color:#17202a !important;
+  color:#17202a!important;
+  caret-color:#17202a!important;
   outline:none;
-  opacity:1;
 }
 
-/* Text typed into fields */
-#app input[type="text"],
-#app input[type="email"],
-#app input[type="password"],
-#app input[type="number"],
-#app input[type="date"],
-#app input[type="search"],
+#app input,
 #app textarea,
 #app select{
-  color:#17202a !important;
-  -webkit-text-fill-color:#17202a !important;
+  -webkit-text-fill-color:#17202a;
 }
 
-/* Placeholder text */
 #app input::placeholder,
 #app textarea::placeholder{
-  color:#8a929d !important;
-  opacity:1 !important;
+  color:#8a929d!important;
+  opacity:1!important;
 }
 
-/* Focus state */
 #app input:focus,
 #app select:focus,
 #app textarea:focus{
   border-color:#087cff;
   box-shadow:0 0 0 3px rgba(8,124,255,.12);
-  background:#fff;
-  color:#17202a !important;
-  -webkit-text-fill-color:#17202a !important;
 }
 
-/* Dropdown options */
 #app select option{
-  color:#17202a !important;
-  background:#fff !important;
+  color:#17202a!important;
+  background:#fff!important;
 }
-
-/* Browser autofill fix */
-#app input:-webkit-autofill,
-#app input:-webkit-autofill:hover,
-#app input:-webkit-autofill:focus{
-  -webkit-text-fill-color:#17202a !important;
-  -webkit-box-shadow:0 0 0 1000px #fff inset !important;
-  transition:background-color 9999s ease-in-out 0s;
-}
-
-
-/* =========================================================
-   TABLES
-========================================================= */
 
 .tablewrap{
   overflow:auto;
@@ -490,10 +417,11 @@ main{
   margin-bottom:14px;
 }
 
-
-/* =========================================================
-   MOBILE
-========================================================= */
+.loading{
+  text-align:center;
+  padding:40px;
+  color:#6b7280;
+}
 
 @media(max-width:700px){
 
@@ -510,10 +438,6 @@ main{
     grid-column:auto;
   }
 
-  .userbox{
-    font-size:10px;
-  }
-
   .title h1{
     font-size:22px;
   }
@@ -527,118 +451,119 @@ main{
 
 <body>
 
-
-<!-- =========================================================
-     LOGIN
-========================================================= -->
+<!-- LOGIN -->
 
 <div id="auth" class="auth">
 
-  <div class="login">
+<div class="login">
 
-    <div class="brand">
-      Mav<span>Rent</span>
-    </div>
+<div class="brand">
+Mav<span>Rent</span>
+</div>
 
-    <div class="muted">
-      Rental management platform
-    </div>
+<div class="muted">
+Rental management platform
+</div>
 
-    <div class="role">
-      <button
-        id="landlordRole"
-        class="sel"
-        onclick="chooseRole('landlord')">
-        🏢 Landlord
-      </button>
+<div class="role">
 
-      <button
-        id="tenantRole"
-        onclick="chooseRole('tenant')">
-        👤 Tenant
-      </button>
-    </div>
+<button
+id="landlordRole"
+class="sel"
+onclick="chooseRole('landlord')">
+🏢 Landlord
+</button>
 
-    <form id="loginForm">
-
-      <label>Email</label>
-
-      <input
-        id="email"
-        type="email"
-        required
-        placeholder="you@example.com">
-
-      <label>Password</label>
-
-      <input
-        id="password"
-        type="password"
-        required>
-
-      <button class="primary">
-        Login
-      </button>
-
-    </form>
-
-    <button
-      class="secondary"
-      onclick="signup()">
-      Create account
-    </button>
-
-    <div class="auth-links">
-      <button
-        class="link"
-        onclick="resetPassword()">
-        Forgot password?
-      </button>
-    </div>
-
-    <div
-      id="authMsg"
-      class="message hidden">
-    </div>
-
-  </div>
+<button
+id="tenantRole"
+onclick="chooseRole('tenant')">
+👤 Tenant
+</button>
 
 </div>
 
+<form id="loginForm">
 
-<!-- =========================================================
-     MAIN APPLICATION
-========================================================= -->
+<label>Email</label>
+
+<input
+id="email"
+type="email"
+required
+placeholder="you@example.com">
+
+<label>Password</label>
+
+<input
+id="password"
+type="password"
+required
+placeholder="Enter password">
+
+<button
+class="primary"
+type="submit">
+Login
+</button>
+
+</form>
+
+<button
+class="secondary"
+onclick="signup()">
+Create account
+</button>
+
+<div class="auth-links">
+
+<button
+class="link"
+onclick="resetPassword()">
+Forgot password?
+</button>
+
+</div>
+
+<div
+id="authMsg"
+class="message hidden">
+</div>
+
+</div>
+</div>
+
+
+<!-- APPLICATION -->
 
 <div id="app" class="hidden">
 
-  <header>
+<header>
 
-    <div class="bar">
+<div class="bar">
 
-      <div class="brand small">
-        Mav<span>Rent</span>
-      </div>
+<div class="brand small">
+Mav<span>Rent</span>
+</div>
 
-      <div class="userbox">
+<div class="userbox">
 
-        <span id="who"></span>
+<span id="who"></span>
 
-        <button
-          class="logout"
-          onclick="logout()">
-          Log out
-        </button>
+<button
+class="logout"
+onclick="logout()">
+Log out
+</button>
 
-      </div>
+</div>
 
-    </div>
+</div>
 
-    <nav id="nav"></nav>
+<nav id="nav"></nav>
 
-  </header>
+</header>
 
-  <main id="main"></main>
+<main id="main"></main>
 
 </div>
 
@@ -646,14 +571,17 @@ main{
 <script>
 
 /* =========================================================
-   SUPABASE
+   SUPABASE CONNECTION
 ========================================================= */
 
-const SUPABASE_URL='https://wborvbuqdiscoasnsrwa.supabase.co';
+const SUPABASE_URL =
+'https://wborvbuqdiscoasnsrwa.supabase.co';
 
-const SUPABASE_KEY='sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
+const SUPABASE_KEY =
+'sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
 
-const sb=window.supabase.createClient(
+const sb =
+window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -664,11 +592,8 @@ const sb=window.supabase.createClient(
 ========================================================= */
 
 let role='landlord';
-
 let user=null;
-
 let profile=null;
-
 let appLoading=false;
 
 let cache={
@@ -688,27 +613,27 @@ let cache={
 
 const $=id=>document.getElementById(id);
 
-const money=n=>
-  'UGX '+Number(n||0).toLocaleString('en-US');
+const money=n =>
+'UGX '+Number(n||0).toLocaleString('en-US');
 
-const esc=s=>
-  String(s??'').replace(
-    /[&<>"']/g,
-    m=>({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#039;'
-    }[m])
-  );
+const esc=s =>
+String(s??'').replace(
+  /[&<>"']/g,
+  m=>({
+    '&':'&amp;',
+    '<':'&lt;',
+    '>':'&gt;',
+    '"':'&quot;',
+    "'":'&#039;'
+  }[m])
+);
 
 
-function msg(t,type='error'){
+function msg(text,type='error'){
 
   const x=$('authMsg');
 
-  x.textContent=t;
+  x.textContent=text;
 
   x.className='message '+type;
 }
@@ -735,31 +660,35 @@ function chooseRole(r){
 async function signup(){
 
   const email=$('email').value.trim();
-
   const password=$('password').value;
 
-  if(!email || password.length<6){
+  if(!email){
+
+    return msg('Enter your email.');
+
+  }
+
+  if(password.length<6){
 
     return msg(
-      'Enter an email and a password of at least 6 characters.'
+      'Password must be at least 6 characters.'
     );
 
   }
 
   msg(
-    'Creating account...',
+    'Creating your MavRent account...',
     'success'
   );
 
   const {data,error}=await sb.auth.signUp({
 
     email,
-
     password,
 
     options:{
       data:{
-        role,
+        role:role,
         full_name:'',
         phone:''
       }
@@ -782,7 +711,7 @@ async function signup(){
   }else{
 
     msg(
-      'Account created. Check your email, confirm it, then log in.',
+      'Account created successfully. Check your email, confirm your account, then log in.',
       'success'
     );
 
@@ -809,7 +738,7 @@ async function resetPassword(){
   const {error}=await sb.auth.resetPasswordForEmail(
     email,
     {
-      redirectTo:location.origin
+      redirectTo:window.location.origin
     }
   );
 
@@ -864,6 +793,35 @@ $('loginForm').onsubmit=async e=>{
 
 
 /* =========================================================
+   LOAD PROFILE
+========================================================= */
+
+async function loadProfile(){
+
+  if(!user)return null;
+
+  const result=await sb
+    .from('profiles')
+    .select('*')
+    .eq('id',user.id)
+    .maybeSingle();
+
+  if(result.error){
+
+    console.error(
+      'Profile error:',
+      result.error
+    );
+
+    return null;
+
+  }
+
+  return result.data;
+}
+
+
+/* =========================================================
    LOAD APPLICATION
 ========================================================= */
 
@@ -873,28 +831,31 @@ async function loadApp(){
 
   appLoading=true;
 
-  const p=await sb
-    .from('profiles')
-    .select('*')
-    .eq('id',user.id)
-    .maybeSingle();
+  $('authMsg').className='message hidden';
 
-  if(p.error){
+  profile=await loadProfile();
 
-    appLoading=false;
 
-    return msg(
-      p.error.message
-    );
-
-  }
-
-  profile=p.data;
+  /*
+    If the profile trigger created the profile,
+    use its role.
+  */
 
   role=
     profile?.role ||
     user.user_metadata?.role ||
     role;
+
+
+  if(
+    role!=='landlord' &&
+    role!=='tenant'
+  ){
+
+    role='tenant';
+
+  }
+
 
   $('auth')
     .classList
@@ -904,15 +865,24 @@ async function loadApp(){
     .classList
     .remove('hidden');
 
+
+  $('main').innerHTML=
+  `<div class="loading">
+  Loading your MavRent account...
+  </div>`;
+
+
   await refresh();
 
   buildNav();
 
+
   show(
     role==='landlord'
-      ? 'dashboard'
-      : 'home'
+      ?'dashboard'
+      :'home'
   );
+
 
   appLoading=false;
 }
@@ -927,7 +897,6 @@ async function logout(){
   await sb.auth.signOut();
 
   user=null;
-
   profile=null;
 
   $('app')
@@ -939,6 +908,8 @@ async function logout(){
     .remove('hidden');
 
   $('loginForm').reset();
+
+  chooseRole('landlord');
 }
 
 
@@ -949,6 +920,7 @@ async function logout(){
 async function refresh(){
 
   if(!user)return;
+
 
   cache={
     properties:[],
@@ -1020,21 +992,18 @@ async function refresh(){
     }
 
 
-    for(const [table,column] of [
+    for(
+      const [table,column]
+      of [
+        ['tenants','landlord_id'],
+        ['payments','landlord_id'],
+        ['maintenance_requests','landlord_id'],
+        ['expenses','landlord_id'],
+        ['receipts','landlord_id']
+      ]
+    ){
 
-      ['tenants','landlord_id'],
-
-      ['payments','landlord_id'],
-
-      ['maintenance_requests','landlord_id'],
-
-      ['expenses','landlord_id'],
-
-      ['receipts','landlord_id']
-
-    ]){
-
-      let r=await sb
+      const r=await sb
         .from(table)
         .select('*')
         .eq(column,user.id)
@@ -1043,14 +1012,6 @@ async function refresh(){
           {ascending:false}
         );
 
-      if(r.error){
-
-        r=await sb
-          .from(table)
-          .select('*')
-          .eq(column,user.id);
-
-      }
 
       if(r.error){
 
@@ -1075,7 +1036,10 @@ async function refresh(){
     const t=await sb
       .from('tenants')
       .select('*')
-      .eq('profile_id',user.id);
+      .eq(
+        'profile_id',
+        user.id
+      );
 
     if(t.error){
 
@@ -1093,6 +1057,7 @@ async function refresh(){
       cache.tenants.map(
         x=>x.id
       );
+
 
     const unitIds=[
       ...new Set(
@@ -1235,10 +1200,7 @@ async function refresh(){
    DATABASE ERROR
 ========================================================= */
 
-function showDbError(
-  table,
-  error
-){
+function showDbError(table,error){
 
   console.error(
     'MavRent database error:',
@@ -1250,23 +1212,33 @@ function showDbError(
     error?.message ||
     String(error);
 
+
   if($('main')){
 
-    $('main').insertAdjacentHTML(
-      'afterbegin',
-      `<div class="notice"
-        style="background:#fff0f0;color:#8f2222">
-        Database error in
-        <b>${esc(table)}</b>:
-        ${esc(text)}
-      </div>`
-    );
+    $('main').innerHTML=`
 
-  }else{
+<div class="card">
 
-    msg(
-      `Database error in ${table}: ${text}`
-    );
+<h2>
+Database error
+</h2>
+
+<div class="notice"
+style="background:#fff0f0;color:#8f2222">
+
+<b>${esc(table)}</b><br><br>
+
+${esc(text)}
+
+</div>
+
+<p>
+Check the Supabase table and RLS policy for this section.
+</p>
+
+</div>
+
+`;
 
   }
 
@@ -1280,47 +1252,91 @@ function showDbError(
 function buildNav(){
 
   $('who').textContent=
-    (role==='landlord'
-      ? 'Landlord: '
-      : 'Tenant: ')
-    +
-    (user?.email||'');
+    (
+      role==='landlord'
+      ?'Landlord: '
+      :'Tenant: '
+    )
+    +(user?.email||'');
 
 
   $('nav').innerHTML=
-    role==='landlord'
 
-    ?
+  role==='landlord'
 
-`
-<button data-p="dashboard">🏠 Dashboard</button>
-<button data-p="properties">🏘️ Properties</button>
-<button data-p="units">🚪 Units</button>
-<button data-p="tenants">👥 Tenants</button>
-<button data-p="payments">💰 Payments</button>
-<button data-p="maintenance">🔧 Maintenance</button>
-<button data-p="expenses">🧾 Expenses</button>
-<button data-p="receipts">🧾 Receipts</button>
-<button data-p="reports">📊 Reports</button>
-`
-
-    :
+  ?
 
 `
-<button data-p="home">🏠 My Home</button>
-<button data-p="myPayments">💰 My Payments</button>
-<button data-p="myMaintenance">🔧 Maintenance</button>
-<button data-p="myReceipts">🧾 My Receipts</button>
-<button data-p="myProfile">👤 My Profile</button>
+<button data-p="dashboard">
+🏠 Dashboard
+</button>
+
+<button data-p="properties">
+🏘️ Properties
+</button>
+
+<button data-p="units">
+🚪 Units
+</button>
+
+<button data-p="tenants">
+👥 Tenants
+</button>
+
+<button data-p="payments">
+💰 Payments
+</button>
+
+<button data-p="maintenance">
+🔧 Maintenance
+</button>
+
+<button data-p="expenses">
+🧾 Expenses
+</button>
+
+<button data-p="receipts">
+🧾 Receipts
+</button>
+
+<button data-p="reports">
+📊 Reports
+</button>
+`
+
+:
+
+`
+<button data-p="home">
+🏠 My Home
+</button>
+
+<button data-p="myPayments">
+💰 My Payments
+</button>
+
+<button data-p="myMaintenance">
+🔧 Maintenance
+</button>
+
+<button data-p="myReceipts">
+🧾 My Receipts
+</button>
+
+<button data-p="myProfile">
+👤 My Profile
+</button>
 `;
 
 
   document
     .querySelectorAll('#nav button')
     .forEach(
-      b=>b.onclick=()=>show(
-        b.dataset.p
-      )
+      b=>{
+        b.onclick=()=>show(
+          b.dataset.p
+        );
+      }
     );
 
 }
@@ -1336,8 +1352,9 @@ async function show(id){
 
   $('main').innerHTML=
     role==='landlord'
-      ? landlord(id)
-      : tenant(id);
+      ?landlord(id)
+      :tenant(id);
+
 
   document
     .querySelectorAll('#nav button')
@@ -1348,6 +1365,7 @@ async function show(id){
       )
     );
 
+
   attach();
 
   window.scrollTo(0,0);
@@ -1355,26 +1373,26 @@ async function show(id){
 
 
 /* =========================================================
-   LANDLORD DASHBOARD STATS
+   LANDLORD DASHBOARD
 ========================================================= */
 
 function cardStats(){
 
   const collected=
     cache.payments.reduce(
-      (a,x)=>a+ +x.amount,
+      (a,x)=>a+Number(x.amount||0),
       0
     );
 
   const expenses=
     cache.expenses.reduce(
-      (a,x)=>a+ +x.amount,
+      (a,x)=>a+Number(x.amount||0),
       0
     );
 
   const scheduled=
     cache.tenants.reduce(
-      (a,x)=>a+ +x.rent_amount,
+      (a,x)=>a+Number(x.rent_amount||0),
       0
     );
 
@@ -1389,28 +1407,36 @@ function cardStats(){
 <div class="stats">
 
 <div class="card">
-<div class="label">Properties</div>
+<div class="label">
+Properties
+</div>
 <div class="big">
 ${cache.properties.length}
 </div>
 </div>
 
 <div class="card">
-<div class="label">Units</div>
+<div class="label">
+Units
+</div>
 <div class="big">
 ${cache.units.length}
 </div>
 </div>
 
 <div class="card">
-<div class="label">Collected</div>
+<div class="label">
+Collected
+</div>
 <div class="big green">
 ${money(collected)}
 </div>
 </div>
 
 <div class="card">
-<div class="label">Expenses</div>
+<div class="label">
+Expenses
+</div>
 <div class="big red">
 ${money(expenses)}
 </div>
@@ -1419,16 +1445,19 @@ ${money(expenses)}
 </div>
 
 <div class="notice">
+
 Occupancy:
 ${
-  cache.units.length
-  ? Math.round(
-      occupied/cache.units.length*100
-    )
-  : 0
+cache.units.length
+?Math.round(
+occupied/cache.units.length*100
+)
+:0
 }%
+
 · Scheduled rent:
 ${money(scheduled)}
+
 </div>
 
 `;
@@ -1449,8 +1478,15 @@ function landlord(id){
 <section>
 
 <div class="title">
-<h1>Landlord Dashboard</h1>
-<p>Manage your complete rental business.</p>
+
+<h1>
+Landlord Dashboard
+</h1>
+
+<p>
+Manage your complete rental business.
+</p>
+
 </div>
 
 ${cardStats()}
@@ -1459,36 +1495,44 @@ ${cardStats()}
 
 <div class="card">
 
-<h3>Quick actions</h3>
+<h3>
+Quick actions
+</h3>
 
 <div class="actions">
 
-<button class="btn"
+<button
+class="btn"
 onclick="show('properties')">
 ＋ Property
 </button>
 
-<button class="btn"
+<button
+class="btn"
 onclick="show('units')">
 ＋ Unit
 </button>
 
-<button class="btn"
+<button
+class="btn"
 onclick="show('tenants')">
-＋ Tenant assignment
+＋ Tenant
 </button>
 
-<button class="btn"
+<button
+class="btn"
 onclick="show('payments')">
 ＋ Payment
 </button>
 
-<button class="btn"
+<button
+class="btn"
 onclick="show('maintenance')">
 🔧 Maintenance
 </button>
 
-<button class="btn"
+<button
+class="btn"
 onclick="show('expenses')">
 🧾 Expense
 </button>
@@ -1497,11 +1541,16 @@ onclick="show('expenses')">
 
 </div>
 
+
 <div class="card">
 
-<h3>Account</h3>
+<h3>
+Account
+</h3>
 
-<p>${esc(user.email)}</p>
+<p>
+${esc(user.email)}
+</p>
 
 <p class="label">
 Role: Landlord
@@ -1512,10 +1561,9 @@ Role: Landlord
 </div>
 
 </section>
+
 `;
 
-
-  /* PROPERTIES */
 
   if(id==='properties')
 
@@ -1524,7 +1572,8 @@ Role: Landlord
       'Create and manage rental properties.',
 
 `
-<form id="propertyForm" class="formgrid">
+<form id="propertyForm"
+class="formgrid">
 
 <input
 id="pname"
@@ -1540,25 +1589,33 @@ id="pdesc"
 class="full"
 placeholder="Description"></textarea>
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Save property
 </button>
 
 </form>
 `,
 
-      table(
-        ['Name','Location','Description',''],
-        cache.properties,
-        x=>`
+table(
+['Name','Location','Description',''],
+cache.properties,
+x=>`
 
 <tr>
 
-<td>${esc(x.name)}</td>
+<td>
+${esc(x.name)}
+</td>
 
-<td>${esc(x.location)}</td>
+<td>
+${esc(x.location)}
+</td>
 
-<td>${esc(x.description)}</td>
+<td>
+${esc(x.description)}
+</td>
 
 <td>
 
@@ -1577,11 +1634,9 @@ Delete
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* UNITS */
 
   if(id==='units')
 
@@ -1590,12 +1645,19 @@ Delete
       'Every unit belongs to one of your properties.',
 
 `
-<form id="unitForm" class="formgrid">
+<form id="unitForm"
+class="formgrid">
 
-<select id="uproperty" required>
+<select
+id="uproperty"
+required>
+
+<option value="">
+Select property
+</option>
 
 ${cache.properties.map(
-  x=>`
+x=>`
 <option value="${x.id}">
 ${esc(x.name)}
 </option>
@@ -1636,24 +1698,26 @@ Maintenance
 
 </select>
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Save unit
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Unit',
-          'Property',
-          'Rent',
-          'Deposit',
-          'Status',
-          ''
-        ],
-        cache.units,
-        x=>`
+table(
+[
+'Unit',
+'Property',
+'Rent',
+'Deposit',
+'Status',
+''
+],
+cache.units,
+x=>`
 
 <tr>
 
@@ -1663,9 +1727,9 @@ ${esc(x.unit_number)}
 
 <td>
 ${esc(
-  cache.properties.find(
-    p=>p.id===x.property_id
-  )?.name||''
+cache.properties.find(
+p=>p.id===x.property_id
+)?.name||'—'
 )}
 </td>
 
@@ -1698,30 +1762,35 @@ Delete
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* TENANTS */
 
   if(id==='tenants')
 
     return page(
       'Tenants',
-      'Assign an existing registered account to a unit. The tenant must first create a MavRent account.',
+      'Assign a registered MavRent account to one of your units.',
 
 `
-<form id="tenantForm" class="formgrid">
+<form id="tenantForm"
+class="formgrid">
 
 <input
 id="tprofile"
-placeholder="Tenant profile UUID"
+placeholder="Tenant Profile ID"
 required>
 
-<select id="tunit" required>
+<select
+id="tunit"
+required>
+
+<option value="">
+Select unit
+</option>
 
 ${cache.units.map(
-  x=>`
+x=>`
 <option value="${x.id}">
 ${esc(x.unit_number)}
 —
@@ -1749,30 +1818,32 @@ type="number"
 min="1"
 max="28"
 value="1"
-placeholder="Due day">
+placeholder="Rent due day">
 
 <input
 id="tmove"
 type="date">
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Assign tenant
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Tenant ID',
-          'Unit',
-          'Rent',
-          'Due day',
-          'Status',
-          ''
-        ],
-        cache.tenants,
-        x=>`
+table(
+[
+'Tenant Profile ID',
+'Unit',
+'Rent',
+'Due',
+'Status',
+''
+],
+cache.tenants,
+x=>`
 
 <tr>
 
@@ -1782,9 +1853,9 @@ ${esc(x.profile_id)}
 
 <td>
 ${esc(
-  cache.units.find(
-    u=>u.id===x.unit_id
-  )?.unit_number||''
+cache.units.find(
+u=>u.id===x.unit_id
+)?.unit_number||'—'
 )}
 </td>
 
@@ -1817,32 +1888,37 @@ Delete
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* PAYMENTS */
 
   if(id==='payments')
 
     return page(
       'Payments',
-      'Record rent received.',
+      'Record rent received from your tenants.',
 
 `
-<form id="paymentForm" class="formgrid">
+<form id="paymentForm"
+class="formgrid">
 
-<select id="ptenant" required>
+<select
+id="ptenant"
+required>
+
+<option value="">
+Select tenant
+</option>
 
 ${cache.tenants.map(
-  t=>`
+t=>`
 <option value="${t.id}">
 ${esc(t.profile_id)}
 —
 ${esc(
-  cache.units.find(
-    u=>u.id===t.unit_id
-  )?.unit_number||''
+cache.units.find(
+u=>u.id===t.unit_id
+)?.unit_number||''
 )}
 </option>
 `
@@ -1860,11 +1936,7 @@ required>
 <input
 id="pdate"
 type="date"
-value="${
-  new Date()
-  .toISOString()
-  .slice(0,10)
-}">
+value="${new Date().toISOString().slice(0,10)}">
 
 <select id="pmethod">
 
@@ -1895,28 +1967,30 @@ id="pnotes"
 class="full"
 placeholder="Notes"></textarea>
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Save payment
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Date',
-          'Tenant',
-          'Amount',
-          'Method',
-          'Reference'
-        ],
-        cache.payments,
-        x=>`
+table(
+[
+'Date',
+'Tenant',
+'Amount',
+'Method',
+'Reference'
+],
+cache.payments,
+x=>`
 
 <tr>
 
 <td>
-${x.payment_date}
+${esc(x.payment_date)}
 </td>
 
 <td>
@@ -1932,17 +2006,15 @@ ${esc(x.payment_method)}
 </td>
 
 <td>
-${esc(x.transaction_reference)}
+${esc(x.transaction_reference||'—')}
 </td>
 
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* MAINTENANCE */
 
   if(id==='maintenance')
 
@@ -1951,12 +2023,19 @@ ${esc(x.transaction_reference)}
       'Track repairs and tenant requests.',
 
 `
-<form id="maintForm" class="formgrid">
+<form id="maintForm"
+class="formgrid">
 
-<select id="mtenant" required>
+<select
+id="mtenant"
+required>
+
+<option value="">
+Select tenant
+</option>
 
 ${cache.tenants.map(
-  t=>`
+t=>`
 <option value="${t.id}">
 ${esc(t.profile_id)}
 </option>
@@ -1965,10 +2044,16 @@ ${esc(t.profile_id)}
 
 </select>
 
-<select id="munit" required>
+<select
+id="munit"
+required>
+
+<option value="">
+Select unit
+</option>
 
 ${cache.units.map(
-  u=>`
+u=>`
 <option value="${u.id}">
 ${esc(u.unit_number)}
 </option>
@@ -2016,23 +2101,25 @@ Cancelled
 id="mnotes"
 placeholder="Landlord notes">
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Save request
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Title',
-          'Unit',
-          'Status',
-          'Cost',
-          'Date'
-        ],
-        cache.maintenance_requests,
-        x=>`
+table(
+[
+'Title',
+'Unit',
+'Status',
+'Cost',
+'Date'
+],
+cache.maintenance_requests,
+x=>`
 
 <tr>
 
@@ -2042,14 +2129,16 @@ ${esc(x.title)}
 
 <td>
 ${esc(
-  cache.units.find(
-    u=>u.id===x.unit_id
-  )?.unit_number||''
+cache.units.find(
+u=>u.id===x.unit_id
+)?.unit_number||'—'
 )}
 </td>
 
 <td>
+<span class="badge">
 ${esc(x.status)}
+</span>
 </td>
 
 <td>
@@ -2057,21 +2146,17 @@ ${money(x.repair_cost)}
 </td>
 
 <td>
-${
-  new Date(
-    x.created_at
-  ).toLocaleDateString()
-}
+${x.created_at
+?new Date(x.created_at).toLocaleDateString()
+:'—'}
 </td>
 
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* EXPENSES */
 
   if(id==='expenses')
 
@@ -2080,7 +2165,8 @@ ${
       'Record property and business expenses.',
 
 `
-<form id="expenseForm" class="formgrid">
+<form id="expenseForm"
+class="formgrid">
 
 <select id="eprop">
 
@@ -2089,7 +2175,7 @@ No property
 </option>
 
 ${cache.properties.map(
-  x=>`
+x=>`
 <option value="${x.id}">
 ${esc(x.name)}
 </option>
@@ -2105,7 +2191,7 @@ No unit
 </option>
 
 ${cache.units.map(
-  x=>`
+x=>`
 <option value="${x.id}">
 ${esc(x.unit_number)}
 </option>
@@ -2129,38 +2215,36 @@ required>
 <input
 id="edate"
 type="date"
-value="${
-  new Date()
-  .toISOString()
-  .slice(0,10)
-}">
+value="${new Date().toISOString().slice(0,10)}">
 
 <textarea
 id="edesc"
 class="full"
 placeholder="Description"></textarea>
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Save expense
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Date',
-          'Category',
-          'Amount',
-          'Description'
-        ],
-        cache.expenses,
-        x=>`
+table(
+[
+'Date',
+'Category',
+'Amount',
+'Description'
+],
+cache.expenses,
+x=>`
 
 <tr>
 
 <td>
-${x.expense_date}
+${esc(x.expense_date)}
 </td>
 
 <td>
@@ -2178,27 +2262,32 @@ ${esc(x.description)}
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* RECEIPTS */
 
   if(id==='receipts')
 
     return page(
       'Receipts',
-      'Create and view payment receipts.',
+      'Create payment receipts.',
 
 `
-<form id="receiptForm" class="formgrid">
+<form id="receiptForm"
+class="formgrid">
 
-<select id="rpayment" required>
+<select
+id="rpayment"
+required>
+
+<option value="">
+Select payment
+</option>
 
 ${cache.payments.map(
-  p=>`
+p=>`
 <option value="${p.id}">
-${p.payment_date}
+${esc(p.payment_date)}
 —
 ${money(p.amount)}
 </option>
@@ -2212,21 +2301,23 @@ id="rnumber"
 placeholder="Receipt number"
 required>
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Issue receipt
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Receipt number',
-          'Payment',
-          'Issued'
-        ],
-        cache.receipts,
-        x=>`
+table(
+[
+'Receipt number',
+'Payment',
+'Issued'
+],
+cache.receipts,
+x=>`
 
 <tr>
 
@@ -2239,37 +2330,33 @@ ${esc(x.payment_id)}
 </td>
 
 <td>
-${
-  new Date(
-    x.issued_at
-  ).toLocaleString()
-}
+${x.issued_at
+?new Date(x.issued_at).toLocaleString()
+:'—'}
 </td>
 
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* REPORTS */
 
   const scheduled=
     cache.tenants.reduce(
-      (a,x)=>a+ +x.rent_amount,
+      (a,x)=>a+Number(x.rent_amount||0),
       0
     );
 
   const collected=
     cache.payments.reduce(
-      (a,x)=>a+ +x.amount,
+      (a,x)=>a+Number(x.amount||0),
       0
     );
 
   const expenses=
     cache.expenses.reduce(
-      (a,x)=>a+ +x.amount,
+      (a,x)=>a+Number(x.amount||0),
       0
     );
 
@@ -2280,7 +2367,9 @@ ${
 
 <div class="title">
 
-<h1>Reports</h1>
+<h1>
+Reports
+</h1>
 
 <p>
 Private financial overview.
@@ -2294,56 +2383,43 @@ Private financial overview.
 <div class="label">
 Scheduled rent
 </div>
-
 <div class="big">
 ${money(scheduled)}
 </div>
 </div>
 
-
 <div class="card">
-
 <div class="label">
 Collected
 </div>
-
 <div class="big green">
 ${money(collected)}
 </div>
-
 </div>
 
-
 <div class="card">
-
 <div class="label">
 Outstanding
 </div>
-
 <div class="big red">
 ${money(
-  Math.max(
-    0,
-    scheduled-collected
-  )
+Math.max(
+0,
+scheduled-collected
+)
 )}
 </div>
-
 </div>
-
 
 <div class="card">
-
 <div class="label">
-Net before other costs
+Net
 </div>
-
 <div class="big">
 ${money(
-  collected-expenses
+collected-expenses
 )}
 </div>
-
 </div>
 
 </div>
@@ -2360,13 +2436,13 @@ ${money(
 ========================================================= */
 
 function page(
-  title,
-  sub,
-  form,
-  tbl
+title,
+sub,
+form,
+tbl
 ){
 
-  return`
+return`
 
 <section>
 
@@ -2382,7 +2458,6 @@ ${sub}
 
 </div>
 
-
 <div class="card">
 
 <h3>
@@ -2392,7 +2467,6 @@ Add / Save
 ${form}
 
 </div>
-
 
 <div class="card">
 
@@ -2412,40 +2486,48 @@ ${tbl}
 
 
 /* =========================================================
-   TABLE BUILDER
+   TABLE
 ========================================================= */
 
 function table(
-  head,
-  rows,
-  fn
+head,
+rows,
+fn
 ){
 
-  return`
+return`
 
 <div class="tablewrap">
 
 <table class="table">
 
+<thead>
+
 <tr>
 
 ${head.map(
-  h=>`<th>${h}</th>`
+h=>`<th>${h}</th>`
 ).join('')}
 
 </tr>
 
+</thead>
+
+<tbody>
+
 ${
-  rows.map(fn).join('')
-  ||
-  `
-  <tr>
-  <td colspan="${head.length}">
-  No records yet.
-  </td>
-  </tr>
-  `
+rows.map(fn).join('')
+||
+`
+<tr>
+<td colspan="${head.length}">
+No records yet.
+</td>
+</tr>
+`
 }
+
+</tbody>
 
 </table>
 
@@ -2465,22 +2547,18 @@ function tenant(id){
   const t=cache.tenants[0];
 
 
-  /* HOME */
-
   if(id==='home'){
 
-    const unit=
-      t
-      ? cache.units.find(
-          u=>u.id===t.unit_id
-        )
+    const unit=t
+      ?cache.units.find(
+        u=>u.id===t.unit_id
+      )
       :null;
 
-    const property=
-      unit
-      ? cache.properties.find(
-          p=>p.id===unit.property_id
-        )
+    const property=unit
+      ?cache.properties.find(
+        p=>p.id===unit.property_id
+      )
       :null;
 
 
@@ -2500,117 +2578,95 @@ Your private tenancy information.
 
 </div>
 
-
 <div class="notice">
 
-🔒 Other tenants and landlord financial information are hidden.
+🔒 Your account only shows your own tenancy information.
 
 </div>
 
 
 ${
-  t
-
-  ?
+t
+?
 
 `
 <div class="stats">
 
 <div class="card">
-
 <div class="label">
 Property
 </div>
-
 <div class="big">
-${esc(
-  property?.name||'—'
-)}
+${esc(property?.name||'—')}
 </div>
-
 </div>
-
 
 <div class="card">
-
 <div class="label">
 Unit
 </div>
-
 <div class="big">
-${esc(
-  unit?.unit_number||'—'
-)}
+${esc(unit?.unit_number||'—')}
 </div>
-
 </div>
-
 
 <div class="card">
-
 <div class="label">
 Monthly rent
 </div>
-
 <div class="big">
 ${money(t.rent_amount)}
 </div>
-
 </div>
 
-
 <div class="card">
-
 <div class="label">
 Due day
 </div>
-
 <div class="big">
-${t.rent_due_day}
+${t.rent_due_day||'—'}
+</div>
 </div>
 
 </div>
-
-</div>
-
 
 <div class="card">
 
 <p>
-
-<b>
-Tenancy status:
-</b>
-
+<b>Tenancy status:</b>
 <span class="badge">
 ${esc(t.status)}
 </span>
-
 </p>
 
-
 <p>
-
-<b>
-Move-in:
-</b>
-
-${esc(
-  t.move_in_date||'Not set'
-)}
-
+<b>Move-in:</b>
+${esc(t.move_in_date||'Not set')}
 </p>
 
 </div>
-
 `
 
-  :
+:
 
 `
 <div class="card">
 
-Your landlord has not assigned a unit to your account yet.
+<h3>
+Waiting for landlord assignment
+</h3>
+
+<p>
+Your MavRent account is active, but your landlord has not assigned a rental unit to you yet.
+</p>
+
+<p class="label">
+Send your Profile ID to your landlord.
+</p>
+
+<strong>
+${esc(user.id)}
+</strong>
 
 </div>
 `
@@ -2624,8 +2680,6 @@ Your landlord has not assigned a unit to your account yet.
   }
 
 
-  /* MY PAYMENTS */
-
   if(id==='myPayments')
 
     return page(
@@ -2633,19 +2687,19 @@ Your landlord has not assigned a unit to your account yet.
       'Your own payment history.',
       '',
 
-      table(
-        [
-          'Date',
-          'Amount',
-          'Method',
-          'Reference'
-        ],
+table(
+[
+'Date',
+'Amount',
+'Method',
+'Reference'
+],
 
-        cache.payments.filter(
-          p=>p.tenant_id===t?.id
-        ),
+cache.payments.filter(
+p=>p.tenant_id===t?.id
+),
 
-        x=>`
+x=>`
 
 <tr>
 
@@ -2662,19 +2716,15 @@ ${esc(x.payment_method)}
 </td>
 
 <td>
-${esc(
-  x.transaction_reference||'—'
-)}
+${esc(x.transaction_reference||'—')}
 </td>
 
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* MY MAINTENANCE */
 
   if(id==='myMaintenance')
 
@@ -2698,25 +2748,27 @@ class="full"
 placeholder="Describe the problem"
 required></textarea>
 
-<button class="primary full">
+<button
+class="primary full"
+type="submit">
 Submit request
 </button>
 
 </form>
 `,
 
-      table(
-        [
-          'Title',
-          'Status',
-          'Date'
-        ],
+table(
+[
+'Title',
+'Status',
+'Date'
+],
 
-        cache.maintenance_requests.filter(
-          m=>m.tenant_id===t?.id
-        ),
+cache.maintenance_requests.filter(
+m=>m.tenant_id===t?.id
+),
 
-        x=>`
+x=>`
 
 <tr>
 
@@ -2725,27 +2777,23 @@ ${esc(x.title)}
 </td>
 
 <td>
+<span class="badge">
 ${esc(x.status)}
+</span>
 </td>
 
 <td>
-${
-  x.created_at
-  ? new Date(
-      x.created_at
-    ).toLocaleDateString()
-  :'—'
-}
+${x.created_at
+?new Date(x.created_at).toLocaleDateString()
+:'—'}
 </td>
 
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* MY RECEIPTS */
 
   if(id==='myReceipts')
 
@@ -2754,18 +2802,18 @@ ${
       'Receipts issued for your payments.',
       '',
 
-      table(
-        [
-          'Receipt number',
-          'Payment',
-          'Issued'
-        ],
+table(
+[
+'Receipt number',
+'Payment',
+'Issued'
+],
 
-        cache.receipts.filter(
-          r=>r.tenant_id===t?.id
-        ),
+cache.receipts.filter(
+r=>r.tenant_id===t?.id
+),
 
-        x=>`
+x=>`
 
 <tr>
 
@@ -2775,30 +2823,24 @@ ${esc(x.receipt_number)}
 
 <td>
 ${money(
-  cache.payments.find(
-    p=>p.id===x.payment_id
-  )?.amount||0
+cache.payments.find(
+p=>p.id===x.payment_id
+)?.amount||0
 )}
 </td>
 
 <td>
-${
-  x.issued_at
-  ? new Date(
-      x.issued_at
-    ).toLocaleString()
-  :'—'
-}
+${x.issued_at
+?new Date(x.issued_at).toLocaleString()
+:'—'}
 </td>
 
 </tr>
 
 `
-      )
-    );
+)
+);
 
-
-  /* MY PROFILE */
 
   return`
 
@@ -2811,11 +2853,10 @@ My Profile
 </h1>
 
 <p>
-Your account information.
+Your MavRent account information.
 </p>
 
 </div>
-
 
 <div class="card">
 
@@ -2831,13 +2872,14 @@ Tenant
 
 <p>
 <b>Profile ID:</b>
-${esc(user.id)}
 </p>
 
+<div class="notice">
+${esc(user.id)}
+</div>
+
 <p class="label">
-
-Give your Profile ID to your landlord so they can assign your tenant account.
-
+Give this Profile ID to your landlord so they can assign your tenant account.
 </p>
 
 </div>
@@ -2855,42 +2897,44 @@ Give your Profile ID to your landlord so they can assign your tenant account.
 
 function attach(){
 
-
   /* PROPERTY */
 
   let f=$('propertyForm');
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const r=await sb
-        .from('properties')
-        .insert({
+    const r=await sb
+      .from('properties')
+      .insert({
 
-          landlord_id:user.id,
+        landlord_id:user.id,
 
-          name:$('pname').value,
+        name:$('pname').value.trim(),
 
-          location:$('ploc').value,
+        location:$('ploc').value.trim(),
 
-          description:$('pdesc').value
+        description:$('pdesc').value.trim()
 
-        });
-
-
-      if(r.error)
-
-        return alert(
-          r.error.message
-        );
+      });
 
 
-      show('properties');
+    if(r.error){
 
-    };
+      return alert(
+        'Property error: '+r.error.message
+      );
+
+    }
+
+    alert('Property saved successfully.');
+
+    show('properties');
+
+  };
 
 
   /* UNIT */
@@ -2899,42 +2943,42 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const r=await sb
-        .from('units')
-        .insert({
+    const r=await sb
+      .from('units')
+      .insert({
 
-          property_id:
-            $('uproperty').value,
+        property_id:$('uproperty').value,
 
-          unit_number:
-            $('unum').value,
+        unit_number:$('unum').value.trim(),
 
-          monthly_rent:
-            +$('urent').value,
+        monthly_rent:
+          Number($('urent').value),
 
-          deposit_amount:
-            +$('udep').value||0,
+        deposit_amount:
+          Number($('udep').value||0),
 
-          status:
-            $('ustatus').value
+        status:$('ustatus').value
 
-        });
+      });
 
 
-      if(r.error)
+    if(r.error){
 
-        return alert(
-          r.error.message
-        );
+      return alert(
+        'Unit error: '+r.error.message
+      );
 
+    }
 
-      show('units');
+    alert('Unit saved successfully.');
 
-    };
+    show('units');
+
+  };
 
 
   /* TENANT */
@@ -2943,55 +2987,72 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
-
-      const unit=
-        cache.units.find(
-          x=>x.id===$('tunit').value
-        );
+    e.preventDefault();
 
 
-      const r=await sb
-        .from('tenants')
-        .insert({
-
-          profile_id:
-            $('tprofile').value.trim(),
-
-          unit_id:
-            $('tunit').value,
-
-          landlord_id:
-            user.id,
-
-          rent_amount:
-            +$('trent').value,
-
-          deposit_amount:
-            +$('tdeposit').value||0,
-
-          rent_due_day:
-            +$('tdue').value,
-
-          move_in_date:
-            $('tmove').value||null,
-
-          status:'active'
-
-        });
+    const profileId=
+      $('tprofile')
+      .value
+      .trim();
 
 
-      if(r.error)
+    const unit=
+      cache.units.find(
+        x=>x.id===$('tunit').value
+      );
 
-        return alert(
-          r.error.message
-        );
+
+    if(!profileId){
+
+      return alert(
+        'Enter the tenant Profile ID.'
+      );
+
+    }
 
 
-      if(unit)
+    const r=await sb
+      .from('tenants')
+      .insert({
 
+        profile_id:profileId,
+
+        unit_id:$('tunit').value,
+
+        landlord_id:user.id,
+
+        rent_amount:
+          Number($('trent').value),
+
+        deposit_amount:
+          Number($('tdeposit').value||0),
+
+        rent_due_day:
+          Number($('tdue').value),
+
+        move_in_date:
+          $('tmove').value||null,
+
+        status:'active'
+
+      });
+
+
+    if(r.error){
+
+      return alert(
+        'Tenant assignment error: '+
+        r.error.message
+      );
+
+    }
+
+
+    if(unit){
+
+      const update=
         await sb
           .from('units')
           .update({
@@ -3003,9 +3064,24 @@ function attach(){
           );
 
 
-      show('tenants');
+      if(update.error){
 
-    };
+        console.error(
+          update.error
+        );
+
+      }
+
+    }
+
+
+    alert(
+      'Tenant assigned successfully.'
+    );
+
+    show('tenants');
+
+  };
 
 
   /* PAYMENT */
@@ -3014,48 +3090,50 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const r=await sb
-        .from('payments')
-        .insert({
+    const r=await sb
+      .from('payments')
+      .insert({
 
-          tenant_id:
-            $('ptenant').value,
+        tenant_id:
+          $('ptenant').value,
 
-          landlord_id:
-            user.id,
+        landlord_id:user.id,
 
-          amount:
-            +$('pamount').value,
+        amount:
+          Number($('pamount').value),
 
-          payment_date:
-            $('pdate').value,
+        payment_date:
+          $('pdate').value,
 
-          payment_method:
-            $('pmethod').value,
+        payment_method:
+          $('pmethod').value,
 
-          transaction_reference:
-            $('pref').value||null,
+        transaction_reference:
+          $('pref').value.trim()||null,
 
-          notes:
-            $('pnotes').value||null
+        notes:
+          $('pnotes').value.trim()||null
 
-        });
-
-
-      if(r.error)
-
-        return alert(
-          r.error.message
-        );
+      });
 
 
-      show('payments');
+    if(r.error){
 
-    };
+      return alert(
+        'Payment error: '+r.error.message
+      );
+
+    }
+
+    alert('Payment saved successfully.');
+
+    show('payments');
+
+  };
 
 
   /* MAINTENANCE */
@@ -3064,51 +3142,56 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const r=await sb
-        .from('maintenance_requests')
-        .insert({
+    const r=await sb
+      .from('maintenance_requests')
+      .insert({
 
-          tenant_id:
-            $('mtenant').value,
+        tenant_id:
+          $('mtenant').value,
 
-          landlord_id:
-            user.id,
+        landlord_id:user.id,
 
-          unit_id:
-            $('munit').value,
+        unit_id:
+          $('munit').value,
 
-          title:
-            $('mtitle').value,
+        title:
+          $('mtitle').value.trim(),
 
-          description:
-            $('mdesc').value,
+        description:
+          $('mdesc').value.trim(),
 
-          status:
-            $('mstatus').value,
+        status:
+          $('mstatus').value,
 
-          repair_cost:
-            +$('mcost').value||0,
+        repair_cost:
+          Number($('mcost').value||0),
 
-          landlord_notes:
-            $('mnotes').value||null
+        landlord_notes:
+          $('mnotes').value.trim()||null
 
-        });
-
-
-      if(r.error)
-
-        return alert(
-          r.error.message
-        );
+      });
 
 
-      show('maintenance');
+    if(r.error){
 
-    };
+      return alert(
+        'Maintenance error: '+
+        r.error.message
+      );
+
+    }
+
+    alert(
+      'Maintenance request saved.'
+    );
+
+    show('maintenance');
+
+  };
 
 
   /* EXPENSE */
@@ -3117,48 +3200,51 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const r=await sb
-        .from('expenses')
-        .insert({
+    const r=await sb
+      .from('expenses')
+      .insert({
 
-          landlord_id:
-            user.id,
+        landlord_id:user.id,
 
-          property_id:
-            $('eprop').value||null,
+        property_id:
+          $('eprop').value||null,
 
-          unit_id:
-            $('eunit').value||null,
+        unit_id:
+          $('eunit').value||null,
 
-          amount:
-            +$('eamount').value,
+        amount:
+          Number($('eamount').value),
 
-          category:
-            $('ecat').value,
+        category:
+          $('ecat').value.trim(),
 
-          description:
-            $('edesc').value,
+        description:
+          $('edesc').value.trim(),
 
-          expense_date:
-            $('edate').value
+        expense_date:
+          $('edate').value
 
-        });
-
-
-      if(r.error)
-
-        return alert(
-          r.error.message
-        );
+      });
 
 
-      show('expenses');
+    if(r.error){
 
-    };
+      return alert(
+        'Expense error: '+
+        r.error.message
+      );
+
+    }
+
+    alert('Expense saved successfully.');
+
+    show('expenses');
+
+  };
 
 
   /* RECEIPT */
@@ -3167,52 +3253,59 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
+    e.preventDefault();
 
-      const p=
-        cache.payments.find(
-          x=>x.id===$('rpayment').value
-        );
-
-
-      if(!p)
-
-        return alert(
-          'Select a payment.'
-        );
+    const payment=
+      cache.payments.find(
+        x=>x.id===$('rpayment').value
+      );
 
 
-      const r=await sb
-        .from('receipts')
-        .insert({
+    if(!payment){
 
-          payment_id:
-            p.id,
+      return alert(
+        'Select a payment.'
+      );
 
-          tenant_id:
-            p.tenant_id,
-
-          landlord_id:
-            user.id,
-
-          receipt_number:
-            $('rnumber').value.trim()
-
-        });
+    }
 
 
-      if(r.error)
+    const r=await sb
+      .from('receipts')
+      .insert({
 
-        return alert(
-          r.error.message
-        );
+        payment_id:
+          payment.id,
+
+        tenant_id:
+          payment.tenant_id,
+
+        landlord_id:user.id,
+
+        receipt_number:
+          $('rnumber').value.trim()
+
+      });
 
 
-      show('receipts');
+    if(r.error){
 
-    };
+      return alert(
+        'Receipt error: '+
+        r.error.message
+      );
+
+    }
+
+    alert(
+      'Receipt issued successfully.'
+    );
+
+    show('receipts');
+
+  };
 
 
   /* TENANT MAINTENANCE */
@@ -3221,66 +3314,62 @@ function attach(){
 
   if(f)
 
-    f.onsubmit=async e=>{
+  f.onsubmit=async e=>{
 
-      e.preventDefault();
-
-      if(!tSafe())
-
-        return;
+    e.preventDefault();
 
 
-      const t=
-        cache.tenants[0];
+    const t=cache.tenants[0];
 
 
-      const r=await sb
-        .from('maintenance_requests')
-        .insert({
+    if(!t){
 
-          tenant_id:
-            t.id,
+      return alert(
+        'You have not been assigned a rental unit yet.'
+      );
 
-          landlord_id:
-            t.landlord_id,
-
-          unit_id:
-            t.unit_id,
-
-          title:
-            $('ttitle').value,
-
-          description:
-            $('tdesc').value,
-
-          status:'pending',
-
-          repair_cost:0
-
-        });
+    }
 
 
-      if(r.error)
+    const r=await sb
+      .from('maintenance_requests')
+      .insert({
 
-        return alert(
-          r.error.message
-        );
+        tenant_id:t.id,
+
+        landlord_id:t.landlord_id,
+
+        unit_id:t.unit_id,
+
+        title:
+          $('ttitle').value.trim(),
+
+        description:
+          $('tdesc').value.trim(),
+
+        status:'pending',
+
+        repair_cost:0
+
+      });
 
 
-      show('myMaintenance');
+    if(r.error){
 
-    };
+      return alert(
+        'Request error: '+
+        r.error.message
+      );
 
-}
+    }
 
+    alert(
+      'Maintenance request sent to your landlord.'
+    );
 
-/* =========================================================
-   TENANT SAFETY
-========================================================= */
+    show('myMaintenance');
 
-function tSafe(){
-
-  return cache.tenants.length>0;
+  };
 
 }
 
@@ -3290,18 +3379,14 @@ function tSafe(){
 ========================================================= */
 
 async function del(
-  table,
-  id,
-  page
+table,
+id,
+page
 ){
 
-  if(
-    !confirm(
-      'Delete this record?'
-    )
-  )
-
-    return;
+  if(!confirm(
+    'Delete this record?'
+  ))return;
 
 
   const r=await sb
@@ -3313,12 +3398,19 @@ async function del(
     );
 
 
-  if(r.error)
+  if(r.error){
 
     return alert(
+      'Delete error: '+
       r.error.message
     );
 
+  }
+
+
+  alert(
+    'Record deleted.'
+  );
 
   show(page);
 
@@ -3330,31 +3422,42 @@ async function del(
 ========================================================= */
 
 sb.auth.onAuthStateChange(
-  (event,session)=>{
+(event,session)=>{
 
-    if(
-      session &&
-      !user
-    ){
+  if(
+    session &&
+    !user
+  ){
 
-      user=session.user;
+    user=session.user;
 
-      loadApp();
-
-    }
+    loadApp();
 
   }
-);
+
+});
 
 
 /* =========================================================
-   START APP
+   START
 ========================================================= */
 
 (async()=>{
 
-  const {data}=
-    await sb.auth.getSession();
+  const {
+    data,
+    error
+  }=await sb.auth.getSession();
+
+
+  if(error){
+
+    console.error(error);
+
+    return;
+
+  }
+
 
   if(data.session){
 
