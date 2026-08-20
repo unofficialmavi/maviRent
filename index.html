@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#111827">
@@ -11,7 +10,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-
 *{box-sizing:border-box}
 
 body{
@@ -21,19 +19,9 @@ background:#f4f5f7;
 color:#17202a;
 }
 
-button,input,select,textarea{
-font:inherit
-}
-
-button{
-cursor:pointer
-}
-
-.hidden{
-display:none!important
-}
-
-/* ================= AUTH ================= */
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
 
 .auth{
 min-height:100vh;
@@ -42,7 +30,6 @@ place-items:center;
 padding:28px 18px;
 position:relative;
 overflow:hidden;
-
 background:
 radial-gradient(circle at 15% 15%,rgba(52,180,255,.30),transparent 30%),
 radial-gradient(circle at 85% 20%,rgba(0,98,255,.35),transparent 34%),
@@ -81,19 +68,15 @@ padding:30px;
 position:relative;
 z-index:1;
 color:#fff;
-
 border:1px solid rgba(255,255,255,.28);
 border-radius:26px;
-
 background:linear-gradient(
 145deg,
 rgba(255,255,255,.20),
 rgba(255,255,255,.07)
 );
-
 backdrop-filter:blur(22px);
 -webkit-backdrop-filter:blur(22px);
-
 box-shadow:
 0 28px 80px rgba(0,0,0,.35),
 inset 0 1px 0 rgba(255,255,255,.25);
@@ -105,9 +88,7 @@ font-weight:900;
 letter-spacing:-1px;
 }
 
-.brand span{
-color:#67c7ff;
-}
+.brand span{color:#67c7ff}
 
 .muted,
 .label{
@@ -209,21 +190,7 @@ background:rgba(70,255,160,.14);
 color:#d8ffeb;
 }
 
-.auth-links{
-text-align:center;
-margin-top:14px;
-font-size:12px;
-}
-
-.link{
-border:0;
-background:none;
-text-decoration:underline;
-font-weight:700;
-color:#8bd6ff;
-}
-
-/* ================= HEADER ================= */
+/* HEADER */
 
 header{
 background:#111827;
@@ -248,9 +215,7 @@ align-items:center;
 gap:10px;
 }
 
-.brand.small{
-font-size:22px;
-}
+.brand.small{font-size:22px}
 
 .userbox{
 font-size:12px;
@@ -295,7 +260,7 @@ border-radius:50%;
 border:2px solid #111827;
 }
 
-/* ================= NAV ================= */
+/* NAV */
 
 nav{
 display:flex;
@@ -318,15 +283,13 @@ background:#fff;
 color:#111827;
 }
 
-/* ================= MAIN ================= */
+/* MAIN */
 
 main{
 padding:20px 14px 50px;
 }
 
-.title{
-margin-bottom:15px;
-}
+.title{margin-bottom:15px}
 
 .title h1{
 margin:0;
@@ -358,17 +321,9 @@ font-weight:800;
 margin-top:6px;
 }
 
-.green{
-color:#13844b;
-}
-
-.red{
-color:#c93636;
-}
-
-.orange{
-color:#b86b00;
-}
+.green{color:#13844b}
+.red{color:#c93636}
+.orange{color:#b86b00}
 
 .grid{
 display:grid;
@@ -416,9 +371,7 @@ grid-template-columns:1fr 1fr;
 gap:10px;
 }
 
-.full{
-grid-column:1/-1;
-}
+.full{grid-column:1/-1}
 
 #app input,
 #app select,
@@ -457,9 +410,7 @@ color:#17202a!important;
 background:#fff!important;
 }
 
-.tablewrap{
-overflow:auto;
-}
+.tablewrap{overflow:auto}
 
 .table{
 width:100%;
@@ -513,7 +464,14 @@ padding:40px;
 color:#6b7280;
 }
 
-/* ================= NOTIFICATIONS ================= */
+.empty{
+padding:25px;
+text-align:center;
+color:#737b87;
+font-size:13px;
+}
+
+/* NOTIFICATIONS */
 
 .notificationPanel{
 position:fixed;
@@ -541,9 +499,7 @@ background:#fff;
 z-index:2;
 }
 
-.notificationHead h3{
-margin:0;
-}
+.notificationHead h3{margin:0}
 
 .notificationItem{
 padding:14px;
@@ -577,14 +533,7 @@ color:#9299a3;
 margin-top:7px;
 }
 
-.empty{
-padding:25px;
-text-align:center;
-color:#737b87;
-font-size:13px;
-}
-
-/* ================= PAYMENT BOX ================= */
+/* PAYMENT */
 
 .paymentStatusBox{
 border-radius:12px;
@@ -593,19 +542,11 @@ margin-bottom:12px;
 background:#f8fafc;
 }
 
-.paymentPending{
-border-left:4px solid #e5a400;
-}
+.paymentPending{border-left:4px solid #e5a400}
+.paymentConfirmed{border-left:4px solid #16a34a}
+.paymentRejected{border-left:4px solid #dc2626}
 
-.paymentConfirmed{
-border-left:4px solid #16a34a;
-}
-
-.paymentRejected{
-border-left:4px solid #dc2626;
-}
-
-/* ================= MOBILE ================= */
+/* MOBILE */
 
 @media(max-width:700px){
 
@@ -639,17 +580,17 @@ right:10px;
 top:70px;
 }
 
+.actions{
+grid-template-columns:1fr;
+}
+
 }
 </style>
-
 </head>
 
 <body>
 
-<!-- ======================================================
-     LOGIN
-======================================================= -->
-
+<!-- AUTH -->
 <div id="auth" class="auth">
 
 <div class="login">
@@ -664,21 +605,17 @@ Rental management platform
 
 <div class="role">
 
-<button
-id="landlordRole"
+<button id="landlordRole"
 class="sel"
+type="button"
 onclick="chooseRole('landlord')">
-
 🏢 Landlord
-
 </button>
 
-<button
-id="tenantRole"
+<button id="tenantRole"
+type="button"
 onclick="chooseRole('tenant')">
-
 👤 Tenant
-
 </button>
 
 </div>
@@ -690,6 +627,7 @@ onclick="chooseRole('tenant')">
 <input
 id="email"
 type="email"
+autocomplete="email"
 required
 placeholder="you@example.com">
 
@@ -698,53 +636,43 @@ placeholder="you@example.com">
 <input
 id="password"
 type="password"
+autocomplete="current-password"
 required
 placeholder="Enter password">
 
 <button
 class="primary"
 type="submit">
-
 Login
-
 </button>
 
 </form>
 
 <button
 class="secondary"
+type="button"
 onclick="signup()">
-
 Create account
-
 </button>
 
 <div class="auth-links">
 
 <button
 class="link"
+type="button"
 onclick="resetPassword()">
-
 Forgot password?
-
 </button>
 
 </div>
 
-<div
-id="authMsg"
-class="message hidden">
-</div>
+<div id="authMsg" class="message hidden"></div>
 
 </div>
-
 </div>
 
 
-<!-- ======================================================
-     APPLICATION
-======================================================= -->
-
+<!-- APPLICATION -->
 <div id="app" class="hidden">
 
 <header>
@@ -761,6 +689,7 @@ Mav<span>Rent</span>
 
 <button
 class="notifyBtn"
+type="button"
 onclick="toggleNotifications()"
 title="Notifications">
 
@@ -769,23 +698,19 @@ title="Notifications">
 <span
 id="notifyCount"
 class="notifyCount hidden">
-
 0
-
 </span>
 
 </button>
 
 <button
 class="logout"
+type="button"
 onclick="logout()">
-
 Log out
-
 </button>
 
 </div>
-
 </div>
 
 <nav id="nav"></nav>
@@ -797,10 +722,7 @@ Log out
 </div>
 
 
-<!-- ======================================================
-     NOTIFICATION PANEL
-======================================================= -->
-
+<!-- NOTIFICATIONS -->
 <div
 id="notificationPanel"
 class="notificationPanel hidden">
@@ -811,20 +733,17 @@ class="notificationPanel hidden">
 
 <button
 class="btn"
+type="button"
 onclick="markAllNotificationsRead()">
-
 Mark all read
-
 </button>
 
 </div>
 
 <div id="notificationList">
-
 <div class="empty">
 Loading notifications...
 </div>
-
 </div>
 
 </div>
@@ -853,34 +772,22 @@ SUPABASE_KEY
    GLOBAL STATE
 ========================================================= */
 
-let role='landlord';
+let role = 'landlord';
+let user = null;
+let profile = null;
+let appLoading = false;
+let notifications = [];
+let notificationChannel = null;
 
-let user=null;
-
-let profile=null;
-
-let appLoading=false;
-
-let notifications=[];
-
-let cache={
-
-properties:[],
-
-units:[],
-
-tenants:[],
-
-registeredTenants:[],
-
-payments:[],
-
-maintenance_requests:[],
-
-expenses:[],
-
-receipts:[]
-
+let cache = {
+properties: [],
+units: [],
+tenants: [],
+registeredTenants: [],
+payments: [],
+maintenance_requests: [],
+expenses: [],
+receipts: []
 };
 
 
@@ -888,15 +795,15 @@ receipts:[]
    HELPERS
 ========================================================= */
 
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-const money=n=>
-'UGX '+Number(n||0).toLocaleString('en-US');
+const money = n =>
+'UGX ' + Number(n || 0).toLocaleString('en-US');
 
-const esc=s=>
-String(s??'').replace(
+const esc = s =>
+String(s ?? '').replace(
 /[&<>"']/g,
-m=>({
+m => ({
 '&':'&amp;',
 '<':'&lt;',
 '>':'&gt;',
@@ -905,14 +812,32 @@ m=>({
 }[m])
 );
 
-
 function msg(text,type='error'){
 
-const x=$('authMsg');
+const x = $('authMsg');
 
-x.textContent=text;
+x.textContent = text;
 
-x.className='message '+type;
+x.className =
+'message ' + type;
+
+}
+
+function today(){
+
+return new Date()
+.toISOString()
+.slice(0,10);
+
+}
+
+function setMainLoading(text='Loading...'){
+
+$('main').innerHTML = `
+<div class="loading">
+${esc(text)}
+</div>
+`;
 
 }
 
@@ -923,21 +848,15 @@ x.className='message '+type;
 
 function chooseRole(r){
 
-role=r;
+role = r;
 
 $('landlordRole')
 .classList
-.toggle(
-'sel',
-r==='landlord'
-);
+.toggle('sel',r==='landlord');
 
 $('tenantRole')
 .classList
-.toggle(
-'sel',
-r==='tenant'
-);
+.toggle('sel',r==='tenant');
 
 }
 
@@ -948,9 +867,11 @@ r==='tenant'
 
 async function signup(){
 
-const email=$('email').value.trim();
+const email =
+$('email').value.trim();
 
-const password=$('password').value;
+const password =
+$('password').value;
 
 if(!email){
 
@@ -960,7 +881,7 @@ return msg(
 
 }
 
-if(password.length<6){
+if(password.length < 6){
 
 return msg(
 'Password must be at least 6 characters.'
@@ -973,10 +894,10 @@ msg(
 'success'
 );
 
-const {data,error}=await sb.auth.signUp({
+const {data,error} =
+await sb.auth.signUp({
 
 email,
-
 password,
 
 options:{
@@ -997,7 +918,7 @@ return msg(error.message);
 
 if(data.session){
 
-user=data.user;
+user = data.user;
 
 await loadApp();
 
@@ -1019,7 +940,8 @@ msg(
 
 async function resetPassword(){
 
-const email=$('email').value.trim();
+const email =
+$('email').value.trim();
 
 if(!email){
 
@@ -1029,7 +951,7 @@ return msg(
 
 }
 
-const {error}=
+const {error} =
 await sb.auth.resetPasswordForEmail(
 email,
 {
@@ -1055,9 +977,25 @@ msg(
    LOGIN
 ========================================================= */
 
-$('loginForm').onsubmit=async e=>{
+$('loginForm').addEventListener(
+'submit',
+async e=>{
 
 e.preventDefault();
+
+const email =
+$('email').value.trim();
+
+const password =
+$('password').value;
+
+if(!email || !password){
+
+return msg(
+'Enter your email and password.'
+);
+
+}
 
 msg(
 'Logging in...',
@@ -1067,11 +1005,11 @@ msg(
 const {
 data,
 error
-}=await sb.auth.signInWithPassword({
+} =
+await sb.auth.signInWithPassword({
 
-email:$('email').value.trim(),
-
-password:$('password').value
+email,
+password
 
 });
 
@@ -1081,11 +1019,12 @@ return msg(error.message);
 
 }
 
-user=data.user;
+user = data.user;
 
 await loadApp();
 
-};
+}
+);
 
 
 /* =========================================================
@@ -1096,7 +1035,7 @@ async function loadProfile(){
 
 if(!user)return null;
 
-const result=
+const result =
 await sb
 .from('profiles')
 .select('*')
@@ -1120,31 +1059,40 @@ return result.data;
 
 
 /* =========================================================
-   LOAD APP
+   LOAD APPLICATION
 ========================================================= */
 
 async function loadApp(){
 
 if(!user || appLoading)return;
 
-appLoading=true;
+appLoading = true;
 
-$('authMsg').className=
+$('authMsg').className =
 'message hidden';
 
-profile=await loadProfile();
+setMainLoading(
+'Loading your MavRent account...'
+);
 
-role=
+profile =
+await loadProfile();
+
+/*
+  The database profile is authoritative.
+  Metadata is only used as fallback for a newly
+  created account whose profile has not loaded yet.
+*/
+
+role =
 profile?.role ||
 user.user_metadata?.role ||
 role;
 
-if(
-role!=='landlord' &&
-role!=='tenant'
-){
+if(role !== 'landlord' &&
+role !== 'tenant'){
 
-role='tenant';
+role = 'tenant';
 
 }
 
@@ -1156,26 +1104,31 @@ $('app')
 .classList
 .remove('hidden');
 
-$('main').innerHTML=
-`
-<div class="loading">
-Loading your MavRent account...
-</div>
-`;
+buildNav();
 
+const success =
 await refresh();
 
-buildNav();
+if(!success){
+
+appLoading = false;
+
+return;
+
+}
 
 await loadNotifications();
 
 show(
-role==='landlord'
+role === 'landlord'
 ?'dashboard'
-:'home'
+:'home',
+false
 );
 
-appLoading=false;
+startNotificationRealtime();
+
+appLoading = false;
 
 }
 
@@ -1186,13 +1139,21 @@ appLoading=false;
 
 async function logout(){
 
+if(notificationChannel){
+
+await sb.removeChannel(
+notificationChannel
+);
+
+notificationChannel = null;
+
+}
+
 await sb.auth.signOut();
 
-user=null;
-
-profile=null;
-
-notifications=[];
+user = null;
+profile = null;
+notifications = [];
 
 $('app')
 .classList
@@ -1210,45 +1171,40 @@ $('notificationPanel')
 .classList
 .add('hidden');
 
+$('notifyCount')
+.classList
+.add('hidden');
+
 }
 
 
 /* =========================================================
-   REFRESH
+   REFRESH DATABASE CACHE
 ========================================================= */
 
 async function refresh(){
 
-if(!user)return;
+if(!user)return false;
 
-cache={
-
-properties:[],
-
-units:[],
-
-tenants:[],
-
-registeredTenants:[],
-
-payments:[],
-
-maintenance_requests:[],
-
-expenses:[],
-
-receipts:[]
-
+cache = {
+properties: [],
+units: [],
+tenants: [],
+registeredTenants: [],
+payments: [],
+maintenance_requests: [],
+expenses: [],
+receipts: []
 };
 
 
 /* ================= LANDLORD ================= */
 
-if(role==='landlord'){
+if(role === 'landlord'){
 
 /* REGISTERED TENANT ACCOUNTS */
 
-const registered=
+const registered =
 await sb
 .from('profiles')
 .select(
@@ -1262,22 +1218,20 @@ await sb
 
 if(registered.error){
 
-console.error(
-'Registered tenants:',
+return showDbError(
+'profiles',
 registered.error
 );
 
-}else{
-
-cache.registeredTenants=
-registered.data||[];
-
 }
+
+cache.registeredTenants =
+registered.data || [];
 
 
 /* PROPERTIES */
 
-const p=
+const p =
 await sb
 .from('properties')
 .select('*')
@@ -1299,19 +1253,18 @@ p.error
 
 }
 
-cache.properties=p.data||[];
+cache.properties =
+p.data || [];
 
 
 /* UNITS */
 
-const propertyIds=
-cache.properties.map(
-x=>x.id
-);
+const propertyIds =
+cache.properties.map(x=>x.id);
 
 if(propertyIds.length){
 
-const u=
+const u =
 await sb
 .from('units')
 .select('*')
@@ -1333,35 +1286,29 @@ u.error
 
 }
 
-cache.units=u.data||[];
+cache.units =
+u.data || [];
 
 }
 
 
-/* OTHER TABLES */
+/* OTHER LANDLORD TABLES */
 
 for(
-const [table,column]
-of [
-
-['tenants','landlord_id'],
-
-['payments','landlord_id'],
-
-['maintenance_requests','landlord_id'],
-
-['expenses','landlord_id'],
-
-['receipts','landlord_id']
-
+const table of [
+'tenants',
+'payments',
+'maintenance_requests',
+'expenses',
+'receipts'
 ]){
 
-const r=
+const r =
 await sb
 .from(table)
 .select('*')
 .eq(
-column,
+'landlord_id',
 user.id
 )
 .order(
@@ -1371,6 +1318,42 @@ user.id
 
 if(r.error){
 
+/*
+  Receipts may use issued_at instead of created_at.
+  Retry receipts with issued_at.
+*/
+
+if(table === 'receipts'){
+
+const rr =
+await sb
+.from('receipts')
+.select('*')
+.eq(
+'landlord_id',
+user.id
+)
+.order(
+'issued_at',
+{ascending:false}
+);
+
+if(rr.error){
+
+return showDbError(
+table,
+rr.error
+);
+
+}
+
+cache[table] =
+rr.data || [];
+
+continue;
+
+}
+
 return showDbError(
 table,
 r.error
@@ -1378,8 +1361,8 @@ r.error
 
 }
 
-cache[table]=
-r.data||[];
+cache[table] =
+r.data || [];
 
 }
 
@@ -1390,13 +1373,21 @@ r.data||[];
 
 else{
 
-const t=
+const t =
 await sb
 .from('tenants')
 .select('*')
 .eq(
 'profile_id',
 user.id
+)
+.eq(
+'status',
+'active'
+)
+.order(
+'created_at',
+{ascending:false}
 );
 
 if(t.error){
@@ -1408,16 +1399,14 @@ t.error
 
 }
 
-cache.tenants=
-t.data||[];
+cache.tenants =
+t.data || [];
 
 
-const tenantIds=
-cache.tenants.map(
-x=>x.id
-);
+const tenantIds =
+cache.tenants.map(x=>x.id);
 
-const unitIds=[
+const unitIds = [
 ...new Set(
 cache.tenants
 .map(x=>x.unit_id)
@@ -1428,7 +1417,7 @@ cache.tenants
 
 if(unitIds.length){
 
-const u=
+const u =
 await sb
 .from('units')
 .select('*')
@@ -1446,11 +1435,11 @@ u.error
 
 }
 
-cache.units=
-u.data||[];
+cache.units =
+u.data || [];
 
 
-const propertyIds=[
+const propertyIds = [
 ...new Set(
 cache.units
 .map(x=>x.property_id)
@@ -1461,7 +1450,7 @@ cache.units
 
 if(propertyIds.length){
 
-const p=
+const p =
 await sb
 .from('properties')
 .select('*')
@@ -1479,8 +1468,8 @@ p.error
 
 }
 
-cache.properties=
-p.data||[];
+cache.properties =
+p.data || [];
 
 }
 
@@ -1489,7 +1478,7 @@ p.data||[];
 
 if(tenantIds.length){
 
-const payment=
+const payment =
 await sb
 .from('payments')
 .select('*')
@@ -1511,11 +1500,11 @@ payment.error
 
 }
 
-cache.payments=
-payment.data||[];
+cache.payments =
+payment.data || [];
 
 
-const maint=
+const maint =
 await sb
 .from('maintenance_requests')
 .select('*')
@@ -1537,11 +1526,11 @@ maint.error
 
 }
 
-cache.maintenance_requests=
-maint.data||[];
+cache.maintenance_requests =
+maint.data || [];
 
 
-const receipts=
+const receipts =
 await sb
 .from('receipts')
 .select('*')
@@ -1563,12 +1552,14 @@ receipts.error
 
 }
 
-cache.receipts=
-receipts.data||[];
+cache.receipts =
+receipts.data || [];
 
 }
 
 }
+
+return true;
 
 }
 
@@ -1585,19 +1576,15 @@ table,
 error
 );
 
-const text=
-error?.message||
+const text =
+error?.message ||
 String(error);
 
-if($('main')){
-
-$('main').innerHTML=`
+$('main').innerHTML = `
 
 <div class="card">
 
-<h2>
-Database error
-</h2>
+<h2>Database error</h2>
 
 <div
 class="notice"
@@ -1612,14 +1599,15 @@ ${esc(text)}
 </div>
 
 <p>
-Check the Supabase table and RLS policy for this section.
+MavRent could not load this section.
+Check the Supabase table structure and RLS policy.
 </p>
 
 </div>
 
 `;
 
-}
+return false;
 
 }
 
@@ -1630,59 +1618,32 @@ Check the Supabase table and RLS policy for this section.
 
 function buildNav(){
 
-$('who').textContent=
+$('who').textContent =
 (
-role==='landlord'
+role === 'landlord'
 ?'Landlord: '
 :'Tenant: '
 )
 +
-(user?.email||'');
+(user?.email || '');
 
 
-$('nav').innerHTML=
-
-role==='landlord'
+$('nav').innerHTML =
+role === 'landlord'
 
 ?
 
 `
 
-<button data-p="dashboard">
-🏠 Dashboard
-</button>
-
-<button data-p="properties">
-🏘️ Properties
-</button>
-
-<button data-p="units">
-🚪 Units
-</button>
-
-<button data-p="tenants">
-👥 Tenants
-</button>
-
-<button data-p="payments">
-💰 Payments
-</button>
-
-<button data-p="maintenance">
-🔧 Maintenance
-</button>
-
-<button data-p="expenses">
-🧾 Expenses
-</button>
-
-<button data-p="receipts">
-🧾 Receipts
-</button>
-
-<button data-p="reports">
-📊 Reports
-</button>
+<button data-p="dashboard">🏠 Dashboard</button>
+<button data-p="properties">🏘️ Properties</button>
+<button data-p="units">🚪 Units</button>
+<button data-p="tenants">👥 Tenants</button>
+<button data-p="payments">💰 Payments</button>
+<button data-p="maintenance">🔧 Maintenance</button>
+<button data-p="expenses">🧾 Expenses</button>
+<button data-p="receipts">🧾 Receipts</button>
+<button data-p="reports">📊 Reports</button>
 
 `
 
@@ -1690,25 +1651,11 @@ role==='landlord'
 
 `
 
-<button data-p="home">
-🏠 My Home
-</button>
-
-<button data-p="myPayments">
-💰 My Payments
-</button>
-
-<button data-p="myMaintenance">
-🔧 Maintenance
-</button>
-
-<button data-p="myReceipts">
-🧾 My Receipts
-</button>
-
-<button data-p="myProfile">
-👤 My Profile
-</button>
+<button data-p="home">🏠 My Home</button>
+<button data-p="myPayments">💰 My Payments</button>
+<button data-p="myMaintenance">🔧 Maintenance</button>
+<button data-p="myReceipts">🧾 My Receipts</button>
+<button data-p="myProfile">👤 My Profile</button>
 
 `;
 
@@ -1717,9 +1664,8 @@ document
 .querySelectorAll('#nav button')
 .forEach(
 b=>{
-b.onclick=()=>show(
-b.dataset.p
-);
+b.onclick = () =>
+show(b.dataset.p);
 }
 );
 
@@ -1727,30 +1673,42 @@ b.dataset.p
 
 
 /* =========================================================
-   SHOW
+   SHOW PAGE
 ========================================================= */
 
-async function show(id){
+async function show(id,reload=true){
 
+if(reload){
+
+const success =
 await refresh();
 
-$('main').innerHTML=
-role==='landlord'
-?landlord(id)
-:tenant(id);
+if(!success)return;
+
+}
+
+$('main').innerHTML =
+role === 'landlord'
+? landlord(id)
+: tenant(id);
 
 document
 .querySelectorAll('#nav button')
 .forEach(
-b=>b.classList.toggle(
+b=>{
+b.classList.toggle(
 'active',
-b.dataset.p===id
-)
+b.dataset.p === id
+);
+}
 );
 
 attach();
 
-window.scrollTo(0,0);
+window.scrollTo({
+top:0,
+behavior:'smooth'
+});
 
 }
 
@@ -1763,7 +1721,7 @@ async function loadNotifications(){
 
 if(!user)return;
 
-const r=
+const r =
 await sb
 .from('notifications')
 .select('*')
@@ -1788,11 +1746,10 @@ return;
 
 }
 
-notifications=
-r.data||[];
+notifications =
+r.data || [];
 
 updateNotificationCount();
-
 renderNotifications();
 
 }
@@ -1800,23 +1757,24 @@ renderNotifications();
 
 function updateNotificationCount(){
 
-const unread=
+const unread =
 notifications.filter(
 n=>!n.is_read
 ).length;
 
-const count=$('notifyCount');
+const count =
+$('notifyCount');
 
 if(!count)return;
 
-count.textContent=
-unread>99
+count.textContent =
+unread > 99
 ?'99+'
 :String(unread);
 
 count.classList.toggle(
 'hidden',
-unread===0
+unread === 0
 );
 
 }
@@ -1824,15 +1782,14 @@ unread===0
 
 function renderNotifications(){
 
-const box=
+const box =
 $('notificationList');
 
 if(!box)return;
 
 if(!notifications.length){
 
-box.innerHTML=
-`
+box.innerHTML = `
 <div class="empty">
 No notifications yet.
 </div>
@@ -1842,31 +1799,29 @@ return;
 
 }
 
-box.innerHTML=
+box.innerHTML =
 notifications.map(
 n=>`
 
 <div
 class="notificationItem ${n.is_read?'':'unread'}"
-onclick="openNotification('${n.id}','${n.related_id||''}')">
+data-notification-id="${esc(n.id)}"
+data-related-id="${esc(n.related_id || '')}">
 
 <div class="notificationTitle">
-
 ${esc(n.title)}
-
 </div>
 
 <div class="notificationMessage">
-
 ${esc(n.message)}
-
 </div>
 
 <div class="notificationDate">
-
-${new Date(n.created_at)
-.toLocaleString()}
-
+${n.created_at
+?new Date(n.created_at)
+.toLocaleString()
+:''
+}
 </div>
 
 </div>
@@ -1874,12 +1829,27 @@ ${new Date(n.created_at)
 `
 ).join('');
 
+
+document
+.querySelectorAll(
+'.notificationItem'
+)
+.forEach(item=>{
+
+item.onclick = () =>
+openNotification(
+item.dataset.notificationId,
+item.dataset.relatedId
+);
+
+});
+
 }
 
 
 function toggleNotifications(){
 
-const panel=
+const panel =
 $('notificationPanel');
 
 panel.classList.toggle(
@@ -1918,76 +1888,71 @@ user.id
 
 await loadNotifications();
 
-const n=
+const n =
 notifications.find(
-x=>x.id===notificationId
+x=>x.id === notificationId
 );
 
 if(!n)return;
 
-if(
-n.type==='payment' &&
-role==='landlord'
-){
-
 $('notificationPanel')
 .classList
 .add('hidden');
+
+
+if(
+n.type === 'payment' &&
+role === 'landlord'
+){
 
 show('payments');
+return;
 
 }
 
-if(
-n.type==='payment_confirmed' ||
-n.type==='payment_rejected'
-){
 
-$('notificationPanel')
-.classList
-.add('hidden');
+if(
+n.type === 'payment_confirmed' ||
+n.type === 'payment_rejected'
+){
 
 show('myPayments');
+return;
 
 }
+
 
 if(
-n.type==='maintenance'
+n.type === 'maintenance'
 ){
 
-$('notificationPanel')
-.classList
-.add('hidden');
+show(
+role === 'landlord'
+?'maintenance'
+:'myMaintenance'
+);
 
-if(role==='landlord'){
-show('maintenance');
-}else{
-show('myMaintenance');
-}
+return;
 
 }
+
 
 if(
-n.type==='tenant_assigned'
+n.type === 'tenant_assigned'
 ){
-
-$('notificationPanel')
-.classList
-.add('hidden');
 
 show('home');
+return;
 
 }
 
+
 if(
-n.type==='receipt'
+n.type === 'receipt'
 ){
 
-$('notificationPanel')
-.classList
-.add('hidden');
-
 show('myReceipts');
+return;
 
 }
 
@@ -1998,7 +1963,7 @@ async function markAllNotificationsRead(){
 
 if(!user)return;
 
-const r=
+const r =
 await sb
 .from('notifications')
 .update({
@@ -2033,37 +1998,46 @@ await loadNotifications();
 
 function cardStats(){
 
-const collected=
+const collected =
 cache.payments
 .filter(
-x=>x.status!=='rejected'
+x=>x.status === 'confirmed'
 )
 .reduce(
 (a,x)=>a+Number(x.amount||0),
 0
 );
 
-const expenses=
+const expenses =
 cache.expenses.reduce(
 (a,x)=>a+Number(x.amount||0),
 0
 );
 
-const scheduled=
+const scheduled =
 cache.tenants.reduce(
 (a,x)=>a+Number(x.rent_amount||0),
 0
 );
 
-const occupied=
+const occupied =
 cache.units.filter(
-x=>x.status==='occupied'
+x=>x.status === 'occupied'
 ).length;
 
-const pending=
+const pending =
 cache.payments.filter(
-x=>x.status==='pending'
+x=>x.status === 'pending'
 ).length;
+
+const occupancy =
+cache.units.length
+?Math.round(
+occupied /
+cache.units.length *
+100
+)
+:0;
 
 
 return`
@@ -2071,74 +2045,48 @@ return`
 <div class="stats">
 
 <div class="card">
-
-<div class="label">
-Properties
-</div>
-
+<div class="label">Properties</div>
 <div class="big">
 ${cache.properties.length}
 </div>
-
 </div>
-
 
 <div class="card">
-
-<div class="label">
-Units
-</div>
-
+<div class="label">Units</div>
 <div class="big">
 ${cache.units.length}
 </div>
-
 </div>
-
 
 <div class="card">
-
-<div class="label">
-Collected
-</div>
-
+<div class="label">Confirmed collected</div>
 <div class="big green">
 ${money(collected)}
 </div>
-
 </div>
-
 
 <div class="card">
-
-<div class="label">
-Pending payments
-</div>
-
+<div class="label">Pending payments</div>
 <div class="big orange">
 ${pending}
 </div>
-
 </div>
 
 </div>
-
 
 <div class="notice">
 
-Occupancy:
-${
-cache.units.length
-?Math.round(
-occupied/cache.units.length*100
-)
-:0
-}%
+<strong>Occupancy:</strong>
+${occupancy}%
 
-· Scheduled rent:
+&nbsp; · &nbsp;
+
+<strong>Scheduled rent:</strong>
 ${money(scheduled)}
 
-· Net:
+&nbsp; · &nbsp;
+
+<strong>Net:</strong>
 ${money(collected-expenses)}
 
 </div>
@@ -2154,88 +2102,65 @@ ${money(collected-expenses)}
 
 function landlord(id){
 
-if(id==='dashboard')
+if(id === 'dashboard')
 
 return`
 
 <section>
 
 <div class="title">
-
-<h1>
-Landlord Dashboard
-</h1>
-
-<p>
-Manage your complete rental business.
-</p>
-
+<h1>Landlord Dashboard</h1>
+<p>Manage your complete rental business.</p>
 </div>
 
 ${cardStats()}
 
-
 <div class="grid">
-
 
 <div class="card">
 
-<h3>
-Quick actions
-</h3>
+<h3>Quick actions</h3>
 
 <div class="actions">
 
-<button
-class="btn"
+<button class="btn"
 onclick="show('properties')">
 ＋ Property
 </button>
 
-<button
-class="btn"
+<button class="btn"
 onclick="show('units')">
 ＋ Unit
 </button>
 
-<button
-class="btn"
+<button class="btn"
 onclick="show('tenants')">
 ＋ Tenant
 </button>
 
-<button
-class="btn"
+<button class="btn"
 onclick="show('payments')">
 💰 Payments
 </button>
 
-<button
-class="btn"
+<button class="btn"
 onclick="show('maintenance')">
 🔧 Maintenance
 </button>
 
-<button
-class="btn"
+<button class="btn"
 onclick="show('expenses')">
 🧾 Expense
 </button>
 
 </div>
-
 </div>
-
 
 <div class="card">
 
-<h3>
-Account
-</h3>
+<h3>Account</h3>
 
-<p>
-${esc(user.email)}
-</p>
+<p>${esc(user.email)}</p>
 
 <p class="label">
 Role: Landlord
@@ -2252,12 +2177,11 @@ Role: Landlord
 
 /* ================= PROPERTIES ================= */
 
-if(id==='properties')
+if(id === 'properties')
 
 return page(
 'Properties',
 'Create and manage rental properties.',
-
 `
 
 <form id="propertyForm"
@@ -2286,40 +2210,24 @@ Save property
 </form>
 
 `,
-
 table(
-[
-'Name',
-'Location',
-'Description',
-''
-],
+['Name','Location','Description',''],
 cache.properties,
 x=>`
 
 <tr>
 
-<td>
-${esc(x.name)}
-</td>
+<td>${esc(x.name)}</td>
 
-<td>
-${esc(x.location)}
-</td>
+<td>${esc(x.location)}</td>
 
-<td>
-${esc(x.description)}
-</td>
+<td>${esc(x.description)}</td>
 
 <td>
 
 <button
 class="btn danger"
-onclick="del(
-'properties',
-'${x.id}',
-'properties'
-)">
+onclick="delProperty('${x.id}')">
 Delete
 </button>
 
@@ -2333,20 +2241,17 @@ Delete
 
 /* ================= UNITS ================= */
 
-if(id==='units')
+if(id === 'units')
 
 return page(
 'Units',
 'Every unit belongs to one of your properties.',
-
 `
 
 <form id="unitForm"
 class="formgrid">
 
-<select
-id="uproperty"
-required>
+<select id="uproperty" required>
 
 <option value="">
 Select property
@@ -2354,11 +2259,9 @@ Select property
 
 ${cache.properties.map(
 x=>`
-
 <option value="${x.id}">
 ${esc(x.name)}
 </option>
-
 `
 ).join('')}
 
@@ -2372,27 +2275,21 @@ required>
 <input
 id="urent"
 type="number"
+min="0"
 placeholder="Monthly rent"
 required>
 
 <input
 id="udep"
 type="number"
+min="0"
 placeholder="Deposit">
 
 <select id="ustatus">
 
-<option value="vacant">
-Vacant
-</option>
-
-<option value="occupied">
-Occupied
-</option>
-
-<option value="maintenance">
-Maintenance
-</option>
+<option value="vacant">Vacant</option>
+<option value="occupied">Occupied</option>
+<option value="maintenance">Maintenance</option>
 
 </select>
 
@@ -2405,7 +2302,6 @@ Save unit
 </form>
 
 `,
-
 table(
 [
 'Unit',
@@ -2420,25 +2316,19 @@ x=>`
 
 <tr>
 
-<td>
-${esc(x.unit_number)}
-</td>
+<td>${esc(x.unit_number)}</td>
 
 <td>
 ${esc(
 cache.properties.find(
 p=>p.id===x.property_id
-)?.name||'—'
+)?.name || '—'
 )}
 </td>
 
-<td>
-${money(x.monthly_rent)}
-</td>
+<td>${money(x.monthly_rent)}</td>
 
-<td>
-${money(x.deposit_amount)}
-</td>
+<td>${money(x.deposit_amount)}</td>
 
 <td>
 <span class="badge">
@@ -2450,11 +2340,7 @@ ${esc(x.status)}
 
 <button
 class="btn danger"
-onclick="del(
-'units',
-'${x.id}',
-'units'
-)">
+onclick="delUnit('${x.id}')">
 Delete
 </button>
 
@@ -2468,30 +2354,24 @@ Delete
 
 /* ================= TENANTS ================= */
 
-if(id==='tenants')
+if(id === 'tenants')
 
 return page(
 'Tenant Assignment',
 'Assign a registered MavRent tenant account to one of your units.',
-
 `
 
 <div class="notice">
 
 <strong>How it works:</strong>
-
-Select a registered tenant account below, select a vacant unit, enter the tenancy details, then assign the tenant.
+Select a registered tenant account, select a vacant unit, enter the tenancy details, then assign the tenant.
 
 </div>
-
 
 <form id="tenantForm"
 class="formgrid">
 
-
-<select
-id="tprofile"
-required>
+<select id="tprofile" required>
 
 <option value="">
 Select registered tenant
@@ -2501,16 +2381,13 @@ ${cache.registeredTenants.map(
 p=>`
 
 <option value="${p.id}">
-
 ${esc(
-p.full_name||
-p.email||
+p.full_name ||
+p.email ||
 p.id
 )}
-
- —
-${esc(p.email||'')}
-
+—
+${esc(p.email || '')}
 </option>
 
 `
@@ -2518,10 +2395,7 @@ ${esc(p.email||'')}
 
 </select>
 
-
-<select
-id="tunit"
-required>
+<select id="tunit" required>
 
 <option value="">
 Select vacant unit
@@ -2529,17 +2403,15 @@ Select vacant unit
 
 ${cache.units
 .filter(
-x=>x.status!=='occupied'
+x=>x.status !== 'occupied'
 )
 .map(
 x=>`
 
 <option value="${x.id}">
-
 ${esc(x.unit_number)}
- —
+—
 ${money(x.monthly_rent)}
-
 </option>
 
 `
@@ -2547,19 +2419,18 @@ ${money(x.monthly_rent)}
 
 </select>
 
-
 <input
 id="trent"
 type="number"
+min="0"
 placeholder="Rent amount"
 required>
-
 
 <input
 id="tdeposit"
 type="number"
+min="0"
 placeholder="Deposit">
-
 
 <input
 id="tdue"
@@ -2569,24 +2440,19 @@ max="28"
 value="1"
 placeholder="Rent due day">
 
-
 <input
 id="tmove"
 type="date">
 
-
 <button
 class="primary full"
 type="submit">
-
 Assign tenant
-
 </button>
 
 </form>
 
 `,
-
 table(
 [
 'Tenant',
@@ -2600,7 +2466,7 @@ table(
 cache.tenants,
 x=>{
 
-const tenantProfile=
+const tenantProfile =
 cache.registeredTenants.find(
 p=>p.id===x.profile_id
 );
@@ -2610,68 +2476,48 @@ return`
 <tr>
 
 <td>
-
 ${esc(
-tenantProfile?.full_name||
+tenantProfile?.full_name ||
 x.profile_id
 )}
-
 </td>
 
 <td>
-
 ${esc(
-tenantProfile?.email||
+tenantProfile?.email ||
 '—'
 )}
-
 </td>
 
 <td>
-
 ${esc(
 cache.units.find(
 u=>u.id===x.unit_id
-)?.unit_number||
+)?.unit_number ||
 '—'
 )}
-
 </td>
 
 <td>
-
 ${money(x.rent_amount)}
-
 </td>
 
 <td>
-
 ${esc(x.rent_due_day)}
-
 </td>
 
 <td>
-
 <span class="badge">
-
 ${esc(x.status)}
-
 </span>
-
 </td>
 
 <td>
 
 <button
 class="btn danger"
-onclick="del(
-'tenants',
-'${x.id}',
-'tenants'
-)">
-
-Delete
-
+onclick="removeTenant('${x.id}','${x.unit_id}')">
+Remove
 </button>
 
 </td>
@@ -2687,11 +2533,11 @@ Delete
 
 /* ================= PAYMENTS ================= */
 
-if(id==='payments'){
+if(id === 'payments'){
 
-const pending=
+const pending =
 cache.payments.filter(
-p=>p.status==='pending'
+p=>p.status === 'pending'
 );
 
 return`
@@ -2700,16 +2546,13 @@ return`
 
 <div class="title">
 
-<h1>
-💰 Payments
-</h1>
+<h1>💰 Payments</h1>
 
 <p>
 Review tenant rent payments.
 </p>
 
 </div>
-
 
 <div class="notice">
 
@@ -2723,19 +2566,14 @@ Tenant-submitted payments require landlord confirmation.
 
 </div>
 
-
 <div class="card">
 
-<h3>
-Record a payment manually
-</h3>
+<h3>Record a payment manually</h3>
 
 <form id="paymentForm"
 class="formgrid">
 
-<select
-id="ptenant"
-required>
+<select id="ptenant" required>
 
 <option value="">
 Select tenant
@@ -2749,15 +2587,16 @@ t=>`
 ${esc(
 cache.registeredTenants.find(
 p=>p.id===t.profile_id
-)?.full_name||
+)?.full_name ||
 t.profile_id
 )}
 
- —
+—
 ${esc(
 cache.units.find(
 u=>u.id===t.unit_id
-)?.unit_number||''
+)?.unit_number ||
+''
 )}
 
 </option>
@@ -2767,7 +2606,6 @@ u=>u.id===t.unit_id
 
 </select>
 
-
 <input
 id="pamount"
 type="number"
@@ -2775,16 +2613,10 @@ min="1"
 placeholder="Amount (UGX)"
 required>
 
-
 <input
 id="pdate"
 type="date"
-value="${
-new Date()
-.toISOString()
-.slice(0,10)
-}">
-
+value="${today()}">
 
 <select id="pmethod">
 
@@ -2796,48 +2628,39 @@ MTN Mobile Money
 Airtel Money
 </option>
 
-<option value="bank">
-Bank
-</option>
+<option value="bank">Bank</option>
 
-<option value="cash">
-Cash
-</option>
+<option value="cash">Cash</option>
 
 </select>
-
 
 <input
 id="pref"
 placeholder="Transaction reference">
-
 
 <textarea
 id="pnotes"
 class="full"
 placeholder="Notes"></textarea>
 
-
 <button
 class="primary full"
 type="submit">
-
 Save confirmed payment
-
 </button>
 
 </form>
 
 </div>
 
-
 <div class="card">
 
-<h3>
-⏳ Pending payments
-</h3>
+<h3>⏳ Pending payments</h3>
 
-${pending.length?
+${
+pending.length
+
+?
 
 table(
 [
@@ -2851,12 +2674,12 @@ table(
 pending,
 x=>{
 
-const tenantRow=
+const tenantRow =
 cache.tenants.find(
 t=>t.id===x.tenant_id
 );
 
-const tenantProfile=
+const tenantProfile =
 cache.registeredTenants.find(
 p=>p.id===tenantRow?.profile_id
 );
@@ -2865,32 +2688,25 @@ return`
 
 <tr>
 
-<td>
-${esc(x.payment_date)}
-</td>
+<td>${esc(x.payment_date)}</td>
 
 <td>
 ${esc(
-tenantProfile?.full_name||
-tenantProfile?.email||
+tenantProfile?.full_name ||
+tenantProfile?.email ||
 'Tenant'
 )}
 </td>
 
 <td>
-<strong>
-${money(x.amount)}
-</strong>
+<strong>${money(x.amount)}</strong>
 </td>
 
-<td>
-${esc(x.payment_method)}
-</td>
+<td>${esc(x.payment_method)}</td>
 
 <td>
 ${esc(
-x.transaction_reference||
-'—'
+x.transaction_reference || '—'
 )}
 </td>
 
@@ -2899,19 +2715,13 @@ x.transaction_reference||
 <button
 class="btn successBtn"
 onclick="confirmPayment('${x.id}')">
-
 ✅ Confirm
-
 </button>
-
-<br>
 
 <button
 class="btn danger"
 onclick="rejectPayment('${x.id}')">
-
 ❌ Reject
-
 </button>
 
 </td>
@@ -2929,16 +2739,15 @@ onclick="rejectPayment('${x.id}')">
 <div class="empty">
 No pending payments.
 </div>
-`}
+`
+
+}
 
 </div>
 
-
 <div class="card">
 
-<h3>
-Payment history
-</h3>
+<h3>Payment history</h3>
 
 ${table(
 [
@@ -2952,12 +2761,12 @@ ${table(
 cache.payments,
 x=>{
 
-const tenantRow=
+const tenantRow =
 cache.tenants.find(
 t=>t.id===x.tenant_id
 );
 
-const tenantProfile=
+const tenantProfile =
 cache.registeredTenants.find(
 p=>p.id===tenantRow?.profile_id
 );
@@ -2966,31 +2775,29 @@ return`
 
 <tr>
 
-<td>
-${esc(x.payment_date)}
-</td>
+<td>${esc(x.payment_date)}</td>
 
 <td>
 ${esc(
-tenantProfile?.full_name||
-tenantProfile?.email||
+tenantProfile?.full_name ||
+tenantProfile?.email ||
 'Tenant'
 )}
 </td>
 
-<td>
-${money(x.amount)}
-</td>
+<td>${money(x.amount)}</td>
 
-<td>
-${esc(x.payment_method)}
-</td>
+<td>${esc(x.payment_method)}</td>
 
 <td>
 
-<span class="badge ${esc(x.status||'confirmed')}">
+<span class="badge ${esc(
+x.status || 'confirmed'
+)}">
 
-${esc(x.status||'confirmed')}
+${esc(
+x.status || 'confirmed'
+)}
 
 </span>
 
@@ -2998,8 +2805,7 @@ ${esc(x.status||'confirmed')}
 
 <td>
 ${esc(
-x.transaction_reference||
-'—'
+x.transaction_reference || '—'
 )}
 </td>
 
@@ -3021,20 +2827,17 @@ x.transaction_reference||
 
 /* ================= MAINTENANCE ================= */
 
-if(id==='maintenance')
+if(id === 'maintenance')
 
 return page(
 'Maintenance',
 'Track repairs and tenant requests.',
-
 `
 
 <form id="maintForm"
 class="formgrid">
 
-<select
-id="mtenant"
-required>
+<select id="mtenant" required>
 
 <option value="">
 Select tenant
@@ -3048,7 +2851,7 @@ t=>`
 ${esc(
 cache.registeredTenants.find(
 p=>p.id===t.profile_id
-)?.full_name||
+)?.full_name ||
 t.profile_id
 )}
 
@@ -3059,10 +2862,7 @@ t.profile_id
 
 </select>
 
-
-<select
-id="munit"
-required>
+<select id="munit" required>
 
 <option value="">
 Select unit
@@ -3080,63 +2880,44 @@ ${esc(u.unit_number)}
 
 </select>
 
-
 <input
 id="mtitle"
 placeholder="Problem title"
 required>
 
-
 <input
 id="mcost"
 type="number"
+min="0"
 placeholder="Repair cost">
-
 
 <textarea
 id="mdesc"
 class="full"
 placeholder="Description"></textarea>
 
-
 <select id="mstatus">
 
-<option value="pending">
-Pending
-</option>
-
-<option value="in_progress">
-In progress
-</option>
-
-<option value="completed">
-Completed
-</option>
-
-<option value="cancelled">
-Cancelled
-</option>
+<option value="pending">Pending</option>
+<option value="in_progress">In progress</option>
+<option value="completed">Completed</option>
+<option value="cancelled">Cancelled</option>
 
 </select>
-
 
 <input
 id="mnotes"
 placeholder="Landlord notes">
 
-
 <button
 class="primary full"
 type="submit">
-
 Save request
-
 </button>
 
 </form>
 
 `,
-
 table(
 [
 'Title',
@@ -3150,37 +2931,29 @@ x=>`
 
 <tr>
 
-<td>
-${esc(x.title)}
-</td>
+<td>${esc(x.title)}</td>
 
 <td>
 ${esc(
 cache.units.find(
 u=>u.id===x.unit_id
-)?.unit_number||
-'—'
+)?.unit_number || '—'
 )}
 </td>
 
 <td>
-
 <span class="badge">
 ${esc(x.status)}
 </span>
-
 </td>
 
-<td>
-${money(x.repair_cost)}
-</td>
+<td>${money(x.repair_cost)}</td>
 
 <td>
 ${
 x.created_at
-?new Date(
-x.created_at
-).toLocaleDateString()
+?new Date(x.created_at)
+.toLocaleDateString()
 :'—'
 }
 </td>
@@ -3193,12 +2966,11 @@ x.created_at
 
 /* ================= EXPENSES ================= */
 
-if(id==='expenses')
+if(id === 'expenses')
 
 return page(
 'Expenses',
 'Record property and business expenses.',
-
 `
 
 <form id="expenseForm"
@@ -3222,7 +2994,6 @@ ${esc(x.name)}
 
 </select>
 
-
 <select id="eunit">
 
 <option value="">
@@ -3241,7 +3012,6 @@ ${esc(x.unit_number)}
 
 </select>
 
-
 <input
 id="eamount"
 type="number"
@@ -3249,41 +3019,30 @@ min="0"
 placeholder="Amount"
 required>
 
-
 <input
 id="ecat"
 placeholder="Category"
 required>
 
-
 <input
 id="edate"
 type="date"
-value="${
-new Date()
-.toISOString()
-.slice(0,10)
-}">
-
+value="${today()}">
 
 <textarea
 id="edesc"
 class="full"
 placeholder="Description"></textarea>
 
-
 <button
 class="primary full"
 type="submit">
-
 Save expense
-
 </button>
 
 </form>
 
 `,
-
 table(
 [
 'Date',
@@ -3296,21 +3055,10 @@ x=>`
 
 <tr>
 
-<td>
-${esc(x.expense_date)}
-</td>
-
-<td>
-${esc(x.category)}
-</td>
-
-<td>
-${money(x.amount)}
-</td>
-
-<td>
-${esc(x.description)}
-</td>
+<td>${esc(x.expense_date)}</td>
+<td>${esc(x.category)}</td>
+<td>${money(x.amount)}</td>
+<td>${esc(x.description)}</td>
 
 </tr>
 
@@ -3320,20 +3068,17 @@ ${esc(x.description)}
 
 /* ================= RECEIPTS ================= */
 
-if(id==='receipts')
+if(id === 'receipts')
 
 return page(
 'Receipts',
 'Create payment receipts.',
-
 `
 
 <form id="receiptForm"
 class="formgrid">
 
-<select
-id="rpayment"
-required>
+<select id="rpayment" required>
 
 <option value="">
 Select confirmed payment
@@ -3341,7 +3086,7 @@ Select confirmed payment
 
 ${cache.payments
 .filter(
-p=>p.status==='confirmed'
+p=>p.status === 'confirmed'
 )
 .map(
 p=>`
@@ -3349,7 +3094,7 @@ p=>`
 <option value="${p.id}">
 
 ${esc(p.payment_date)}
- —
+—
 ${money(p.amount)}
 
 </option>
@@ -3359,25 +3104,20 @@ ${money(p.amount)}
 
 </select>
 
-
 <input
 id="rnumber"
 placeholder="Receipt number"
 required>
 
-
 <button
 class="primary full"
 type="submit">
-
 Issue receipt
-
 </button>
 
 </form>
 
 `,
-
 table(
 [
 'Receipt number',
@@ -3389,20 +3129,15 @@ x=>`
 
 <tr>
 
-<td>
-${esc(x.receipt_number)}
-</td>
+<td>${esc(x.receipt_number)}</td>
 
-<td>
-${esc(x.payment_id)}
-</td>
+<td>${esc(x.payment_id)}</td>
 
 <td>
 ${
 x.issued_at
-?new Date(
-x.issued_at
-).toLocaleString()
+?new Date(x.issued_at)
+.toLocaleString()
 :'—'
 }
 </td>
@@ -3415,50 +3150,41 @@ x.issued_at
 
 /* ================= REPORTS ================= */
 
-const scheduled=
+const scheduled =
 cache.tenants.reduce(
 (a,x)=>
-a+Number(
-x.rent_amount||0
-),
+a + Number(x.rent_amount || 0),
 0
 );
 
-const collected=
+const collected =
 cache.payments
 .filter(
-x=>x.status==='confirmed'
+x=>x.status === 'confirmed'
 )
 .reduce(
 (a,x)=>
-a+Number(
-x.amount||0
-),
+a + Number(x.amount || 0),
 0
 );
 
-const pending=
+const pending =
 cache.payments
 .filter(
-x=>x.status==='pending'
+x=>x.status === 'pending'
 )
 .reduce(
 (a,x)=>
-a+Number(
-x.amount||0
-),
+a + Number(x.amount || 0),
 0
 );
 
-const expenses=
+const expenses =
 cache.expenses.reduce(
 (a,x)=>
-a+Number(
-x.amount||0
-),
+a + Number(x.amount || 0),
 0
 );
-
 
 return`
 
@@ -3466,9 +3192,7 @@ return`
 
 <div class="title">
 
-<h1>
-📊 Reports
-</h1>
+<h1>📊 Reports</h1>
 
 <p>
 Private financial overview.
@@ -3476,9 +3200,7 @@ Private financial overview.
 
 </div>
 
-
 <div class="stats">
-
 
 <div class="card">
 
@@ -3492,7 +3214,6 @@ ${money(scheduled)}
 
 </div>
 
-
 <div class="card">
 
 <div class="label">
@@ -3504,7 +3225,6 @@ ${money(collected)}
 </div>
 
 </div>
-
 
 <div class="card">
 
@@ -3518,7 +3238,6 @@ ${money(pending)}
 
 </div>
 
-
 <div class="card">
 
 <div class="label">
@@ -3526,12 +3245,42 @@ Net
 </div>
 
 <div class="big">
-${money(
-collected-expenses
-)}
+${money(collected-expenses)}
 </div>
 
 </div>
+
+</div>
+
+<div class="card">
+
+<h3>Financial summary</h3>
+
+<table class="table">
+
+<tr>
+<td>Confirmed income</td>
+<td><strong>${money(collected)}</strong></td>
+</tr>
+
+<tr>
+<td>Pending income</td>
+<td>${money(pending)}</td>
+</tr>
+
+<tr>
+<td>Expenses</td>
+<td class="red">${money(expenses)}</td>
+</tr>
+
+<tr>
+<td>Net confirmed income</td>
+<td class="green">
+<strong>${money(collected-expenses)}</strong>
+</td>
+</tr>
+
+</table>
 
 </div>
 
@@ -3559,33 +3308,23 @@ return`
 
 <div class="title">
 
-<h1>
-${title}
-</h1>
+<h1>${title}</h1>
 
-<p>
-${sub}
-</p>
+<p>${sub}</p>
 
 </div>
 
-
 <div class="card">
 
-<h3>
-Add / Save
-</h3>
+<h3>Add / Save</h3>
 
 ${form}
 
 </div>
 
-
 <div class="card">
 
-<h3>
-Records
-</h3>
+<h3>Records</h3>
 
 ${tbl}
 
@@ -3629,15 +3368,15 @@ h=>`<th>${h}</th>`
 <tbody>
 
 ${
+rows.length
+?
 rows.map(fn).join('')
-||
+:
 `
 <tr>
 
 <td colspan="${head.length}">
-
 No records yet.
-
 </td>
 
 </tr>
@@ -3661,26 +3400,27 @@ No records yet.
 
 function tenant(id){
 
-const t=
-cache.tenants[0];
+const t =
+cache.tenants[0] || null;
 
 
-/* ================= HOME ================= */
+/* HOME */
 
-if(id==='home'){
+if(id === 'home'){
 
-const unit=t
+const unit =
+t
 ?cache.units.find(
 u=>u.id===t.unit_id
 )
 :null;
 
-const property=unit
+const property =
+unit
 ?cache.properties.find(
 p=>p.id===unit.property_id
 )
 :null;
-
 
 return`
 
@@ -3688,9 +3428,7 @@ return`
 
 <div class="title">
 
-<h1>
-My Home 👋
-</h1>
+<h1>My Home 👋</h1>
 
 <p>
 Your private tenancy information.
@@ -3698,13 +3436,11 @@ Your private tenancy information.
 
 </div>
 
-
 <div class="notice">
 
 🔒 Your account only shows your own tenancy information.
 
 </div>
-
 
 ${
 t
@@ -3715,84 +3451,49 @@ t
 
 <div class="stats">
 
-
 <div class="card">
-
-<div class="label">
-Property
-</div>
-
+<div class="label">Property</div>
 <div class="big">
-${esc(property?.name||'—')}
+${esc(property?.name || '—')}
 </div>
-
 </div>
-
 
 <div class="card">
-
-<div class="label">
-Unit
-</div>
-
+<div class="label">Unit</div>
 <div class="big">
-${esc(unit?.unit_number||'—')}
+${esc(unit?.unit_number || '—')}
 </div>
-
 </div>
-
 
 <div class="card">
-
-<div class="label">
-Monthly rent
-</div>
-
+<div class="label">Monthly rent</div>
 <div class="big">
 ${money(t.rent_amount)}
 </div>
-
 </div>
-
 
 <div class="card">
-
-<div class="label">
-Due day
-</div>
-
+<div class="label">Due day</div>
 <div class="big">
-${t.rent_due_day||'—'}
+${t.rent_due_day || '—'}
+</div>
 </div>
 
 </div>
-
-</div>
-
 
 <div class="card">
 
 <p>
-
 <b>Tenancy status:</b>
 
 <span class="badge">
-
 ${esc(t.status)}
-
 </span>
-
 </p>
 
 <p>
-
 <b>Move-in:</b>
-
-${esc(
-t.move_in_date||
-'Not set'
-)}
-
+${esc(t.move_in_date || 'Not set')}
 </p>
 
 </div>
@@ -3813,14 +3514,6 @@ Waiting for landlord assignment
 Your MavRent account is active, but your landlord has not assigned a rental unit to you yet.
 </p>
 
-<p class="label">
-Your Profile ID
-</p>
-
-<strong>
-${esc(user.id)}
-</strong>
-
 </div>
 
 `
@@ -3834,13 +3527,13 @@ ${esc(user.id)}
 }
 
 
-/* ================= PAYMENTS ================= */
+/* PAYMENTS */
 
-if(id==='myPayments'){
+if(id === 'myPayments'){
 
-const myPayments=
+const myPayments =
 cache.payments.filter(
-p=>p.tenant_id===t?.id
+p=>p.tenant_id === t?.id
 );
 
 return`
@@ -3849,9 +3542,7 @@ return`
 
 <div class="title">
 
-<h1>
-💰 My Payments
-</h1>
+<h1>💰 My Payments</h1>
 
 <p>
 Submit rent payments and view your payment history.
@@ -3859,23 +3550,20 @@ Submit rent payments and view your payment history.
 
 </div>
 
-
 ${
 t
+
 ?
 
 `
 
 <div class="card">
 
-<h3>
-Submit Rent Payment
-</h3>
+<h3>Submit Rent Payment</h3>
 
 <form
 id="tenantPaymentForm"
 class="formgrid">
-
 
 <input
 id="tpamount"
@@ -3884,16 +3572,10 @@ min="1"
 placeholder="Amount (UGX)"
 required>
 
-
 <input
 id="tpdate"
 type="date"
-value="${
-new Date()
-.toISOString()
-.slice(0,10)
-}">
-
+value="${today()}">
 
 <select id="tpmethod">
 
@@ -3915,25 +3597,20 @@ Cash
 
 </select>
 
-
 <input
 id="tpref"
 placeholder="Transaction reference"
 required>
-
 
 <textarea
 id="tpnotes"
 class="full"
 placeholder="Payment notes"></textarea>
 
-
 <button
 class="primary full"
 type="submit">
-
 Submit Payment
-
 </button>
 
 </form>
@@ -3947,20 +3624,15 @@ Submit Payment
 `
 
 <div class="notice">
-
 You cannot submit a rent payment until a landlord assigns you a rental unit.
-
 </div>
 
 `
 }
 
-
 <div class="card">
 
-<h3>
-Payment History
-</h3>
+<h3>Payment History</h3>
 
 ${
 myPayments.length
@@ -3970,19 +3642,18 @@ myPayments.length
 myPayments.map(
 p=>`
 
-<div class="paymentStatusBox
+<div class="
+paymentStatusBox
 ${
-p.status==='pending'
+p.status === 'pending'
 ?'paymentPending'
-:p.status==='rejected'
+:p.status === 'rejected'
 ?'paymentRejected'
 :'paymentConfirmed'
 }">
 
 <strong>
-
 ${money(p.amount)}
-
 </strong>
 
 <br>
@@ -3993,11 +3664,8 @@ ${esc(p.payment_method)}
 
 Status:
 
-<span
-class="badge ${esc(p.status||'confirmed')}">
-
-${esc(p.status||'confirmed')}
-
+<span class="badge ${esc(p.status || 'confirmed')}">
+${esc(p.status || 'confirmed')}
 </span>
 
 <br>
@@ -4009,7 +3677,7 @@ ${esc(p.payment_date)}
 ${
 p.transaction_reference
 ?
-' · Ref: '+
+' · Ref: ' +
 esc(p.transaction_reference)
 :''
 }
@@ -4025,10 +3693,8 @@ p.rejection_reason
 <br>
 
 <strong class="red">
-
 Reason:
 ${esc(p.rejection_reason)}
-
 </strong>
 
 `
@@ -4060,18 +3726,16 @@ No payments yet.
 }
 
 
-/* ================= MAINTENANCE ================= */
+/* MAINTENANCE */
 
-if(id==='myMaintenance')
+if(id === 'myMaintenance')
 
 return page(
 'Report a Problem',
 'Send a maintenance request to your landlord.',
-
 `
 
-<form
-id="tenantMaintForm"
+<form id="tenantMaintForm"
 class="formgrid">
 
 <input
@@ -4088,48 +3752,38 @@ required></textarea>
 <button
 class="primary full"
 type="submit">
-
 Submit request
-
 </button>
 
 </form>
 
 `,
-
 table(
 [
 'Title',
 'Status',
 'Date'
 ],
-
 cache.maintenance_requests.filter(
-m=>m.tenant_id===t?.id
+m=>m.tenant_id === t?.id
 ),
-
 x=>`
 
 <tr>
 
-<td>
-${esc(x.title)}
-</td>
+<td>${esc(x.title)}</td>
 
 <td>
-
 <span class="badge">
 ${esc(x.status)}
 </span>
-
 </td>
 
 <td>
 ${
 x.created_at
-?new Date(
-x.created_at
-).toLocaleDateString()
+?new Date(x.created_at)
+.toLocaleDateString()
 :'—'
 }
 </td>
@@ -4137,58 +3791,47 @@ x.created_at
 </tr>
 
 `
-)
 );
 
 
-/* ================= RECEIPTS ================= */
+/* RECEIPTS */
 
-if(id==='myReceipts')
+if(id === 'myReceipts')
 
 return page(
 'My Receipts',
 'Receipts issued for your payments.',
 '',
-
 table(
 [
 'Receipt number',
 'Payment',
 'Issued'
 ],
-
 cache.receipts.filter(
-r=>r.tenant_id===t?.id
+r=>r.tenant_id === t?.id
 ),
-
 x=>`
 
 <tr>
 
-<td>
-${esc(x.receipt_number)}
-</td>
+<td>${esc(x.receipt_number)}</td>
 
 <td>
-
 ${money(
 cache.payments.find(
 p=>p.id===x.payment_id
-)?.amount||0
+)?.amount || 0
 )}
-
 </td>
 
 <td>
-
 ${
 x.issued_at
-?new Date(
-x.issued_at
-).toLocaleString()
+?new Date(x.issued_at)
+.toLocaleString()
 :'—'
 }
-
 </td>
 
 </tr>
@@ -4197,7 +3840,7 @@ x.issued_at
 );
 
 
-/* ================= PROFILE ================= */
+/* PROFILE */
 
 return`
 
@@ -4205,9 +3848,7 @@ return`
 
 <div class="title">
 
-<h1>
-My Profile
-</h1>
+<h1>My Profile</h1>
 
 <p>
 Your MavRent account information.
@@ -4215,45 +3856,28 @@ Your MavRent account information.
 
 </div>
 
-
 <div class="card">
 
 <p>
-
 <b>Email:</b>
-
 ${esc(user.email)}
-
 </p>
 
-
 <p>
-
 <b>Role:</b>
-
 Tenant
-
 </p>
-
 
 <p>
-
 <b>Profile ID:</b>
-
 </p>
-
 
 <div class="notice">
-
 ${esc(user.id)}
-
 </div>
 
-
 <p class="label">
-
 Give this Profile ID to your landlord if your landlord needs to identify your account.
-
 </p>
 
 </div>
@@ -4277,14 +3901,14 @@ if(
 )
 )return;
 
-const payment=
+const payment =
 cache.payments.find(
-p=>p.id===id
+p=>p.id === id
 );
 
 if(!payment)return;
 
-const r=
+const r =
 await sb
 .from('payments')
 .update({
@@ -4304,6 +3928,10 @@ id
 .eq(
 'landlord_id',
 user.id
+)
+.eq(
+'status',
+'pending'
 );
 
 if(r.error){
@@ -4332,14 +3960,14 @@ show('payments');
 
 async function rejectPayment(id){
 
-const reason=
+const reason =
 prompt(
 'Enter the reason for rejecting this payment:'
 );
 
-if(reason===null)return;
+if(reason === null)return;
 
-const cleanReason=
+const cleanReason =
 reason.trim();
 
 if(!cleanReason){
@@ -4350,7 +3978,7 @@ return alert(
 
 }
 
-const r=
+const r =
 await sb
 .from('payments')
 .update({
@@ -4360,8 +3988,7 @@ status:'rejected',
 rejection_reason:
 cleanReason,
 
-confirmed_at:
-null,
+confirmed_at:null,
 
 confirmed_by:null
 
@@ -4373,6 +4000,10 @@ id
 .eq(
 'landlord_id',
 user.id
+)
+.eq(
+'status',
+'pending'
 );
 
 if(r.error){
@@ -4401,17 +4032,19 @@ show('payments');
 
 function attach(){
 
-/* ================= PROPERTY ================= */
+/* PROPERTY */
 
-let f=$('propertyForm');
+let f =
+$('propertyForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const r=
+const r =
 await sb
 .from('properties')
 .insert({
@@ -4447,23 +4080,34 @@ show('properties');
 };
 
 
-/* ================= UNIT ================= */
+/* UNIT */
 
-f=$('unitForm');
+f = $('unitForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const r=
+const propertyId =
+$('uproperty').value;
+
+if(!propertyId){
+
+return alert(
+'Select a property.'
+);
+
+}
+
+const r =
 await sb
 .from('units')
 .insert({
 
-property_id:
-$('uproperty').value,
+property_id:propertyId,
 
 unit_number:
 $('unum').value.trim(),
@@ -4475,7 +4119,7 @@ $('urent').value
 
 deposit_amount:
 Number(
-$('udep').value||0
+$('udep').value || 0
 ),
 
 status:
@@ -4501,41 +4145,40 @@ show('units');
 };
 
 
-/* ================= TENANT ASSIGNMENT ================= */
+/* TENANT */
 
-f=$('tenantForm');
+f = $('tenantForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-
-const profileId=
+const profileId =
 $('tprofile').value;
 
-const unitId=
+const unitId =
 $('tunit').value;
 
-const rent=
+const rent =
 Number(
 $('trent').value
 );
 
-const deposit=
+const deposit =
 Number(
-$('tdeposit').value||0
+$('tdeposit').value || 0
 );
 
-const dueDay=
+const dueDay =
 Number(
 $('tdue').value
 );
 
-const moveDate=
-$('tmove').value||
-null;
+const moveDate =
+$('tmove').value || null;
 
 
 if(!profileId){
@@ -4546,7 +4189,6 @@ return alert(
 
 }
 
-
 if(!unitId){
 
 return alert(
@@ -4555,12 +4197,33 @@ return alert(
 
 }
 
+if(
+!rent ||
+rent < 0
+){
 
-const existing=
+return alert(
+'Enter a valid rent amount.'
+);
+
+}
+
+if(
+dueDay < 1 ||
+dueDay > 28
+){
+
+return alert(
+'Rent due day must be between 1 and 28.'
+);
+
+}
+
+const existing =
 cache.tenants.find(
 t=>
-t.profile_id===profileId &&
-t.status==='active'
+t.profile_id === profileId &&
+t.status === 'active'
 );
 
 if(existing){
@@ -4571,10 +4234,9 @@ return alert(
 
 }
 
-
-const unit=
+const unit =
 cache.units.find(
-x=>x.id===unitId
+x=>x.id === unitId
 );
 
 if(!unit){
@@ -4585,9 +4247,8 @@ return alert(
 
 }
 
-
 if(
-unit.status==='occupied'
+unit.status === 'occupied'
 ){
 
 return alert(
@@ -4596,40 +4257,23 @@ return alert(
 
 }
 
-
-const r=
+const r =
 await sb
 .from('tenants')
 .insert({
 
-profile_id:
-profileId,
-
-unit_id:
-unitId,
-
-landlord_id:
-user.id,
-
-rent_amount:
-rent,
-
-deposit_amount:
-deposit,
-
-rent_due_day:
-dueDay,
-
-move_in_date:
-moveDate,
-
-status:
-'active'
+profile_id:profileId,
+unit_id:unitId,
+landlord_id:user.id,
+rent_amount:rent,
+deposit_amount:deposit,
+rent_due_day:dueDay,
+move_in_date:moveDate,
+status:'active'
 
 })
 .select()
 .single();
-
 
 if(r.error){
 
@@ -4648,7 +4292,7 @@ r.error.message
 
 /* MARK UNIT OCCUPIED */
 
-const unitUpdate=
+const unitUpdate =
 await sb
 .from('units')
 .update({
@@ -4672,7 +4316,6 @@ unitUpdate.error.message
 
 }
 
-
 alert(
 'Tenant successfully assigned.'
 );
@@ -4682,31 +4325,51 @@ show('tenants');
 };
 
 
-/* ================= LANDLORD PAYMENT ================= */
+/* LANDLORD PAYMENT */
 
-f=$('paymentForm');
+f = $('paymentForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const r=
+const tenantId =
+$('ptenant').value;
+
+const amount =
+Number(
+$('pamount').value
+);
+
+if(!tenantId){
+
+return alert(
+'Select a tenant.'
+);
+
+}
+
+if(amount <= 0){
+
+return alert(
+'Enter a valid amount.'
+);
+
+}
+
+const r =
 await sb
 .from('payments')
 .insert({
 
-tenant_id:
-$('ptenant').value,
+tenant_id:tenantId,
 
-landlord_id:
-user.id,
+landlord_id:user.id,
 
-amount:
-Number(
-$('pamount').value
-),
+amount:amount,
 
 payment_date:
 $('pdate').value,
@@ -4715,21 +4378,19 @@ payment_method:
 $('pmethod').value,
 
 transaction_reference:
-$('pref').value.trim()||
+$('pref').value.trim() ||
 null,
 
 notes:
-$('pnotes').value.trim()||
+$('pnotes').value.trim() ||
 null,
 
-status:
-'confirmed',
+status:'confirmed',
 
 confirmed_at:
 new Date().toISOString(),
 
-confirmed_by:
-user.id
+confirmed_by:user.id
 
 });
 
@@ -4751,21 +4412,21 @@ show('payments');
 };
 
 
-/* ================= TENANT PAYMENT ================= */
+/* TENANT PAYMENT */
 
-f=$('tenantPaymentForm');
+f = $('tenantPaymentForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-
-const t=
+const tenant =
 cache.tenants[0];
 
-if(!t){
+if(!tenant){
 
 return alert(
 'You have not been assigned a rental unit yet.'
@@ -4773,13 +4434,12 @@ return alert(
 
 }
 
-
-const amount=
+const amount =
 Number(
 $('tpamount').value
 );
 
-if(amount<=0){
+if(amount <= 0){
 
 return alert(
 'Enter a valid payment amount.'
@@ -4787,8 +4447,7 @@ return alert(
 
 }
 
-
-const reference=
+const reference =
 $('tpref').value.trim();
 
 if(!reference){
@@ -4799,21 +4458,17 @@ return alert(
 
 }
 
-
-const r=
+const r =
 await sb
 .from('payments')
 .insert({
 
-tenant_id:
-t.id,
+tenant_id:tenant.id,
 
 landlord_id:
-t.landlord_id,
+tenant.landlord_id,
 
-amount:
-
-amount,
+amount:amount,
 
 payment_date:
 $('tpdate').value,
@@ -4825,16 +4480,14 @@ transaction_reference:
 reference,
 
 notes:
-$('tpnotes').value.trim()||
+$('tpnotes').value.trim() ||
 null,
 
-status:
-'pending'
+status:'pending'
 
 })
 .select()
 .single();
-
 
 if(r.error){
 
@@ -4845,7 +4498,6 @@ r.error.message
 
 }
 
-
 alert(
 'Payment submitted successfully. Your landlord will review it.'
 );
@@ -4855,29 +4507,41 @@ show('myPayments');
 };
 
 
-/* ================= MAINTENANCE ================= */
+/* LANDLORD MAINTENANCE */
 
-f=$('maintForm');
+f = $('maintForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const r=
+const tenantId =
+$('mtenant').value;
+
+const unitId =
+$('munit').value;
+
+if(!tenantId || !unitId){
+
+return alert(
+'Select both tenant and unit.'
+);
+
+}
+
+const r =
 await sb
 .from('maintenance_requests')
 .insert({
 
-tenant_id:
-$('mtenant').value,
+tenant_id:tenantId,
 
-landlord_id:
-user.id,
+landlord_id:user.id,
 
-unit_id:
-$('munit').value,
+unit_id:unitId,
 
 title:
 $('mtitle').value.trim(),
@@ -4890,11 +4554,11 @@ $('mstatus').value,
 
 repair_cost:
 Number(
-$('mcost').value||0
+$('mcost').value || 0
 ),
 
 landlord_notes:
-$('mnotes').value.trim()||
+$('mnotes').value.trim() ||
 null
 
 });
@@ -4917,20 +4581,21 @@ show('maintenance');
 };
 
 
-/* ================= TENANT MAINTENANCE ================= */
+/* TENANT MAINTENANCE */
 
-f=$('tenantMaintForm');
+f = $('tenantMaintForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const t=
+const tenant =
 cache.tenants[0];
 
-if(!t){
+if(!tenant){
 
 return alert(
 'You have not been assigned a rental unit yet.'
@@ -4938,28 +4603,38 @@ return alert(
 
 }
 
-const r=
+const title =
+$('ttitle').value.trim();
+
+const description =
+$('tdesc').value.trim();
+
+if(!title || !description){
+
+return alert(
+'Enter the problem title and description.'
+);
+
+}
+
+const r =
 await sb
 .from('maintenance_requests')
 .insert({
 
-tenant_id:
-t.id,
+tenant_id:tenant.id,
 
 landlord_id:
-t.landlord_id,
+tenant.landlord_id,
 
 unit_id:
-t.unit_id,
+tenant.unit_id,
 
-title:
-$('ttitle').value.trim(),
+title:title,
 
-description:
-$('tdesc').value.trim(),
+description:description,
 
-status:
-'pending',
+status:'pending',
 
 repair_cost:0
 
@@ -4983,17 +4658,31 @@ show('myMaintenance');
 };
 
 
-/* ================= EXPENSE ================= */
+/* EXPENSE */
 
-f=$('expenseForm');
+f = $('expenseForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const r=
+const amount =
+Number(
+$('eamount').value
+);
+
+if(amount < 0){
+
+return alert(
+'Enter a valid expense amount.'
+);
+
+}
+
+const r =
 await sb
 .from('expenses')
 .insert({
@@ -5001,17 +4690,12 @@ await sb
 landlord_id:user.id,
 
 property_id:
-$('eprop').value||
-null,
+$('eprop').value || null,
 
 unit_id:
-$('eunit').value||
-null,
+$('eunit').value || null,
 
-amount:
-Number(
-$('eamount').value
-),
+amount:amount,
 
 category:
 $('ecat').value.trim(),
@@ -5042,20 +4726,21 @@ show('expenses');
 };
 
 
-/* ================= RECEIPT ================= */
+/* RECEIPT */
 
-f=$('receiptForm');
+f = $('receiptForm');
 
 if(f)
 
-f.onsubmit=async e=>{
+f.onsubmit =
+async e=>{
 
 e.preventDefault();
 
-const payment=
+const payment =
 cache.payments.find(
 x=>
-x.id===
+x.id ===
 $('rpayment').value
 );
 
@@ -5068,7 +4753,7 @@ return alert(
 }
 
 if(
-payment.status!=='confirmed'
+payment.status !== 'confirmed'
 ){
 
 return alert(
@@ -5077,25 +4762,33 @@ return alert(
 
 }
 
+const receiptNumber =
+$('rnumber')
+.value
+.trim();
 
-const r=
+if(!receiptNumber){
+
+return alert(
+'Enter a receipt number.'
+);
+
+}
+
+const r =
 await sb
 .from('receipts')
 .insert({
 
-payment_id:
-payment.id,
+payment_id:payment.id,
 
 tenant_id:
 payment.tenant_id,
 
-landlord_id:
-user.id,
+landlord_id:user.id,
 
 receipt_number:
-$('rnumber')
-.value
-.trim()
+receiptNumber
 
 });
 
@@ -5120,24 +4813,78 @@ show('receipts');
 
 
 /* =========================================================
-   DELETE
+   SAFE DELETE PROPERTY
 ========================================================= */
 
-async function del(
-table,
-id,
-pageName
-){
+async function delProperty(id){
 
 if(
 !confirm(
-'Delete this record?'
+'Delete this property? Units belonging to it may prevent deletion.'
 )
 )return;
 
-const r=
+const r =
 await sb
-.from(table)
+.from('properties')
+.delete()
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error){
+
+return alert(
+'Delete error: '+
+r.error.message
+);
+
+}
+
+alert(
+'Property deleted.'
+);
+
+show('properties');
+
+}
+
+
+/* =========================================================
+   SAFE DELETE UNIT
+========================================================= */
+
+async function delUnit(id){
+
+if(
+!confirm(
+'Delete this unit?'
+)
+)return;
+
+const unit =
+cache.units.find(
+x=>x.id===id
+);
+
+if(
+unit?.status === 'occupied'
+){
+
+return alert(
+'You cannot delete an occupied unit. Remove the tenant first.'
+);
+
+}
+
+const r =
+await sb
+.from('units')
 .delete()
 .eq(
 'id',
@@ -5154,10 +4901,81 @@ r.error.message
 }
 
 alert(
-'Record deleted.'
+'Unit deleted.'
 );
 
-show(pageName);
+show('units');
+
+}
+
+
+/* =========================================================
+   REMOVE TENANT
+========================================================= */
+
+async function removeTenant(
+tenantId,
+unitId
+){
+
+if(
+!confirm(
+'Remove this tenant from the unit?'
+)
+)return;
+
+const r =
+await sb
+.from('tenants')
+.update({
+status:'inactive'
+})
+.eq(
+'id',
+tenantId
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error){
+
+return alert(
+'Tenant removal error: '+
+r.error.message
+);
+
+}
+
+
+/* MAKE UNIT VACANT */
+
+const unitUpdate =
+await sb
+.from('units')
+.update({
+status:'vacant'
+})
+.eq(
+'id',
+unitId
+);
+
+if(unitUpdate.error){
+
+return alert(
+'Tenant removed, but unit status could not be updated: '+
+unitUpdate.error.message
+);
+
+}
+
+alert(
+'Tenant removed and unit is now vacant.'
+);
+
+show('tenants');
 
 }
 
@@ -5170,10 +4988,10 @@ document.addEventListener(
 'click',
 e=>{
 
-const panel=
+const panel =
 $('notificationPanel');
 
-const button=
+const button =
 e.target.closest(
 '.notifyBtn'
 );
@@ -5185,9 +5003,7 @@ panel &&
 !button
 ){
 
-panel.classList.add(
-'hidden'
-);
+panel.classList.add('hidden');
 
 }
 
@@ -5203,9 +5019,19 @@ function startNotificationRealtime(){
 
 if(!user)return;
 
+if(notificationChannel){
+
+sb.removeChannel(
+notificationChannel
+);
+
+}
+
+notificationChannel =
 sb
 .channel(
-'mavrent-notifications-'+user.id
+'mavrent-notifications-' +
+user.id
 )
 .on(
 'postgres_changes',
@@ -5214,10 +5040,10 @@ event:'*',
 schema:'public',
 table:'notifications',
 filter:
-'user_id=eq.'+
+'user_id=eq.' +
 user.id
 },
-payload=>{
+()=>{
 
 loadNotifications();
 
@@ -5233,16 +5059,24 @@ loadNotifications();
 ========================================================= */
 
 sb.auth.onAuthStateChange(
-(event,session)=>{
+async (event,session)=>{
+
+if(event === 'SIGNED_OUT'){
+
+return;
+
+}
 
 if(
 session &&
-!user
+!user &&
+!appLoading
 ){
 
-user=session.user;
+user =
+session.user;
 
-loadApp();
+await loadApp();
 
 }
 
@@ -5251,7 +5085,7 @@ loadApp();
 
 
 /* =========================================================
-   START
+   START APPLICATION
 ========================================================= */
 
 (async()=>{
@@ -5259,25 +5093,29 @@ loadApp();
 const {
 data,
 error
-}=
+} =
 await sb.auth.getSession();
 
 if(error){
 
-console.error(error);
+console.error(
+'Session error:',
+error
+);
 
-return;
+return msg(
+'Unable to initialize MavRent: '+
+error.message
+);
 
 }
 
 if(data.session){
 
-user=
+user =
 data.session.user;
 
 await loadApp();
-
-startNotificationRealtime();
 
 }
 
