@@ -184,15 +184,23 @@ function tenant(id){
 
 async function uploadMaintenanceMedia(file){
  if(!file)return null;
- const allowed=file.type.startsWith('image/')||file.type.startsWith('video/');
- if(!allowed)throw new Error('Please select an image or video.');
- const max=50*1024*1024;if(file.size>max)throw new Error('The selected file is larger than 50 MB.');
- const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
- const path=`${user.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
- const {error}=await sb.storage.from(MEDIA_BUCKET).upload(path,file,{contentType:file.type,upsert:false});
- if(error)throw error;
- const {data}=sb.storage.from(MEDIA_BUCKET).getPublicUrl(path);
- return {url:data.publicUrl,path,type:file.type,name:file.name};
+ const type=(file.type||'').toLowerCase();
+ const allowed=type.startsWith('image/')||type.startsWith('video/');
+ if(!allowed)throw new Error('Please select an image or video file.');
+ const max=25*1024*1024;
+ if(file.size>max)throw new Error('This file is too large. Please choose a photo or video under 25 MB.');
+ if(!user?.id)throw new Error('Your MavRent session has expired. Please log in again.');
+ const safeName=(file.name||'upload').replace(/[^a-zA-Z0-9._-]/g,'_');
+ const path=`${user.id}/${Date.now()}-${Math.random().toString(36).slice(2,10)}-${safeName}`;
+ const bucket=sb.storage.from(MEDIA_BUCKET);
+ const {error}=await bucket.upload(path,file,{contentType:type,cacheControl:'3600',upsert:false});
+ if(error){
+   throw new Error('Photo/video upload failed: '+(error.message||'Storage upload error')+' Make sure the maintenance-media Storage policies were created in Supabase.');
+ }
+ const publicResult=bucket.getPublicUrl(path);
+ const url=publicResult?.data?.publicUrl;
+ if(!url)throw new Error('The file uploaded, but MavRent could not create its viewing link.');
+ return {url,path,type,name:file.name};
 }
 
 async function confirmPayment(id){if(!confirm('Confirm this rent payment?'))return;const r=await sb.from('payments').update({status:'confirmed',confirmed_at:new Date().toISOString(),confirmed_by:user.id}).eq('id',id).eq('landlord_id',user.id).eq('status','pending');if(r.error)return alert('Payment confirmation error: '+r.error.message);alert('Payment confirmed successfully.');await loadNotifications();show('payments')}
@@ -205,7 +213,7 @@ function attach(){
  f=$('paymentForm');if(f)f.onsubmit=async e=>{e.preventDefault();const amount=Number($('pamount').value);if(!$('ptenant').value||amount<=0)return alert('Select a tenant and enter a valid amount.');const r=await sb.from('payments').insert({tenant_id:$('ptenant').value,landlord_id:user.id,amount,payment_date:$('pdate').value,payment_method:$('pmethod').value,transaction_reference:$('pref').value.trim()||null,notes:$('pnotes').value.trim()||null,status:'confirmed',confirmed_at:new Date().toISOString(),confirmed_by:user.id});if(r.error)return alert('Payment error: '+r.error.message);alert('Confirmed payment saved successfully.');show('payments')};
  f=$('tenantPaymentForm');if(f)f.onsubmit=async e=>{e.preventDefault();const tenant=cache.tenants[0],amount=Number($('tpamount').value),reference=$('tpref').value.trim();if(!tenant)return alert('You have not been assigned a rental unit yet.');if(amount<=0)return alert('Enter a valid payment amount.');if(!reference)return alert('Enter the transaction reference.');const r=await sb.from('payments').insert({tenant_id:tenant.id,landlord_id:tenant.landlord_id,amount,payment_date:$('tpdate').value,payment_method:$('tpmethod').value,transaction_reference:reference,notes:$('tpnotes').value.trim()||null,status:'pending'});if(r.error)return alert('Payment submission error: '+r.error.message);alert('Payment submitted successfully. Your landlord will review it.');show('myPayments')};
  f=$('maintForm');if(f)f.onsubmit=async e=>{e.preventDefault();const r=await sb.from('maintenance_requests').insert({tenant_id:$('mtenant').value,landlord_id:user.id,unit_id:$('munit').value,title:$('mtitle').value.trim(),description:$('mdesc').value.trim(),status:$('mstatus').value,repair_cost:Number($('mcost').value||0),landlord_notes:$('mnotes').value.trim()||null});if(r.error)return alert('Maintenance error: '+r.error.message);alert('Maintenance request saved.');show('maintenance')};
- f=$('tenantMaintForm');if(f)f.onsubmit=async e=>{e.preventDefault();const tenant=cache.tenants[0];if(!tenant)return alert('You have not been assigned a rental unit yet.');const title=$('ttitle').value.trim(),description=$('tdesc').value.trim(),file=$('tmedia').files[0];if(!title||!description)return alert('Enter the problem title and description.');const button=f.querySelector('button[type="submit"]');button.disabled=true;button.textContent=file?'Uploading and sending report...':'Sending report...';try{let media=null;if(file)media=await uploadMaintenanceMedia(file);const payload={tenant_id:tenant.id,landlord_id:tenant.landlord_id,unit_id:tenant.unit_id,title,description,status:'pending',repair_cost:0};if(media){payload.media_url=media.url;payload.media_path=media.path;payload.media_type=media.type;payload.media_name=media.name}const r=await sb.from('maintenance_requests').insert(payload);if(r.error){if(media?.path)await sb.storage.from(MEDIA_BUCKET).remove([media.path]);throw r.error}alert('Maintenance report sent successfully to your landlord.');show('myMaintenance')}catch(err){alert('Could not send the maintenance report: '+(err.message||err))}finally{button.disabled=false;button.textContent='📷 Submit Problem Report'}};
+ f=$('tenantMaintForm');if(f)f.onsubmit=async e=>{e.preventDefault();const tenant=cache.tenants[0];if(!tenant)return alert('You have not been assigned a rental unit yet.');const title=$('ttitle').value.trim(),description=$('tdesc').value.trim(),file=$('tmedia')?.files?.[0]||null;if(!title||!description)return alert('Enter the problem title and description.');const button=f.querySelector('button[type="submit"]');const original=button.textContent;button.disabled=true;try{let media=null;if(file){button.textContent='Uploading photo/video...';media=await uploadMaintenanceMedia(file)}button.textContent='Sending report...';const payload={tenant_id:tenant.id,landlord_id:tenant.landlord_id,unit_id:tenant.unit_id,title,description,status:'pending',repair_cost:0};if(media){payload.media_url=media.url;payload.media_path=media.path;payload.media_type=media.type;payload.media_name=media.name}const r=await sb.from('maintenance_requests').insert(payload);if(r.error){if(media?.path)await sb.storage.from(MEDIA_BUCKET).remove([media.path]);throw new Error('Maintenance report could not be saved: '+r.error.message)}alert('Maintenance report sent successfully to your landlord.');await refresh();show('myMaintenance',false)}catch(err){console.error('MavRent maintenance submit error:',err);alert(err.message||'Could not send the maintenance report.')}finally{button.disabled=false;button.textContent=original}};
  f=$('expenseForm');if(f)f.onsubmit=async e=>{e.preventDefault();const amount=Number($('eamount').value);if(amount<0)return alert('Enter a valid expense amount.');const r=await sb.from('expenses').insert({landlord_id:user.id,property_id:$('eprop').value||null,unit_id:$('eunit').value||null,amount,category:$('ecat').value.trim(),description:$('edesc').value.trim(),expense_date:$('edate').value});if(r.error)return alert('Expense error: '+r.error.message);alert('Expense saved successfully.');show('expenses')};
  f=$('receiptForm');if(f)f.onsubmit=async e=>{e.preventDefault();const payment=cache.payments.find(x=>x.id===$('rpayment').value),receiptNumber=$('rnumber').value.trim();if(!payment)return alert('Select a payment.');if(payment.status!=='confirmed')return alert('Only confirmed payments can receive a receipt.');if(!receiptNumber)return alert('Enter a receipt number.');const r=await sb.from('receipts').insert({payment_id:payment.id,tenant_id:payment.tenant_id,landlord_id:user.id,receipt_number:receiptNumber});if(r.error)return alert('Receipt error: '+r.error.message);alert('Receipt issued successfully.');show('receipts')};
 }
