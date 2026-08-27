@@ -1,124 +1,6312 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MavRent - Property Management</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111827">
+<title>MavRent V11</title>
 
-  <!-- Inline PWA Manifest using Data URI -->
-  <link rel="manifest" href='data:application/manifest+json,{
-    "short_name": "MavRent",
-    "name": "MavRent - Property Management",
-    "start_url": "/",
-    "background_color": "#ffffff",
-    "theme_color": "#0f172a",
-    "display": "standalone",
-    "orientation": "portrait-primary",
-    "scope": "/",
-    "icons": [
-      {
-        "src": "https://via.placeholder.com/192/0f172a/ffffff?text=MavRent",
-        "type": "image/png",
-        "sizes": "192x192"
-      },
-      {
-        "src": "https://via.placeholder.com/512/0f172a/ffffff?text=MavRent",
-        "type": "image/png",
-        "sizes": "512x512"
-      }
-    ]
-  }' />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <meta name="theme-color" content="#0f172a" />
+<style>
+*{box-sizing:border-box}
 
-  <!-- iOS / Apple Specific Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="MavRent" />
-  <link rel="apple-touch-icon" href="https://via.placeholder.com/192/0f172a/ffffff?text=MavRent" />
+body{
+margin:0;
+font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+background:#f4f5f7;
+color:#17202a
+}
 
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: #f8fafc; color: #0f172a; display: flex; flex-direction: column; min-height: 100vh; }
-    header { background-color: #0f172a; color: #ffffff; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    header h1 { font-size: 1.25rem; font-weight: 700; }
-    .install-btn { background-color: #2563eb; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; cursor: pointer; display: none; }
-    .install-btn:hover { background-color: #1d4ed8; }
-    main { flex: 1; padding: 1.5rem; max-width: 800px; margin: 0 auto; width: 100%; }
-    .card { background: white; border-radius: 0.5rem; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-    .ios-prompt { display: none; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem; }
-  </style>
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+
+.auth{
+min-height:100vh;
+display:grid;
+place-items:center;
+padding:25px;
+background:
+radial-gradient(circle at 15% 15%,#34b4ff55,transparent 30%),
+radial-gradient(circle at 85% 20%,#0062ff66,transparent 34%),
+linear-gradient(135deg,#061b45,#0a4da2 48%,#03163d)
+}
+
+.login{
+width:min(450px,100%);
+padding:30px;
+color:#fff;
+border:1px solid #ffffff44;
+border-radius:26px;
+background:#ffffff18;
+backdrop-filter:blur(22px);
+box-shadow:0 28px 80px #00000055
+}
+
+.brand{font-size:32px;font-weight:900}
+.brand span{color:#67c7ff}
+.muted{color:#ffffffb8;font-size:13px}
+
+.role{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:9px;
+margin:22px 0
+}
+
+.role button,.secondary{
+padding:13px;
+border:1px solid #ffffff44;
+background:#ffffff12;
+color:#fff;
+border-radius:12px
+}
+
+.role .sel{
+background:#fff;
+color:#0869d7
+}
+
+label{
+display:block;
+font-size:12px;
+margin:12px 0 6px;
+color:#ffffffd0
+}
+
+.login input{
+width:100%;
+padding:13px;
+border:1px solid #ffffff4d;
+border-radius:12px;
+background:#ffffff12;
+color:#fff;
+outline:0
+}
+
+.login input::placeholder{color:#ffffff99}
+
+.primary{
+width:100%;
+margin-top:12px;
+padding:13px;
+border:0;
+border-radius:12px;
+background:linear-gradient(135deg,#087cff,#00b8ff);
+color:#fff;
+font-weight:800
+}
+
+.secondary{
+width:100%;
+margin-top:10px;
+font-weight:700
+}
+
+.link{
+background:none;
+border:0;
+color:#bfe7ff;
+margin-top:12px;
+text-decoration:underline
+}
+
+.message,.notice{
+padding:11px;
+border-radius:10px;
+font-size:13px;
+margin-top:12px
+}
+
+.error{
+background:#fff0f0;
+color:#8f2222
+}
+
+.success{
+background:#ecfdf3;
+color:#08743f
+}
+
+header{
+background:#111827;
+color:#fff;
+padding:15px;
+position:sticky;
+top:0;
+z-index:20
+}
+
+.bar,nav,main{
+max-width:1100px;
+margin:auto
+}
+
+.bar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px
+}
+
+.small{font-size:22px}
+
+.userbox{
+font-size:12px;
+display:flex;
+gap:7px;
+align-items:center
+}
+
+.logout,.notifyBtn{
+background:#273244;
+color:#fff;
+border:0;
+border-radius:9px;
+padding:8px 10px
+}
+
+.notifyBtn{
+position:relative;
+font-size:17px
+}
+
+.notifyCount{
+position:absolute;
+right:-5px;
+top:-6px;
+background:#ef4444;
+border-radius:50%;
+font-size:10px;
+min-width:18px;
+height:18px;
+display:grid;
+place-items:center;
+border:2px solid #111827
+}
+
+nav{
+display:flex;
+gap:6px;
+overflow:auto;
+margin-top:12px
+}
+
+nav button{
+border:0;
+background:#273244;
+color:#dbe1e8;
+border-radius:9px;
+padding:9px 11px;
+white-space:nowrap
+}
+
+nav button.active{
+background:#fff;
+color:#111827
+}
+
+main{
+padding:20px 14px 50px
+}
+
+.title{margin-bottom:15px}
+
+.title h1{
+margin:0;
+font-size:25px
+}
+
+.title p{
+margin:5px 0;
+color:#6b7280
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px
+}
+
+.card{
+background:#fff;
+border:1px solid #e3e6ea;
+border-radius:14px;
+padding:16px;
+margin-bottom:14px
+}
+
+.big{
+font-size:22px;
+font-weight:800;
+margin-top:6px
+}
+
+.green{color:#13844b}
+.orange{color:#b86b00}
+.red{color:#c93636}
+.blue{color:#1769d1}
+
+.grid,.formgrid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:12px
+}
+
+.full{grid-column:1/-1}
+
+.actions{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:9px
+}
+
+.btn{
+border:1px solid #d9dde3;
+background:#fff;
+color:#17202a;
+border-radius:10px;
+padding:11px;
+text-align:left;
+font-weight:700
+}
+
+.danger{
+background:#fff0f0;
+color:#a72828
+}
+
+.successBtn{
+background:#ecfdf3;
+color:#08743f
+}
+
+.warningBtn{
+background:#fff8e6;
+color:#966100
+}
+
+#app input,
+#app select,
+#app textarea{
+width:100%;
+padding:13px 14px;
+border:1px solid #d9dde3;
+border-radius:12px;
+background:#fff;
+color:#17202a!important;
+caret-color:#17202a;
+outline:0
+}
+
+#app input:focus,
+#app select:focus,
+#app textarea:focus{
+border-color:#087cff;
+box-shadow:0 0 0 3px #087cff1f
+}
+
+.tablewrap{overflow:auto}
+
+.table{
+width:100%;
+border-collapse:collapse;
+font-size:13px
+}
+
+.table th,.table td{
+padding:10px 7px;
+border-bottom:1px solid #eceef1;
+text-align:left;
+vertical-align:top;
+white-space:nowrap
+}
+
+.wrap{
+white-space:normal!important;
+min-width:200px
+}
+
+.badge{
+display:inline-block;
+padding:4px 8px;
+border-radius:20px;
+background:#eef1f5;
+font-size:11px
+}
+
+.badge.pending{
+background:#fff4d6;
+color:#956300
+}
+
+.badge.confirmed,
+.badge.completed,
+.badge.paid{
+background:#dcfce7;
+color:#166534
+}
+
+.badge.rejected,
+.badge.cancelled,
+.badge.overdue{
+background:#fee2e2;
+color:#991b1b
+}
+
+.badge.partial{
+background:#fef3c7;
+color:#92400e
+}
+
+.badge.in_progress{
+background:#dbeafe;
+color:#1d4ed8
+}
+
+.empty,.loading{
+text-align:center;
+padding:30px;
+color:#737b87
+}
+
+.code{
+font-family:monospace;
+font-weight:800;
+letter-spacing:.5px
+}
+
+.profileHero{
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:16px
+}
+
+.avatar{
+width:68px;
+height:68px;
+border-radius:50%;
+display:grid;
+place-items:center;
+background:linear-gradient(135deg,#087cff,#00b8ff);
+color:#fff;
+font-size:25px;
+font-weight:900
+}
+
+.profileId{
+background:#eef2ff;
+border-radius:10px;
+padding:10px;
+font-family:monospace;
+font-weight:800
+}
+
+/* =====================================================
+   NOTIFICATIONS
+===================================================== */
+
+.notificationPanel{
+position:fixed;
+right:20px;
+top:75px;
+width:min(390px,calc(100vw - 30px));
+max-height:75vh;
+overflow:auto;
+background:#fff;
+border:1px solid #e2e5e9;
+border-radius:16px;
+box-shadow:0 20px 60px #0003;
+z-index:100
+}
+
+.notificationHead{
+padding:15px;
+border-bottom:1px solid #eceef1;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px
+}
+
+.notificationItem{
+padding:14px;
+border-bottom:1px solid #eceef1;
+cursor:pointer
+}
+
+.notificationItem:hover{
+background:#f8fafc
+}
+
+.notificationItem.unread{
+background:#eff6ff
+}
+
+.notificationTitle{
+font-weight:800
+}
+
+.notificationMessage{
+font-size:12px;
+color:#5f6875;
+margin-top:4px
+}
+
+.notificationDate{
+font-size:10px;
+color:#9299a3;
+margin-top:7px
+}
+
+.notificationType{
+font-size:10px;
+margin-top:6px;
+color:#1769d1;
+font-weight:700
+}
+
+.mediaPreview{
+max-width:280px;
+max-height:220px;
+border-radius:10px;
+margin-top:8px
+}
+
+.mediaBox{
+padding:10px;
+border:1px solid #e5e7eb;
+border-radius:10px;
+background:#f8fafc;
+margin-top:8px
+}
+
+.maintCard{
+border:1px solid #e5e7eb;
+border-radius:14px;
+padding:14px;
+margin-bottom:12px
+}
+
+.maintTop{
+display:flex;
+justify-content:space-between;
+gap:10px
+}
+
+.maintMeta{
+font-size:12px;
+color:#667085;
+line-height:1.6
+}
+
+.maintActions{
+margin-top:12px;
+padding-top:12px;
+border-top:1px solid #eef0f3
+}
+
+.maintActionsGrid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px
+}
+
+.progressLine{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin:10px 0
+}
+
+.progressStep{
+padding:5px 9px;
+border-radius:999px;
+background:#eef1f5;
+font-size:11px
+}
+
+.progressStep.done{
+background:#dcfce7;
+color:#166534
+}
+
+.progressStep.current{
+background:#dbeafe;
+color:#1d4ed8
+}
+
+.rentHero{
+background:
+linear-gradient(135deg,#071b41,#0869d7 55%,#00b8ff);
+color:#fff;
+border:0
+}
+
+.rentHero .muted{
+color:#ffffffc9
+}
+
+.rentBalance{
+font-size:32px;
+font-weight:900;
+margin-top:7px
+}
+
+.rentMiniGrid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-top:15px
+}
+
+.rentMini{
+background:#ffffff18;
+border:1px solid #ffffff30;
+border-radius:12px;
+padding:12px
+}
+
+.rentMini small{
+display:block;
+color:#ffffffb8
+}
+
+.rentMini strong{
+display:block;
+margin-top:4px
+}
+
+.monthCard{
+border:1px solid #e5e7eb;
+border-radius:14px;
+padding:15px;
+margin-bottom:12px;
+background:#fff
+}
+
+.monthTop{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:12px
+}
+
+.monthName{
+font-weight:900;
+font-size:17px
+}
+
+.amountGrid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-top:12px
+}
+
+.amountBox{
+padding:11px;
+border-radius:10px;
+background:#f8fafc
+}
+
+.amountBox small{
+display:block;
+color:#667085
+}
+
+.amountBox strong{
+display:block;
+margin-top:4px
+}
+
+.rentActionRow{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px
+}
+
+.rentActionRow button{
+border:1px solid #d9dde3;
+background:#fff;
+border-radius:9px;
+padding:9px 12px;
+font-weight:700
+}
+
+@media(max-width:700px){
+
+.stats,.grid,.formgrid{
+grid-template-columns:1fr
+}
+
+.stats{
+grid-template-columns:1fr 1fr
+}
+
+.full{
+grid-column:auto
+}
+
+.title h1{
+font-size:22px
+}
+
+.actions{
+grid-template-columns:1fr
+}
+
+.userbox span{
+display:none
+}
+
+.notificationPanel{
+right:10px
+}
+
+.maintTop{
+display:block
+}
+
+.maintActionsGrid{
+grid-template-columns:1fr
+}
+
+.rentMiniGrid{
+grid-template-columns:1fr
+}
+
+.amountGrid{
+grid-template-columns:1fr
+}
+
+}
+</style>
 </head>
+
 <body>
 
-  <header>
-    <h1>MavRent</h1>
-    <button id="pwa-install-btn" class="install-btn">Install App</button>
-  </header>
+<!-- =====================================================
+     LOGIN
+===================================================== -->
 
-  <main>
-    <div id="ios-instructions" class="ios-prompt">
-      To install <strong>MavRent</strong> on your iPhone/iPad: tap the <strong>Share</strong> button in Safari, then select <strong>Add to Home Screen</strong>.
-    </div>
+<div id="auth" class="auth">
 
-    <div class="card">
-      <h2>Welcome to MavRent</h2>
-      <p style="margin-top: 0.5rem; color: #475569;">
-        Your property management platform is ready. When installed, this app functions offline and launches in full-screen native mode.
-      </p>
-    </div>
-  </main>
+<div class="login">
 
-  <script>
-    // Inline Service Worker created dynamically via Blob
-    if ('serviceWorker' in navigator) {
-      const swCode = `
-        const CACHE_NAME = 'mavrent-v1';
-        self.addEventListener('install', (event) => self.skipWaiting());
-        self.addEventListener('activate', (event) => self.clients.claim());
-        self.addEventListener('fetch', (event) => {
-          if (event.request.method !== 'GET') return;
-          event.respondWith(
-            fetch(event.request).catch(() => caches.match(event.request))
-          );
-        });
-      `;
+<div class="brand">
+Mav<span>Rent</span>
+</div>
 
-      const blob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(blob);
+<div class="muted">
+Rental management platform
+</div>
 
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register(swUrl)
-          .then(() => console.log('Inline Service Worker registered!'))
-          .catch((err) => console.error('Service Worker failed:', err));
-      });
-    }
+<div class="role">
 
-    // Install prompt handler for Desktop & Android
-    let deferredPrompt;
-    const installBtn = document.getElementById('pwa-install-btn');
+<button
+id="landlordRole"
+class="sel"
+type="button"
+onclick="chooseRole('landlord')">
+🏢 Landlord
+</button>
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.style.display = 'block';
-    });
+<button
+id="tenantRole"
+type="button"
+onclick="chooseRole('tenant')">
+👤 Tenant
+</button>
 
-    installBtn.addEventListener('click', async () => {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      installBtn.style.display = 'none';
-    });
+</div>
 
-    // Detect iOS and show banner if opening from Safari browser
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+<form id="loginForm">
 
-    if (isIOS && !isStandalone) {
-      document.getElementById('ios-instructions').style.display = 'block';
-    }
-  </script>
+<label>Email</label>
+
+<input
+id="email"
+type="email"
+required
+placeholder="you@example.com">
+
+<label>Password</label>
+
+<input
+id="password"
+type="password"
+required
+placeholder="Enter password">
+
+<button class="primary">
+Login
+</button>
+
+</form>
+
+<button class="secondary" onclick="signup()">
+Create account
+</button>
+
+<button class="link" onclick="resetPassword()">
+Forgot password?
+</button>
+
+<div id="authMsg" class="message hidden"></div>
+
+</div>
+</div>
+
+
+<!-- =====================================================
+     APPLICATION
+===================================================== -->
+
+<div id="app" class="hidden">
+
+<header>
+
+<div class="bar">
+
+<div class="brand small">
+Mav<span>Rent</span>
+</div>
+
+<div class="userbox">
+
+<span id="who"></span>
+
+<button
+class="notifyBtn"
+onclick="toggleNotifications()"
+title="Notifications">
+🔔
+<span id="notifyCount" class="notifyCount hidden">
+0
+</span>
+</button>
+
+<button
+class="logout"
+onclick="logout()">
+Log out
+</button>
+
+</div>
+
+</div>
+
+<nav id="nav"></nav>
+
+</header>
+
+<main id="main"></main>
+
+</div>
+
+
+<!-- =====================================================
+     NOTIFICATION PANEL
+===================================================== -->
+
+<div
+id="notificationPanel"
+class="notificationPanel hidden">
+
+<div class="notificationHead">
+
+<h3 style="margin:0">
+🔔 Notifications
+</h3>
+
+<button
+class="btn"
+onclick="markAllNotificationsRead()">
+Mark all read
+</button>
+
+</div>
+
+<div id="notificationList"></div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   SUPABASE
+===================================================== */
+
+const SUPABASE_URL =
+'https://wborvbuqdiscoasnsrwa.supabase.co';
+
+const SUPABASE_KEY =
+'sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
+
+const MEDIA_BUCKET =
+'maintenance-media';
+
+const sb =
+window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+
+/* =====================================================
+   GLOBAL STATE
+===================================================== */
+
+let role='landlord';
+let user=null;
+let profile=null;
+let notifications=[];
+let channel=null;
+let loading=false;
+
+let cache={
+properties:[],
+units:[],
+tenants:[],
+registeredTenants:[],
+payments:[],
+maintenance_requests:[],
+expenses:[],
+receipts:[],
+rent_records:[]
+};
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+const $=x=>document.getElementById(x);
+
+const money=n =>
+'UGX '+Number(n||0).toLocaleString('en-US');
+
+const today=() =>
+new Date().toISOString().slice(0,10);
+
+const esc=s =>
+String(s??'').replace(
+/[&<>"']/g,
+m=>({
+'&':'&amp;',
+'<':'&lt;',
+'>':'&gt;',
+'"':'&quot;',
+"'":'&#039;'
+}[m])
+);
+
+function shortId(id){
+return id
+?'MVR-'+String(id)
+.replace(/-/g,'')
+.slice(0,8)
+.toUpperCase()
+:'—';
+}
+
+function monthLabel(date){
+
+if(!date)return '—';
+
+let d=new Date(
+date+'T00:00:00'
+);
+
+return d.toLocaleDateString(
+'en-US',
+{
+month:'long',
+year:'numeric'
+}
+);
+
+}
+
+function monthStart(date){
+
+let d=new Date(
+date+'T00:00:00'
+);
+
+return new Date(
+d.getFullYear(),
+d.getMonth(),
+1
+)
+.toISOString()
+.slice(0,10);
+
+}
+
+function addMonths(date,n){
+
+let d=new Date(
+date+'T00:00:00'
+);
+
+d.setMonth(
+d.getMonth()+n
+);
+
+return new Date(
+d.getFullYear(),
+d.getMonth(),
+1
+)
+.toISOString()
+.slice(0,10);
+
+}
+
+function rentBalance(r){
+
+return Math.max(
+0,
+Number(r.amount_due||0)-
+Number(r.amount_paid||0)
+);
+
+}
+
+function rentStatusClass(status){
+
+return String(
+status||'pending'
+)
+.toLowerCase()
+.replace(/\s+/g,'_');
+
+}
+
+function msg(t,c='error'){
+
+let x=$('authMsg');
+
+x.textContent=t;
+
+x.className=
+'message '+c;
+
+}
+
+
+/* =====================================================
+   LOGIN
+===================================================== */
+
+function chooseRole(r){
+
+role=r;
+
+$('landlordRole')
+.classList.toggle(
+'sel',
+r==='landlord'
+);
+
+$('tenantRole')
+.classList.toggle(
+'sel',
+r==='tenant'
+);
+
+}
+
+
+async function signup(){
+
+let email=$('email')
+.value.trim();
+
+let password=$('password')
+.value;
+
+if(!email)
+return msg(
+'Enter your email.'
+);
+
+if(password.length<6)
+return msg(
+'Password must be at least 6 characters.'
+);
+
+msg(
+'Creating account...',
+'success'
+);
+
+let r=
+await sb.auth.signUp({
+email,
+password,
+options:{
+data:{
+role,
+full_name:'',
+phone:''
+}
+}
+});
+
+if(r.error)
+return msg(
+r.error.message
+);
+
+if(r.data.session){
+
+user=r.data.user;
+
+await loadApp();
+
+}else{
+
+msg(
+'Account created. Check your email, confirm it, then log in.',
+'success'
+);
+
+}
+
+}
+
+
+async function resetPassword(){
+
+let e=$('email')
+.value.trim();
+
+if(!e)
+return msg(
+'Enter your email first.'
+);
+
+let r=
+await sb.auth.resetPasswordForEmail(
+e,
+{
+redirectTo:location.origin
+}
+);
+
+if(r.error)
+return msg(
+r.error.message
+);
+
+msg(
+'Password reset email sent.',
+'success'
+);
+
+}
+
+
+$('loginForm').onsubmit=
+async e=>{
+
+e.preventDefault();
+
+msg(
+'Logging in...',
+'success'
+);
+
+let r=
+await sb.auth.signInWithPassword({
+email:$('email').value.trim(),
+password:$('password').value
+});
+
+if(r.error)
+return msg(
+r.error.message
+);
+
+user=r.data.user;
+
+await loadApp();
+
+};
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+async function loadProfile(){
+
+let r=
+await sb
+.from('profiles')
+.select('*')
+.eq('id',user.id)
+.maybeSingle();
+
+if(r.error){
+
+console.error(
+r.error
+);
+
+return null;
+
+}
+
+return r.data;
+
+}
+
+
+/* =====================================================
+   LOAD APPLICATION
+===================================================== */
+
+async function loadApp(){
+
+if(!user||loading)
+return;
+
+loading=true;
+
+profile=
+await loadProfile();
+
+role=
+profile?.role||
+user.user_metadata?.role||
+role;
+
+if(
+!['landlord','tenant']
+.includes(role)
+)
+role='tenant';
+
+$('auth')
+.classList.add(
+'hidden'
+);
+
+$('app')
+.classList.remove(
+'hidden'
+);
+
+buildNav();
+
+await refresh();
+
+await loadNotifications();
+
+show(
+role==='landlord'
+?'dashboard'
+:'home',
+false
+);
+
+startRealtime();
+
+loading=false;
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+async function logout(){
+
+if(channel)
+await sb.removeChannel(
+channel
+);
+
+await sb.auth.signOut();
+
+location.reload();
+
+}
+
+
+/* =====================================================
+   DATABASE ERROR
+===================================================== */
+
+function dbErr(t,e){
+
+console.error(
+t,e
+);
+
+$('main').innerHTML=`
+
+<div class="card">
+
+<h2>
+Database error
+</h2>
+
+<div class="notice error">
+
+<b>${esc(t)}</b>
+
+<br>
+
+${esc(e?.message||e)}
+
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   REFRESH
+===================================================== */
+
+async function refresh(){
+
+cache={
+properties:[],
+units:[],
+tenants:[],
+registeredTenants:[],
+payments:[],
+maintenance_requests:[],
+expenses:[],
+receipts:[],
+rent_records:[]
+};
+
+
+/* LANDLORD */
+
+if(role==='landlord'){
+
+let r=
+await sb
+.from('profiles')
+.select(
+'id,full_name,email,phone,role,tenant_code,created_at'
+)
+.eq('role','tenant')
+.order(
+'created_at',
+{ascending:false}
+);
+
+if(r.error)
+return dbErr(
+'profiles',
+r.error
+);
+
+cache.registeredTenants=
+r.data||[];
+
+
+/* PROPERTIES */
+
+r=
+await sb
+.from('properties')
+.select('*')
+.eq(
+'landlord_id',
+user.id
+)
+.order(
+'created_at',
+{ascending:false}
+);
+
+if(r.error)
+return dbErr(
+'properties',
+r.error
+);
+
+cache.properties=
+r.data||[];
+
+
+/* UNITS */
+
+let ids=
+cache.properties.map(
+x=>x.id
+);
+
+if(ids.length){
+
+r=
+await sb
+.from('units')
+.select('*')
+.in(
+'property_id',
+ids
+);
+
+if(r.error)
+return dbErr(
+'units',
+r.error
+);
+
+cache.units=
+r.data||[];
+
+}
+
+
+/* MAIN TABLES */
+
+for(
+let t of [
+'tenants',
+'payments',
+'maintenance_requests',
+'expenses',
+'receipts'
+]
+){
+
+r=
+await sb
+.from(t)
+.select('*')
+.eq(
+'landlord_id',
+user.id
+)
+.order(
+t==='receipts'
+?'issued_at'
+:'created_at',
+{ascending:false}
+);
+
+if(
+r.error&&
+t==='receipts'
+){
+
+r=
+await sb
+.from(t)
+.select('*')
+.eq(
+'landlord_id',
+user.id
+);
+
+}
+
+if(r.error)
+return dbErr(
+t,
+r.error
+);
+
+cache[t]=
+r.data||[];
+
+}
+
+
+/* RENT RECORDS */
+
+r=
+await sb
+.from('rent_records')
+.select('*')
+.eq(
+'landlord_id',
+user.id
+)
+.order(
+'period_month',
+{ascending:false}
+);
+
+if(r.error)
+return dbErr(
+'rent_records',
+r.error
+);
+
+cache.rent_records=
+r.data||[];
+
+
+/* TENANT */
+
+}else{
+
+let r=
+await sb
+.from('tenants')
+.select('*')
+.eq(
+'profile_id',
+user.id
+)
+.eq(
+'status',
+'active'
+);
+
+if(r.error)
+return dbErr(
+'tenants',
+r.error
+);
+
+cache.tenants=
+r.data||[];
+
+
+let uids=
+cache.tenants
+.map(
+x=>x.unit_id
+)
+.filter(Boolean);
+
+if(uids.length){
+
+r=
+await sb
+.from('units')
+.select('*')
+.in(
+'id',
+uids
+);
+
+if(r.error)
+return dbErr(
+'units',
+r.error
+);
+
+cache.units=
+r.data||[];
+
+
+let pids=
+cache.units
+.map(
+x=>x.property_id
+)
+.filter(Boolean);
+
+if(pids.length){
+
+r=
+await sb
+.from('properties')
+.select('*')
+.in(
+'id',
+pids
+);
+
+if(r.error)
+return dbErr(
+'properties',
+r.error
+);
+
+cache.properties=
+r.data||[];
+
+}
+
+}
+
+
+let tids=
+cache.tenants.map(
+x=>x.id
+);
+
+if(tids.length){
+
+for(
+let t of [
+'payments',
+'maintenance_requests',
+'receipts'
+]
+){
+
+r=
+await sb
+.from(t)
+.select('*')
+.in(
+'tenant_id',
+tids
+)
+.order(
+t==='payments'
+?'payment_date'
+:t==='receipts'
+?'issued_at'
+:'created_at',
+{ascending:false}
+);
+
+if(r.error)
+return dbErr(
+t,
+r.error
+);
+
+cache[t]=
+r.data||[];
+
+}
+
+
+r=
+await sb
+.from('rent_records')
+.select('*')
+.in(
+'tenant_id',
+tids
+)
+.order(
+'period_month',
+{ascending:false}
+);
+
+if(r.error)
+return dbErr(
+'rent_records',
+r.error
+);
+
+cache.rent_records=
+r.data||[];
+
+}
+
+}
+
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+function buildNav(){
+
+$('who').textContent=
+(role==='landlord'
+?'Landlord: '
+:'Tenant: ')
++
+(profile?.full_name||
+user.email);
+
+if(role==='landlord'){
+
+$('nav').innerHTML=[
+
+'dashboard:🏠 Dashboard',
+'rent:💰 Rent',
+'properties:🏘️ Properties',
+'units:🚪 Units',
+'tenants:👥 Tenants',
+'payments:💳 Payments',
+'maintenance:🔧 Maintenance',
+'expenses:🧾 Expenses',
+'receipts:🧾 Receipts',
+'reports:📊 Reports',
+'profile:👤 Profile'
+
+]
+.map(x=>{
+
+let[a,b]=x.split(':');
+
+return`
+<button data-p="${a}">
+${b}
+</button>
+`;
+
+})
+.join('');
+
+}else{
+
+$('nav').innerHTML=[
+
+'home:🏠 My Home',
+'myRent:💰 My Rent',
+'myPayments:💳 My Payments',
+'myMaintenance:🔧 Maintenance',
+'myReceipts:🧾 My Receipts',
+'profile:👤 My Profile'
+
+]
+.map(x=>{
+
+let[a,b]=x.split(':');
+
+return`
+<button data-p="${a}">
+${b}
+</button>
+`;
+
+})
+.join('');
+
+}
+
+document
+.querySelectorAll('#nav button')
+.forEach(b=>{
+
+b.onclick=()=>
+show(
+b.dataset.p
+);
+
+});
+
+}
+
+
+/* =====================================================
+   SHOW
+===================================================== */
+
+async function show(
+id,
+reload=true
+){
+
+if(reload)
+await refresh();
+
+$('main').innerHTML=
+role==='landlord'
+?landlord(id)
+:tenant(id);
+
+document
+.querySelectorAll('#nav button')
+.forEach(b=>
+b.classList.toggle(
+'active',
+b.dataset.p===id
+)
+);
+
+attach();
+
+}
+
+
+/* =====================================================
+   TABLE
+===================================================== */
+
+function table(
+h,
+rows,
+fn
+){
+
+return`
+
+<div class="tablewrap">
+
+<table class="table">
+
+<thead>
+
+<tr>
+
+${h.map(
+x=>`<th>${x}</th>`
+).join('')}
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${
+rows.length
+?rows.map(fn).join('')
+:`
+<tr>
+<td colspan="${h.length}">
+No records yet.
+</td>
+</tr>
+`
+}
+
+</tbody>
+
+</table>
+
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   PAGE
+===================================================== */
+
+function page(
+t,
+s,
+form,
+rows
+){
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>${t}</h1>
+
+<p>${s}</p>
+
+</div>
+
+<div class="card">
+
+${form}
+
+</div>
+
+<div class="card">
+
+<h3>
+Records
+</h3>
+
+${rows}
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   LANDLORD
+===================================================== */
+
+function landlord(id){
+
+if(id==='profile')
+return profilePage();
+
+
+if(id==='dashboard'){
+
+let confirmed=
+cache.payments
+.filter(
+x=>x.status==='confirmed'
+)
+.reduce(
+(a,x)=>a+Number(x.amount||0),
+0
+);
+
+let expenses=
+cache.expenses
+.reduce(
+(a,x)=>a+Number(x.amount||0),
+0
+);
+
+let due=
+cache.rent_records
+.reduce(
+(a,x)=>a+Number(x.amount_due||0),
+0
+);
+
+let paid=
+cache.rent_records
+.reduce(
+(a,x)=>a+Number(x.amount_paid||0),
+0
+);
+
+let outstanding=
+Math.max(
+0,
+due-paid
+);
+
+let overdue=
+cache.rent_records
+.filter(
+x=>x.status==='overdue'
+)
+.reduce(
+(a,x)=>a+rentBalance(x),
+0
+);
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+Landlord Dashboard
+</h1>
+
+<p>
+Manage your rental business.
+</p>
+
+</div>
+
+<div class="stats">
+
+<div class="card">
+<small>Properties</small>
+<div class="big">
+${cache.properties.length}
+</div>
+</div>
+
+<div class="card">
+<small>Units</small>
+<div class="big">
+${cache.units.length}
+</div>
+</div>
+
+<div class="card">
+<small>Rent Collected</small>
+<div class="big green">
+${money(paid)}
+</div>
+</div>
+
+<div class="card">
+<small>Outstanding Rent</small>
+<div class="big red">
+${money(outstanding)}
+</div>
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="card">
+
+<h3>
+💰 Rent Overview
+</h3>
+
+<p>
+Total rent due:
+<b>${money(due)}</b>
+</p>
+
+<p>
+Collected:
+<b class="green">${money(paid)}</b>
+</p>
+
+<p>
+Outstanding:
+<b class="red">${money(outstanding)}</b>
+</p>
+
+<p>
+Overdue:
+<b class="red">${money(overdue)}</b>
+</p>
+
+<button
+class="primary"
+onclick="show('rent')">
+Open Rent System
+</button>
+
+</div>
+
+<div class="card">
+
+<h3>
+Quick actions
+</h3>
+
+<div class="actions">
+
+<button
+class="btn"
+onclick="show('rent')">
+💰 Rent
+</button>
+
+<button
+class="btn"
+onclick="show('properties')">
+＋ Property
+</button>
+
+<button
+class="btn"
+onclick="show('units')">
+＋ Unit
+</button>
+
+<button
+class="btn"
+onclick="show('tenants')">
+＋ Tenant
+</button>
+
+<button
+class="btn"
+onclick="show('payments')">
+💳 Payments
+</button>
+
+<button
+class="btn"
+onclick="show('maintenance')">
+🔧 Maintenance
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>
+Financial Summary
+</h3>
+
+<p>
+Confirmed payments:
+<b class="green">
+${money(confirmed)}
+</b>
+</p>
+
+<p>
+Expenses:
+<b class="red">
+${money(expenses)}
+</b>
+</p>
+
+<p>
+Net:
+<b>
+${money(confirmed-expenses)}
+</b>
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>
+Account
+</h3>
+
+<p>
+${esc(user.email)}
+</p>
+
+<p>
+Profile ID:
+<b>
+${shortId(user.id)}
+</b>
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+if(id==='rent')
+return landlordRent();
+
+
+if(id==='properties')
+
+return page(
+'Properties',
+'Manage your properties.',
+
+`
+
+<form
+id="propertyForm"
+class="formgrid">
+
+<input
+id="pname"
+placeholder="Property name"
+required>
+
+<input
+id="ploc"
+placeholder="Location">
+
+<textarea
+id="pdesc"
+class="full"
+placeholder="Description"></textarea>
+
+<button
+class="primary full">
+Save property
+</button>
+
+</form>
+
+`,
+
+table(
+[
+'Name',
+'Location',
+'Description',
+''
+],
+cache.properties,
+x=>`
+
+<tr>
+
+<td>
+${esc(x.name)}
+</td>
+
+<td>
+${esc(x.location)}
+</td>
+
+<td class="wrap">
+${esc(x.description)}
+</td>
+
+<td>
+
+<button
+class="btn danger"
+onclick="delProperty('${x.id}')">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`
+)
+
+);
+
+
+if(id==='units')
+
+return page(
+'Units',
+'Units belonging to your properties.',
+
+`
+
+<form
+id="unitForm"
+class="formgrid">
+
+<select
+id="uproperty"
+required>
+
+<option value="">
+Select property
+</option>
+
+${cache.properties.map(
+x=>`
+
+<option value="${x.id}">
+${esc(x.name)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<input
+id="unum"
+placeholder="Unit number"
+required>
+
+<input
+id="urent"
+type="number"
+min="0"
+placeholder="Monthly rent"
+required>
+
+<input
+id="udep"
+type="number"
+min="0"
+placeholder="Deposit">
+
+<select id="ustatus">
+
+<option value="vacant">
+Vacant
+</option>
+
+<option value="maintenance">
+Maintenance
+</option>
+
+</select>
+
+<button
+class="primary full">
+Save unit
+</button>
+
+</form>
+
+`,
+
+table(
+[
+'Unit',
+'Property',
+'Rent',
+'Deposit',
+'Status'
+],
+cache.units,
+x=>`
+
+<tr>
+
+<td>${esc(x.unit_number)}</td>
+
+<td>
+${esc(
+cache.properties
+.find(
+p=>p.id===x.property_id
+)?.name||'—'
+)}
+</td>
+
+<td>${money(x.monthly_rent)}</td>
+
+<td>${money(x.deposit_amount)}</td>
+
+<td>${esc(x.status)}</td>
+
+</tr>
+
+`
+)
+
+);
+
+
+if(id==='tenants')
+
+return page(
+'Tenant Assignment',
+'Assign registered tenant accounts.',
+
+`
+
+<form
+id="tenantForm"
+class="formgrid">
+
+<select
+id="tprofile"
+required>
+
+<option value="">
+Select registered tenant
+</option>
+
+${cache.registeredTenants.map(
+p=>`
+
+<option value="${p.id}">
+${esc(
+p.full_name||
+p.email
+)}
+—
+${esc(p.email||'')}
+·
+${shortId(p.id)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<select
+id="tunit"
+required>
+
+<option value="">
+Select vacant unit
+</option>
+
+${cache.units
+.filter(
+x=>x.status!=='occupied'
+)
+.map(
+x=>`
+
+<option value="${x.id}">
+${esc(x.unit_number)}
+—
+${money(x.monthly_rent)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<input
+id="trent"
+type="number"
+min="0"
+placeholder="Rent amount"
+required>
+
+<input
+id="tdeposit"
+type="number"
+min="0"
+placeholder="Deposit">
+
+<input
+id="tdue"
+type="number"
+min="1"
+max="28"
+value="1"
+placeholder="Due day">
+
+<input
+id="tmove"
+type="date">
+
+<button
+class="primary full">
+Assign tenant
+</button>
+
+</form>
+
+`,
+
+table(
+[
+'Tenant',
+'Email',
+'ID',
+'Unit',
+'Rent',
+'Due',
+'Status'
+],
+cache.tenants,
+x=>{
+
+let p=
+cache.registeredTenants
+.find(
+p=>p.id===x.profile_id
+);
+
+return`
+
+<tr>
+
+<td>
+${esc(
+p?.full_name||
+'Tenant'
+)}
+</td>
+
+<td>
+${esc(p?.email)}
+</td>
+
+<td class="code">
+${shortId(x.profile_id)}
+</td>
+
+<td>
+${esc(
+cache.units
+.find(
+u=>u.id===x.unit_id
+)?.unit_number||'—'
+)}
+</td>
+
+<td>
+${money(x.rent_amount)}
+</td>
+
+<td>
+${x.rent_due_day}
+</td>
+
+<td>
+${esc(x.status)}
+</td>
+
+</tr>
+
+`;
+
+}
+)
+
+);
+
+
+if(id==='payments')
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+💳 Payments
+</h1>
+
+<p>
+Review and confirm tenant payments.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>
+Record payment
+</h3>
+
+<form
+id="paymentForm"
+class="formgrid">
+
+<select
+id="ptenant"
+required>
+
+<option value="">
+Select tenant
+</option>
+
+${cache.tenants.map(
+t=>`
+
+<option value="${t.id}">
+${esc(
+cache.registeredTenants
+.find(
+p=>p.id===t.profile_id
+)?.full_name||
+'Tenant'
+)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<select id="prentrecord">
+
+<option value="">
+Link to rent month (optional)
+</option>
+
+${cache.rent_records
+.map(
+r=>`
+
+<option value="${r.id}">
+${monthLabel(r.period_month)}
+—
+${money(r.amount_due)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<input
+id="pamount"
+type="number"
+min="1"
+placeholder="Amount"
+required>
+
+<input
+id="pdate"
+type="date"
+value="${today()}">
+
+<select id="pmethod">
+
+<option value="mtn_mobile_money">
+MTN Mobile Money
+</option>
+
+<option value="airtel_money">
+Airtel Money
+</option>
+
+<option value="bank">
+Bank
+</option>
+
+<option value="cash">
+Cash
+</option>
+
+</select>
+
+<input
+id="pref"
+placeholder="Transaction reference">
+
+<textarea
+id="pnotes"
+class="full"
+placeholder="Notes"></textarea>
+
+<button
+class="primary full">
+Save confirmed payment
+</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h3>
+Payment history
+</h3>
+
+${table(
+[
+'Date',
+'Tenant',
+'Amount',
+'Method',
+'Status',
+'Reference',
+'Rent'
+],
+cache.payments,
+x=>{
+
+let t=
+cache.tenants
+.find(
+t=>t.id===x.tenant_id
+);
+
+let p=
+cache.registeredTenants
+.find(
+p=>p.id===t?.profile_id
+);
+
+let rr=
+cache.rent_records
+.find(
+r=>r.id===x.rent_record_id
+);
+
+return`
+
+<tr>
+
+<td>${esc(x.payment_date)}</td>
+
+<td>
+${esc(
+p?.full_name||
+p?.email||
+'Tenant'
+)}
+</td>
+
+<td>${money(x.amount)}</td>
+
+<td>${esc(x.payment_method)}</td>
+
+<td>
+<span class="badge ${esc(x.status)}">
+${esc(x.status)}
+</span>
+</td>
+
+<td>
+${esc(
+x.transaction_reference||
+'—'
+)}
+</td>
+
+<td>
+${rr
+?monthLabel(rr.period_month)
+:'—'}
+</td>
+
+</tr>
+
+`;
+
+}
+)}
+
+</div>
+
+</section>
+
+`;
+
+
+if(id==='maintenance')
+return maintenanceLandlord();
+
+
+if(id==='expenses')
+
+return page(
+'Expenses',
+'Record expenses.',
+
+`
+
+<form
+id="expenseForm"
+class="formgrid">
+
+<select id="eprop">
+
+<option value="">
+No property
+</option>
+
+${cache.properties.map(
+x=>`
+
+<option value="${x.id}">
+${esc(x.name)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<input
+id="eamount"
+type="number"
+min="0"
+placeholder="Amount"
+required>
+
+<input
+id="ecat"
+placeholder="Category"
+required>
+
+<input
+id="edate"
+type="date"
+value="${today()}">
+
+<textarea
+id="edesc"
+class="full"
+placeholder="Description"></textarea>
+
+<button
+class="primary full">
+Save expense
+</button>
+
+</form>
+
+`,
+
+table(
+[
+'Date',
+'Category',
+'Amount',
+'Description'
+],
+cache.expenses,
+x=>`
+
+<tr>
+
+<td>${esc(x.expense_date)}</td>
+
+<td>${esc(x.category)}</td>
+
+<td>${money(x.amount)}</td>
+
+<td class="wrap">
+${esc(x.description)}
+</td>
+
+</tr>
+
+`
+)
+
+);
+
+
+if(id==='receipts')
+
+return page(
+'Receipts',
+'Issue receipts for confirmed payments.',
+
+`
+
+<form
+id="receiptForm"
+class="formgrid">
+
+<select
+id="rpayment"
+required>
+
+<option value="">
+Select payment
+</option>
+
+${cache.payments
+.filter(
+p=>p.status==='confirmed'
+)
+.map(
+p=>`
+
+<option value="${p.id}">
+${esc(p.payment_date)}
+—
+${money(p.amount)}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<input
+id="rnumber"
+placeholder="Receipt number"
+required>
+
+<button
+class="primary full">
+Issue receipt
+</button>
+
+</form>
+
+`,
+
+table(
+[
+'Receipt',
+'Payment',
+'Issued'
+],
+cache.receipts,
+x=>`
+
+<tr>
+
+<td>${esc(x.receipt_number)}</td>
+
+<td>${esc(x.payment_id)}</td>
+
+<td>
+${
+x.issued_at
+?new Date(
+x.issued_at
+).toLocaleString()
+:'—'
+}
+</td>
+
+</tr>
+
+`
+)
+
+);
+
+
+let c=
+cache.payments
+.filter(
+x=>x.status==='confirmed'
+)
+.reduce(
+(a,x)=>a+Number(x.amount||0),
+0
+);
+
+let ex=
+cache.expenses
+.reduce(
+(a,x)=>a+Number(x.amount||0),
+0
+);
+
+let rentDue=
+cache.rent_records
+.reduce(
+(a,x)=>a+Number(x.amount_due||0),
+0
+);
+
+let rentPaid=
+cache.rent_records
+.reduce(
+(a,x)=>a+Number(x.amount_paid||0),
+0
+);
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+📊 Reports
+</h1>
+
+<p>
+Financial overview.
+</p>
+
+</div>
+
+<div class="stats">
+
+<div class="card">
+<small>Confirmed</small>
+<div class="big green">
+${money(c)}
+</div>
+</div>
+
+<div class="card">
+<small>Expenses</small>
+<div class="big red">
+${money(ex)}
+</div>
+</div>
+
+<div class="card">
+<small>Rent Outstanding</small>
+<div class="big orange">
+${money(
+Math.max(0,rentDue-rentPaid)
+)}
+</div>
+</div>
+
+<div class="card">
+<small>Tenants</small>
+<div class="big">
+${cache.tenants.length}
+</div>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>
+V11 Rent Collection
+</h3>
+
+<p>
+Total rent due:
+<b>${money(rentDue)}</b>
+</p>
+
+<p>
+Total rent paid:
+<b class="green">${money(rentPaid)}</b>
+</p>
+
+<p>
+Outstanding:
+<b class="red">
+${money(
+Math.max(0,rentDue-rentPaid)
+)}
+</b>
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   LANDLORD RENT
+===================================================== */
+
+function landlordRent(){
+
+let totalDue=
+cache.rent_records
+.reduce(
+(a,x)=>a+Number(x.amount_due||0),
+0
+);
+
+let totalPaid=
+cache.rent_records
+.reduce(
+(a,x)=>a+Number(x.amount_paid||0),
+0
+);
+
+let outstanding=
+Math.max(
+0,
+totalDue-totalPaid
+);
+
+let overdue=
+cache.rent_records
+.filter(
+x=>x.status==='overdue'
+);
+
+let overdueAmount=
+overdue.reduce(
+(a,x)=>a+rentBalance(x),
+0
+);
+
+let paidCount=
+cache.rent_records
+.filter(
+x=>x.status==='paid'
+).length;
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+💰 V10 Rent Management
+</h1>
+
+<p>
+Create, monitor and collect monthly rent.
+</p>
+
+</div>
+
+<div class="stats">
+
+<div class="card">
+<small>Total Due</small>
+<div class="big">
+${money(totalDue)}
+</div>
+</div>
+
+<div class="card">
+<small>Collected</small>
+<div class="big green">
+${money(totalPaid)}
+</div>
+</div>
+
+<div class="card">
+<small>Outstanding</small>
+<div class="big orange">
+${money(outstanding)}
+</div>
+</div>
+
+<div class="card">
+<small>Overdue</small>
+<div class="big red">
+${money(overdueAmount)}
+</div>
+</div>
+
+</div>
+
+<div class="card rentHero">
+
+<h2 style="margin-top:0">
+Generate Monthly Rent
+</h2>
+
+<div class="muted">
+Create rent records for active tenants.
+</div>
+
+<form
+id="generateRentForm"
+class="formgrid"
+style="margin-top:12px">
+
+<select
+id="rentMonth"
+required>
+
+<option value="">
+Select month
+</option>
+
+${[
+0,
+1,
+2,
+3
+].map(
+n=>{
+
+let m=
+addMonths(
+monthStart(today()),
+n
+);
+
+return`
+
+<option value="${m}">
+${monthLabel(m)}
+</option>
+
+`;
+
+}).join('')}
+
+</select>
+
+<button
+class="primary"
+style="background:#fff;color:#0869d7">
+Generate Rent
+</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h3>
+Rent Records
+</h3>
+
+${
+cache.rent_records.length
+?cache.rent_records.map(
+r=>{
+
+let t=
+cache.tenants
+.find(
+x=>x.id===r.tenant_id
+);
+
+let p=
+cache.registeredTenants
+.find(
+x=>x.id===t?.profile_id
+);
+
+let u=
+cache.units
+.find(
+x=>x.id===r.unit_id
+);
+
+return`
+
+<div class="monthCard">
+
+<div class="monthTop">
+
+<div>
+
+<div class="monthName">
+${monthLabel(r.period_month)}
+</div>
+
+<div style="font-size:12px;color:#667085">
+
+${esc(
+p?.full_name||
+p?.email||
+'Tenant'
+)}
+
+<br>
+
+Unit:
+${esc(
+u?.unit_number||
+'—'
+)}
+
+<br>
+
+Due:
+${esc(r.due_date)}
+
+</div>
+
+</div>
+
+<span class="badge ${rentStatusClass(r.status)}">
+${esc(r.status)}
+</span>
+
+</div>
+
+<div class="amountGrid">
+
+<div class="amountBox">
+<small>Amount Due</small>
+<strong>
+${money(r.amount_due)}
+</strong>
+</div>
+
+<div class="amountBox">
+<small>Amount Paid</small>
+<strong class="green">
+${money(r.amount_paid)}
+</strong>
+</div>
+
+<div class="amountBox">
+<small>Balance</small>
+<strong class="red">
+${money(rentBalance(r))}
+</strong>
+</div>
+
+</div>
+
+<div class="rentActionRow">
+
+<button
+onclick="openRentPayment('${r.id}')">
+💳 Record Payment
+</button>
+
+<button
+onclick="editRentRecord('${r.id}')">
+✏️ Edit
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}).join('')
+:`
+
+<div class="empty">
+No rent records yet.
+</div>
+
+`}
+
+</div>
+
+<div class="card">
+
+<h3>
+Collection Summary
+</h3>
+
+<p>
+Paid records:
+<b class="green">
+${paidCount}
+</b>
+</p>
+
+<p>
+Pending:
+<b class="orange">
+${cache.rent_records.filter(
+x=>x.status==='pending'
+).length}
+</b>
+</p>
+
+<p>
+Partial:
+<b class="orange">
+${cache.rent_records.filter(
+x=>x.status==='partial'
+).length}
+</b>
+</p>
+
+<p>
+Overdue:
+<b class="red">
+${overdue.length}
+</b>
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   GENERATE RENT
+===================================================== */
+
+async function generateMonthlyRent(e){
+
+e.preventDefault();
+
+let month=
+$('rentMonth').value;
+
+if(!month)
+return alert(
+'Select a month first.'
+);
+
+if(!cache.tenants.length)
+return alert(
+'There are no active tenants.'
+);
+
+let created=0;
+let skipped=0;
+let errors=[];
+
+for(
+let t of cache.tenants
+){
+
+let unit=
+cache.units
+.find(
+u=>u.id===t.unit_id
+);
+
+let amount=
+Number(
+t.rent_amount||
+unit?.monthly_rent||
+0
+);
+
+let dueDay=
+Number(
+t.rent_due_day||
+1
+);
+
+let d=
+new Date(
+month+'T00:00:00'
+);
+
+let lastDay=
+new Date(
+d.getFullYear(),
+d.getMonth()+1,
+0
+).getDate();
+
+let safeDay=
+Math.min(
+dueDay,
+lastDay
+);
+
+let dueDate=
+new Date(
+d.getFullYear(),
+d.getMonth(),
+safeDay
+)
+.toISOString()
+.slice(0,10);
+
+let existing=
+cache.rent_records.find(
+r=>
+r.tenant_id===t.id &&
+r.period_month===month
+);
+
+if(existing){
+
+skipped++;
+
+continue;
+
+}
+
+let r=
+await sb
+.from('rent_records')
+.insert({
+
+tenant_id:t.id,
+landlord_id:t.landlord_id||user.id,
+unit_id:t.unit_id,
+period_month:month,
+due_date:dueDate,
+amount_due:amount,
+amount_paid:0,
+status:'pending'
+
+});
+
+if(r.error){
+
+errors.push(
+r.error.message
+);
+
+}else{
+
+created++;
+
+/* V11 RENT CREATED NOTIFICATION */
+
+await createNotification({
+
+user_id:t.profile_id,
+
+title:'💰 New Rent Due',
+
+message:
+`Your rent for ${monthLabel(month)} is ${money(amount)} and is due on ${dueDate}.`,
+
+type:'rent_due',
+
+related_id:null
+
+});
+
+}
+
+}
+
+await refresh();
+
+show('rent',false);
+
+if(errors.length){
+
+alert(
+`Created ${created} rent record(s). Skipped ${skipped}. Some records failed:\n\n`+
+errors.join('\n')
+);
+
+}else{
+
+alert(
+`Rent generation complete.\n\nCreated: ${created}\nAlready existed: ${skipped}`
+);
+
+}
+
+}
+
+
+/* =====================================================
+   RENT PAYMENT
+===================================================== */
+
+async function openRentPayment(id){
+
+let rr=
+cache.rent_records
+.find(
+x=>x.id===id
+);
+
+if(!rr)
+return;
+
+let balance=
+rentBalance(rr);
+
+if(balance<=0)
+return alert(
+'This rent record is already fully paid.'
+);
+
+let amount=
+prompt(
+`Enter payment amount.\n\nBalance: ${money(balance)}`
+);
+
+if(amount===null)
+return;
+
+amount=
+Number(amount);
+
+if(!amount||amount<=0)
+return alert(
+'Enter a valid payment amount.'
+);
+
+let method=
+prompt(
+'Payment method:',
+'mtn_mobile_money'
+);
+
+if(!method)
+return;
+
+let reference=
+prompt(
+'Transaction reference (optional):'
+);
+
+let newPaid=
+Number(rr.amount_paid||0)+amount;
+
+let newStatus=
+newPaid>=Number(rr.amount_due||0)
+?'paid'
+:'partial';
+
+let paymentPayload={
+
+tenant_id:rr.tenant_id,
+landlord_id:user.id,
+amount,
+payment_date:today(),
+payment_method:method,
+transaction_reference:
+reference?.trim()||null,
+notes:
+`Rent payment for ${monthLabel(rr.period_month)}`,
+status:'confirmed',
+confirmed_at:new Date().toISOString(),
+confirmed_by:user.id,
+rent_record_id:rr.id
+
+};
+
+let p=
+await sb
+.from('payments')
+.insert(
+paymentPayload
+)
+.select()
+.single();
+
+if(p.error)
+return alert(
+'Payment could not be recorded: '+
+p.error.message
+);
+
+let update=
+await sb
+.from('rent_records')
+.update({
+
+amount_paid:newPaid,
+status:newStatus,
+payment_id:p.data.id,
+paid_at:
+newStatus==='paid'
+?new Date().toISOString()
+:null
+
+})
+.eq(
+'id',
+rr.id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(update.error)
+return alert(
+'Payment was created but rent record could not be updated: '+
+update.error.message
+);
+
+
+/* V11 TENANT NOTIFICATION */
+
+let tenantProfile=
+cache.tenants
+.find(
+x=>x.id===rr.tenant_id
+)?.profile_id;
+
+if(tenantProfile){
+
+await createNotification({
+
+user_id:tenantProfile,
+
+title:'💳 Payment Recorded',
+
+message:
+`Your payment of ${money(amount)} for ${monthLabel(rr.period_month)} has been recorded by your landlord.`,
+
+type:'payment',
+
+related_id:p.data.id
+
+});
+
+}
+
+await refresh();
+
+show('rent',false);
+
+alert(
+`Rent payment recorded successfully.\n\nAmount: ${money(amount)}`
+);
+
+}
+
+
+/* =====================================================
+   EDIT RENT
+===================================================== */
+
+async function editRentRecord(id){
+
+let rr=
+cache.rent_records
+.find(
+x=>x.id===id
+);
+
+if(!rr)
+return;
+
+let amount=
+prompt(
+'Enter new rent amount:',
+rr.amount_due
+);
+
+if(amount===null)
+return;
+
+amount=
+Number(amount);
+
+if(!amount||amount<0)
+return alert(
+'Enter a valid amount.'
+);
+
+let due=
+prompt(
+'Enter due date:',
+rr.due_date
+);
+
+if(!due)
+return;
+
+let r=
+await sb
+.from('rent_records')
+.update({
+
+amount_due:amount,
+due_date:due
+
+})
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+await refresh();
+
+show(
+'rent',
+false
+);
+
+}
+
+
+/* =====================================================
+   PROFILE
+===================================================== */
+
+function profilePage(){
+
+let p=profile||{};
+
+let name=p.full_name||'';
+
+let phone=p.phone||'';
+
+let email=
+p.email||
+user.email||
+'';
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+👤 My Profile
+</h1>
+
+<p>
+Edit your MavRent account details.
+</p>
+
+</div>
+
+<div class="card">
+
+<div class="profileHero">
+
+<div class="avatar">
+
+${esc(
+(name||email||'M')
+.trim()
+.charAt(0)
+.toUpperCase()
+)}
+
+</div>
+
+<div>
+
+<h2 style="margin:0">
+${esc(
+name||
+'MavRent User'
+)}
+</h2>
+
+<div
+class="muted"
+style="color:#6b7280">
+
+${esc(role)}
+
+</div>
+
+</div>
+
+</div>
+
+<div class="notice">
+
+Your short Profile ID is
+
+<span class="code">
+${shortId(user.id)}
+</span>.
+
+Your full UUID remains private.
+
+</div>
+
+<form
+id="profileForm"
+class="formgrid">
+
+<div>
+
+<label style="color:#5f6875">
+Full name
+</label>
+
+<input
+id="pfname"
+value="${esc(name)}"
+placeholder="Full name">
+
+</div>
+
+<div>
+
+<label style="color:#5f6875">
+Phone
+</label>
+
+<input
+id="pfphone"
+value="${esc(phone)}"
+placeholder="Phone number">
+
+</div>
+
+<div>
+
+<label style="color:#5f6875">
+Email
+</label>
+
+<input
+value="${esc(email)}"
+disabled>
+
+</div>
+
+<div>
+
+<label style="color:#5f6875">
+Role
+</label>
+
+<input
+value="${esc(role)}"
+disabled>
+
+</div>
+
+<button
+class="primary full">
+💾 Save Profile
+</button>
+
+</form>
+
+<div id="profileStatus"></div>
+
+</div>
+
+<div class="card">
+
+<h3>
+Profile ID
+</h3>
+
+<div class="profileId">
+${shortId(user.id)}
+</div>
+
+<p>
+This is the ID you can share with your landlord or tenant.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   TENANT
+===================================================== */
+
+function tenant(id){
+
+let t=
+cache.tenants[0];
+
+if(id==='profile')
+return profilePage();
+
+
+if(id==='home'){
+
+let u=
+t&&cache.units
+.find(
+x=>x.id===t.unit_id
+);
+
+let p=
+u&&cache.properties
+.find(
+x=>x.id===u.property_id
+);
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+My Home 👋
+</h1>
+
+<p>
+Your private tenancy information.
+</p>
+
+</div>
+
+${
+t
+?`
+
+<div class="stats">
+
+<div class="card">
+<small>Property</small>
+<div class="big">
+${esc(p?.name||'—')}
+</div>
+</div>
+
+<div class="card">
+<small>Unit</small>
+<div class="big">
+${esc(u?.unit_number||'—')}
+</div>
+</div>
+
+<div class="card">
+<small>Monthly rent</small>
+<div class="big">
+${money(t.rent_amount)}
+</div>
+</div>
+
+<div class="card">
+<small>Due day</small>
+<div class="big">
+${t.rent_due_day}
+</div>
+</div>
+
+</div>
+
+`
+:`
+
+<div class="card">
+
+<h3>
+Waiting for landlord assignment
+</h3>
+
+<p>
+Your account is active, but no unit has been assigned yet.
+</p>
+
+</div>
+
+`}
+
+</section>
+
+`;
+
+}
+
+
+if(id==='myRent')
+return tenantRent();
+
+
+if(id==='myPayments')
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+💳 My Payments
+</h1>
+
+<p>
+Submit rent payments and view history.
+</p>
+
+</div>
+
+${
+t
+?`
+
+<div class="card">
+
+<form
+id="tenantPaymentForm"
+class="formgrid">
+
+<select
+id="tprentrecord">
+
+<option value="">
+Select rent month
+</option>
+
+${cache.rent_records
+.filter(
+r=>
+r.tenant_id===t.id
+&&rentBalance(r)>0
+)
+.map(
+r=>`
+
+<option value="${r.id}">
+${monthLabel(r.period_month)}
+—
+Balance:
+${money(rentBalance(r))}
+</option>
+
+`
+).join('')}
+
+</select>
+
+<input
+id="tpamount"
+type="number"
+min="1"
+placeholder="Amount"
+required>
+
+<input
+id="tpdate"
+type="date"
+value="${today()}">
+
+<select
+id="tpmethod">
+
+<option value="mtn_mobile_money">
+MTN Mobile Money
+</option>
+
+<option value="airtel_money">
+Airtel Money
+</option>
+
+<option value="bank">
+Bank
+</option>
+
+<option value="cash">
+Cash
+</option>
+
+</select>
+
+<input
+id="tpref"
+placeholder="Transaction reference"
+required>
+
+<textarea
+id="tpnotes"
+class="full"
+placeholder="Notes"></textarea>
+
+<button
+class="primary full">
+Submit Payment
+</button>
+
+</form>
+
+</div>
+
+`
+:`
+
+<div class="notice">
+You need a rental assignment before submitting rent.
+</div>
+
+`}
+
+<div class="card">
+
+<h3>
+Payment History
+</h3>
+
+${table(
+[
+'Date',
+'Amount',
+'Method',
+'Status',
+'Reference',
+'Rent'
+],
+cache.payments
+.filter(
+x=>x.tenant_id===t?.id
+),
+x=>{
+
+let rr=
+cache.rent_records
+.find(
+r=>r.id===x.rent_record_id
+);
+
+return`
+
+<tr>
+
+<td>
+${esc(x.payment_date)}
+</td>
+
+<td>
+${money(x.amount)}
+</td>
+
+<td>
+${esc(x.payment_method)}
+</td>
+
+<td>
+
+<span class="badge ${esc(x.status)}">
+${esc(x.status)}
+</span>
+
+</td>
+
+<td>
+${esc(
+x.transaction_reference||
+'—'
+)}
+</td>
+
+<td>
+${rr
+?monthLabel(rr.period_month)
+:'—'}
+</td>
+
+</tr>
+
+`;
+
+}
+)}
+
+</div>
+
+</section>
+
+`;
+
+
+if(id==='myMaintenance')
+return tenantMaintenance();
+
+
+if(id==='myReceipts')
+
+return page(
+'My Receipts',
+'Receipts issued for your payments.',
+'',
+
+table(
+[
+'Receipt',
+'Payment',
+'Issued'
+],
+cache.receipts
+.filter(
+x=>x.tenant_id===t?.id
+),
+x=>`
+
+<tr>
+
+<td>
+${esc(x.receipt_number)}
+</td>
+
+<td>
+${money(
+cache.payments
+.find(
+p=>p.id===x.payment_id
+)?.amount||0
+)}
+</td>
+
+<td>
+${
+x.issued_at
+?new Date(
+x.issued_at
+).toLocaleString()
+:'—'
+}
+</td>
+
+</tr>
+
+`
+)
+
+);
+
+}
+
+
+/* =====================================================
+   TENANT RENT
+===================================================== */
+
+function tenantRent(){
+
+let t=
+cache.tenants[0];
+
+if(!t){
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+💰 My Rent
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+No rental assignment
+</h3>
+
+<p>
+Your landlord has not assigned a unit yet.
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+let records=
+cache.rent_records
+.filter(
+r=>r.tenant_id===t.id
+);
+
+let current=
+records.find(
+r=>r.period_month===
+monthStart(today())
+);
+
+let outstanding=
+records.reduce(
+(a,r)=>a+rentBalance(r),
+0
+);
+
+let totalPaid=
+records.reduce(
+(a,r)=>a+Number(r.amount_paid||0),
+0
+);
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+💰 My Rent
+</h1>
+
+<p>
+Your monthly rent account.
+</p>
+
+</div>
+
+<div class="card rentHero">
+
+<h2 style="margin-top:0">
+
+${current
+?monthLabel(current.period_month)
+:'Current Rent'}
+
+</h2>
+
+<div class="muted">
+Current outstanding balance
+</div>
+
+<div class="rentBalance">
+
+${money(
+current
+?rentBalance(current)
+:0
+)}
+
+</div>
+
+<div class="rentMiniGrid">
+
+<div class="rentMini">
+
+<small>
+Rent Due
+</small>
+
+<strong>
+${money(
+current?.amount_due||
+t.rent_amount
+)}
+</strong>
+
+</div>
+
+<div class="rentMini">
+
+<small>
+Paid
+</small>
+
+<strong>
+${money(
+current?.amount_paid||0
+)}
+</strong>
+
+</div>
+
+<div class="rentMini">
+
+<small>
+Due Date
+</small>
+
+<strong>
+${current?.due_date||'—'}
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>
+Rent History
+</h3>
+
+${
+records.length
+?records.map(
+r=>`
+
+<div class="monthCard">
+
+<div class="monthTop">
+
+<div>
+
+<div class="monthName">
+${monthLabel(r.period_month)}
+</div>
+
+<div style="font-size:12px;color:#667085">
+Due:
+${esc(r.due_date)}
+</div>
+
+</div>
+
+<span class="badge ${rentStatusClass(r.status)}">
+${esc(r.status)}
+</span>
+
+</div>
+
+<div class="amountGrid">
+
+<div class="amountBox">
+<small>Due</small>
+<strong>
+${money(r.amount_due)}
+</strong>
+</div>
+
+<div class="amountBox">
+<small>Paid</small>
+<strong class="green">
+${money(r.amount_paid)}
+</strong>
+</div>
+
+<div class="amountBox">
+<small>Balance</small>
+<strong class="red">
+${money(rentBalance(r))}
+</strong>
+</div>
+
+</div>
+
+${
+rentBalance(r)>0
+?`
+
+<div class="rentActionRow">
+
+<button
+onclick="show('myPayments')">
+💳 Pay Rent
+</button>
+
+</div>
+
+`
+:''
+}
+
+</div>
+
+`
+).join('')
+:`
+
+<div class="empty">
+No monthly rent records yet.
+</div>
+
+`}
+
+</div>
+
+<div class="card">
+
+<h3>
+Account Summary
+</h3>
+
+<p>
+Total paid:
+<b class="green">
+${money(totalPaid)}
+</b>
+</p>
+
+<p>
+Total outstanding:
+<b class="red">
+${money(outstanding)}
+</b>
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   TENANT MAINTENANCE
+===================================================== */
+
+function tenantMaintenance(){
+
+let t=
+cache.tenants[0];
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+🔧 Report a Problem
+</h1>
+
+<p>
+Send a photo or video so your landlord can see the real problem.
+</p>
+
+</div>
+
+${
+t
+?`
+
+<div class="card">
+
+<form
+id="tenantMaintForm"
+class="formgrid">
+
+<input
+id="ttitle"
+placeholder="Problem title"
+required>
+
+<textarea
+id="tdesc"
+class="full"
+placeholder="Describe the problem"
+required></textarea>
+
+<div class="full">
+
+<label style="color:#5f6875">
+Photo or video
+</label>
+
+<input
+id="tmedia"
+type="file"
+accept="image/*,video/*"
+capture="environment">
+
+<small>
+Maximum 25 MB.
+</small>
+
+</div>
+
+<button
+id="submitTenantMaintenanceBtn"
+class="primary full">
+📷 Submit Problem Report
+</button>
+
+<div
+id="tenantMaintStatus"
+class="notice full hidden">
+</div>
+
+</form>
+
+</div>
+
+`
+:`
+
+<div class="notice">
+You have not been assigned a unit.
+</div>
+
+`}
+
+<div class="card">
+
+<h3>
+My Reports
+</h3>
+
+${table(
+[
+'Title',
+'Description',
+'Attachment',
+'Status',
+'Date'
+],
+cache.maintenance_requests
+.filter(
+x=>x.tenant_id===t?.id
+),
+x=>`
+
+<tr>
+
+<td>
+${esc(x.title)}
+</td>
+
+<td class="wrap">
+${esc(x.description)}
+</td>
+
+<td>
+
+${
+x.media_url
+?`
+
+<a
+href="${esc(x.media_url)}"
+target="_blank">
+View
+</a>
+
+`
+:'—'
+}
+
+</td>
+
+<td>
+
+<span class="badge ${esc(x.status)}">
+${esc(x.status)}
+</span>
+
+</td>
+
+<td>
+
+${
+x.created_at
+?new Date(
+x.created_at
+).toLocaleDateString()
+:'—'
+}
+
+</td>
+
+</tr>
+
+`
+)}
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   LANDLORD MAINTENANCE
+===================================================== */
+
+function maintenanceLandlord(){
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>
+🔧 Maintenance
+</h1>
+
+<p>
+Review tenant reports and update repair progress.
+</p>
+
+</div>
+
+<div class="card">
+
+${
+cache.maintenance_requests.length
+?cache.maintenance_requests
+.map(
+x=>{
+
+let t=
+cache.tenants
+.find(
+t=>t.id===x.tenant_id
+);
+
+let p=
+cache.registeredTenants
+.find(
+p=>p.id===t?.profile_id
+);
+
+return`
+
+<div class="maintCard">
+
+<div class="maintTop">
+
+<div>
+
+<h3 style="margin:0">
+${esc(x.title)}
+</h3>
+
+<div class="maintMeta">
+
+Tenant:
+${esc(
+p?.full_name||
+p?.email||
+'Tenant'
+)}
+
+<br>
+
+${
+x.created_at
+?new Date(
+x.created_at
+).toLocaleString()
+:''
+}
+
+</div>
+
+</div>
+
+<span class="badge ${esc(x.status)}">
+${esc(x.status)}
+</span>
+
+</div>
+
+<p>
+${esc(x.description)}
+</p>
+
+${
+x.media_url
+?`
+
+<div class="mediaBox">
+
+<strong>
+Tenant attachment
+</strong>
+
+<br>
+
+${
+x.media_type?.startsWith('video')
+?`
+
+<video
+class="mediaPreview"
+controls
+src="${esc(x.media_url)}">
+</video>
+
+`
+:`
+
+<img
+class="mediaPreview"
+src="${esc(x.media_url)}">
+
+`
+}
+
+<br>
+
+<a
+href="${esc(x.media_url)}"
+target="_blank">
+Open attachment
+</a>
+
+</div>
+
+`
+:''
+}
+
+<div class="maintActions">
+
+<div class="maintActionsGrid">
+
+<select id="status_${x.id}">
+
+<option
+value="pending"
+${x.status==='pending'?'selected':''}>
+Pending
+</option>
+
+<option
+value="in_progress"
+${x.status==='in_progress'?'selected':''}>
+In progress
+</option>
+
+<option
+value="completed"
+${x.status==='completed'?'selected':''}>
+Completed
+</option>
+
+<option
+value="cancelled"
+${x.status==='cancelled'?'selected':''}>
+Cancelled
+</option>
+
+</select>
+
+<input
+id="cost_${x.id}"
+type="number"
+min="0"
+value="${Number(x.repair_cost||0)}"
+placeholder="Repair cost">
+
+</div>
+
+<textarea
+id="notes_${x.id}"
+style="margin-top:8px"
+placeholder="Landlord notes">${esc(x.landlord_notes||'')}</textarea>
+
+<input
+id="after_${x.id}"
+type="file"
+accept="image/*,video/*"
+style="margin-top:8px">
+
+<button
+class="primary"
+onclick="updateMaintenance('${x.id}',event)">
+💾 Save Update
+</button>
+
+</div>
+
+</div>
+
+`;
+
+})
+.join('')
+:`
+
+<div class="empty">
+No maintenance requests.
+</div>
+
+`}
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   MEDIA UPLOAD
+===================================================== */
+
+async function upload(
+file,
+path
+){
+
+if(!file)
+return null;
+
+if(
+!/^image\//.test(file.type)&&
+!/^video\//.test(file.type)
+)
+throw Error(
+'Choose an image or video.'
+);
+
+if(
+file.size>
+25*1024*1024
+)
+throw Error(
+'File must be under 25 MB.'
+);
+
+let r=
+await sb
+.storage
+.from(MEDIA_BUCKET)
+.upload(
+path,
+file,
+{
+contentType:file.type,
+upsert:false
+}
+);
+
+if(r.error)
+throw Error(
+'Upload failed: '+
+r.error.message
+);
+
+let u=
+sb.storage
+.from(MEDIA_BUCKET)
+.getPublicUrl(path);
+
+return{
+url:u.data.publicUrl,
+path,
+type:file.type,
+name:file.name
+};
+
+}
+
+
+/* =====================================================
+   CREATE NOTIFICATION
+===================================================== */
+
+async function createNotification({
+user_id,
+title,
+message,
+type='general',
+related_id=null
+}){
+
+if(!user_id)
+return null;
+
+let r=
+await sb
+.from('notifications')
+.insert({
+
+user_id,
+title,
+message,
+type,
+related_id,
+is_read:false
+
+});
+
+if(r.error){
+
+console.error(
+'Notification error:',
+r.error
+);
+
+return null;
+
+}
+
+return r;
+
+}
+
+
+/* =====================================================
+   TENANT MAINTENANCE SUBMIT
+===================================================== */
+
+async function submitTenantMaintenance(e){
+
+e.preventDefault();
+
+let b=
+$('submitTenantMaintenanceBtn');
+
+let s=
+$('tenantMaintStatus');
+
+try{
+
+let t=
+cache.tenants[0];
+
+let file=
+$('tmedia').files[0];
+
+if(!t)
+throw Error(
+'No rental unit assigned.'
+);
+
+b.disabled=true;
+
+b.textContent=
+'Uploading...';
+
+let m=null;
+
+if(file){
+
+m=
+await upload(
+file,
+`${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`
+);
+
+}
+
+let title=
+$('ttitle')
+.value
+.trim();
+
+let description=
+$('tdesc')
+.value
+.trim();
+
+let payload={
+
+tenant_id:t.id,
+
+landlord_id:t.landlord_id,
+
+unit_id:t.unit_id,
+
+title,
+
+description,
+
+status:'pending',
+
+repair_cost:0
+
+};
+
+if(m){
+
+Object.assign(
+payload,
+{
+
+media_url:m.url,
+media_path:m.path,
+media_type:m.type,
+media_name:m.name
+
+}
+);
+
+}
+
+let r=
+await sb
+.from('maintenance_requests')
+.insert(payload)
+.select()
+.single();
+
+if(r.error){
+
+if(m)
+await sb
+.storage
+.from(MEDIA_BUCKET)
+.remove([
+m.path
+]);
+
+throw Error(
+r.error.message
+);
+
+}
+
+
+/* =====================================================
+   V11 NOTIFICATION
+   TENANT → LANDLORD
+===================================================== */
+
+await createNotification({
+
+user_id:t.landlord_id,
+
+title:'🔧 New Maintenance Report',
+
+message:
+`Tenant reported: ${title}`,
+
+type:'maintenance',
+
+related_id:r.data.id
+
+});
+
+
+s.className=
+'notice success full';
+
+s.textContent=
+'Maintenance report sent successfully. Your landlord has been notified.';
+
+$('tenantMaintForm')
+.reset();
+
+await refresh();
+
+setTimeout(
+()=>show(
+'myMaintenance',
+false
+),
+500
+);
+
+}catch(err){
+
+console.error(err);
+
+s.className=
+'notice error full';
+
+s.textContent=
+err.message;
+
+}finally{
+
+b.disabled=false;
+
+b.textContent=
+'📷 Submit Problem Report';
+
+}
+
+}
+
+
+/* =====================================================
+   UPDATE MAINTENANCE
+===================================================== */
+
+async function updateMaintenance(
+id,
+e
+){
+
+e.preventDefault();
+
+try{
+
+let request=
+cache.maintenance_requests
+.find(
+x=>x.id===id
+);
+
+let file=
+$(`after_${id}`).files[0];
+
+let m=null;
+
+if(file){
+
+m=
+await upload(
+file,
+`${user.id}/maintenance-after/${id}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`
+);
+
+}
+
+let newStatus=
+$(`status_${id}`).value;
+
+let p={
+
+status:newStatus,
+
+repair_cost:
+Number(
+$(`cost_${id}`).value||0
+),
+
+landlord_notes:
+$(`notes_${id}`).value.trim()||
+null
+
+};
+
+if(m){
+
+Object.assign(
+p,
+{
+
+completion_media_url:m.url,
+completion_media_path:m.path,
+completion_media_type:m.type,
+completion_media_name:m.name
+
+}
+);
+
+}
+
+let r=
+await sb
+.from('maintenance_requests')
+.update(p)
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error)
+throw Error(
+r.error.message
+);
+
+
+/* =====================================================
+   V11 NOTIFICATION
+   LANDLORD → TENANT
+===================================================== */
+
+if(request){
+
+let tenantProfile=
+cache.tenants
+.find(
+t=>t.id===request.tenant_id
+)?.profile_id;
+
+if(tenantProfile){
+
+let statusText=
+newStatus
+.replace(
+'_',
+' '
+);
+
+await createNotification({
+
+user_id:tenantProfile,
+
+title:'🔧 Maintenance Update',
+
+message:
+`Your maintenance report "${request.title}" is now ${statusText}.`,
+
+type:'maintenance_update',
+
+related_id:id
+
+});
+
+}
+
+}
+
+alert(
+'Maintenance updated. Tenant has been notified.'
+);
+
+show('maintenance');
+
+}catch(err){
+
+console.error(err);
+
+alert(
+'Could not update maintenance: '+
+err.message
+);
+
+}
+
+}
+
+
+/* =====================================================
+   ATTACH FORMS
+===================================================== */
+
+function attach(){
+
+let f;
+
+
+/* PROFILE */
+
+f=$('profileForm');
+
+if(f)
+f.onsubmit=
+saveProfile;
+
+
+/* PROPERTY */
+
+f=$('propertyForm');
+
+if(f)
+f.onsubmit=
+async e=>{
+
+e.preventDefault();
+
+let r=
+await sb
+.from('properties')
+.insert({
+
+landlord_id:user.id,
+
+name:
+$('pname').value.trim(),
+
+location:
+$('ploc').value.trim(),
+
+description:
+$('pdesc').value.trim()
+
+});
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+show('properties');
+
+};
+
+
+/* UNIT */
+
+f=$('unitForm');
+
+if(f)
+f.onsubmit=
+async e=>{
+
+e.preventDefault();
+
+let r=
+await sb
+.from('units')
+.insert({
+
+property_id:
+$('uproperty').value,
+
+unit_number:
+$('unum').value.trim(),
+
+monthly_rent:
+Number(
+$('urent').value
+),
+
+deposit_amount:
+Number(
+$('udep').value||0
+),
+
+status:
+$('ustatus').value
+
+});
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+show('units');
+
+};
+
+
+/* TENANT */
+
+f=$('tenantForm');
+
+if(f)
+f.onsubmit=
+async e=>{
+
+e.preventDefault();
+
+let tenantProfileId=
+$('tprofile').value;
+
+let unitId=
+$('tunit').value;
+
+let rent=
+Number(
+$('trent').value
+);
+
+let r=
+await sb
+.from('tenants')
+.insert({
+
+profile_id:
+tenantProfileId,
+
+unit_id:
+unitId,
+
+landlord_id:
+user.id,
+
+rent_amount:
+rent,
+
+deposit_amount:
+Number(
+$('tdeposit').value||0
+),
+
+rent_due_day:
+Number(
+$('tdue').value
+),
+
+move_in_date:
+$('tmove').value||
+null,
+
+status:'active'
+
+});
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+await sb
+.from('units')
+.update({
+status:'occupied'
+})
+.eq(
+'id',
+unitId
+);
+
+
+/* V11 TENANT ASSIGNMENT NOTIFICATION */
+
+await createNotification({
+
+user_id:tenantProfileId,
+
+title:'🏠 Rental Assignment',
+
+message:
+`You have been assigned a rental unit. Monthly rent: ${money(rent)}.`,
+
+type:'assignment',
+
+related_id:null
+
+});
+
+alert(
+'Tenant assigned successfully. The tenant has been notified.'
+);
+
+show('tenants');
+
+};
+
+
+/* LANDLORD PAYMENT */
+
+f=$('paymentForm');
+
+if(f)
+f.onsubmit=
+async e=>{
+
+e.preventDefault();
+
+let tenantId=
+$('ptenant').value;
+
+let rentRecordId=
+$('prentrecord').value||
+null;
+
+let amount=
+Number(
+$('pamount').value
+);
+
+let paymentPayload={
+
+tenant_id:
+tenantId,
+
+landlord_id:
+user.id,
+
+amount,
+
+payment_date:
+$('pdate').value,
+
+payment_method:
+$('pmethod').value,
+
+transaction_reference:
+$('pref').value.trim()||
+null,
+
+notes:
+$('pnotes').value.trim()||
+null,
+
+status:'confirmed',
+
+confirmed_at:
+new Date().toISOString(),
+
+confirmed_by:
+user.id
+
+};
+
+if(rentRecordId)
+paymentPayload.rent_record_id=
+rentRecordId;
+
+let r=
+await sb
+.from('payments')
+.insert(
+paymentPayload
+)
+.select()
+.single();
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+
+/* UPDATE RENT */
+
+if(rentRecordId){
+
+let rr=
+cache.rent_records
+.find(
+x=>x.id===rentRecordId
+);
+
+if(rr){
+
+let newPaid=
+Number(
+rr.amount_paid||0
+)+amount;
+
+let status=
+newPaid>=Number(
+rr.amount_due||0
+)
+?'paid'
+:'partial';
+
+let u=
+await sb
+.from('rent_records')
+.update({
+
+amount_paid:newPaid,
+
+status,
+
+payment_id:r.data.id,
+
+paid_at:
+status==='paid'
+?new Date().toISOString()
+:null
+
+})
+.eq(
+'id',
+rentRecordId
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(u.error)
+console.error(u.error);
+
+}
+
+}
+
+
+/* V11 PAYMENT NOTIFICATION */
+
+let tenantProfile=
+cache.tenants
+.find(
+x=>x.id===tenantId
+)?.profile_id;
+
+if(tenantProfile){
+
+await createNotification({
+
+user_id:tenantProfile,
+
+title:'💳 Payment Confirmed',
+
+message:
+`Your payment of ${money(amount)} has been confirmed by your landlord.`,
+
+type:'payment_confirmed',
+
+related_id:r.data.id
+
+});
+
+}
+
+show('payments');
+
+};
+
+
+/* TENANT PAYMENT */
+
+f=$('tenantPaymentForm');
+
+if(f)
+f.onsubmit=
+submitTenantPayment;
+
+
+/* TENANT MAINTENANCE */
+
+f=$('tenantMaintForm');
+
+if(f)
+f.onsubmit=
+submitTenantMaintenance;
+
+
+/* EXPENSE */
+
+f=$('expenseForm');
+
+if(f)
+f.onsubmit=
+async e=>{
+
+e.preventDefault();
+
+let r=
+await sb
+.from('expenses')
+.insert({
+
+landlord_id:user.id,
+
+property_id:
+$('eprop').value||
+null,
+
+amount:
+Number(
+$('eamount').value
+),
+
+category:
+$('ecat').value.trim(),
+
+description:
+$('edesc').value.trim(),
+
+expense_date:
+$('edate').value
+
+});
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+show('expenses');
+
+};
+
+
+/* RECEIPT */
+
+f=$('receiptForm');
+
+if(f)
+f.onsubmit=
+async e=>{
+
+e.preventDefault();
+
+let p=
+cache.payments
+.find(
+x=>x.id===
+$('rpayment').value
+);
+
+if(!p)
+return alert(
+'Select a payment.'
+);
+
+let r=
+await sb
+.from('receipts')
+.insert({
+
+payment_id:p.id,
+
+tenant_id:p.tenant_id,
+
+landlord_id:user.id,
+
+receipt_number:
+$('rnumber').value.trim()
+
+});
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+show('receipts');
+
+};
+
+
+/* RENT GENERATOR */
+
+f=$('generateRentForm');
+
+if(f)
+f.onsubmit=
+generateMonthlyRent;
+
+}
+
+
+/* =====================================================
+   TENANT PAYMENT
+===================================================== */
+
+async function submitTenantPayment(e){
+
+e.preventDefault();
+
+let t=
+cache.tenants[0];
+
+if(!t)
+return alert(
+'No active tenancy.'
+);
+
+let rentId=
+$('tprentrecord').value||
+null;
+
+let amount=
+Number(
+$('tpamount').value
+);
+
+if(!amount||amount<=0)
+return alert(
+'Enter a valid payment amount.'
+);
+
+let payload={
+
+tenant_id:t.id,
+
+landlord_id:
+t.landlord_id,
+
+amount,
+
+payment_date:
+$('tpdate').value,
+
+payment_method:
+$('tpmethod').value,
+
+transaction_reference:
+$('tpref').value.trim(),
+
+notes:
+$('tpnotes').value.trim()||
+null,
+
+status:'pending'
+
+};
+
+if(rentId)
+payload.rent_record_id=
+rentId;
+
+let r=
+await sb
+.from('payments')
+.insert(payload)
+.select()
+.single();
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+
+/* =====================================================
+   V11 PAYMENT NOTIFICATION
+   TENANT → LANDLORD
+===================================================== */
+
+let profileName=
+profile?.full_name||
+user.email||
+'Tenant';
+
+await createNotification({
+
+user_id:t.landlord_id,
+
+title:'💳 New Payment Submitted',
+
+message:
+`${profileName} submitted a payment of ${money(amount)} for review.`,
+
+type:'payment_submitted',
+
+related_id:r.data.id
+
+});
+
+alert(
+'Payment submitted successfully. Your landlord has been notified.'
+);
+
+show('myPayments');
+
+}
+
+
+/* =====================================================
+   SAVE PROFILE
+===================================================== */
+
+async function saveProfile(e){
+
+e.preventDefault();
+
+let s=
+$('profileStatus');
+
+try{
+
+let full=
+$('pfname')
+.value.trim();
+
+let phone=
+$('pfphone')
+.value.trim();
+
+if(!full)
+throw Error(
+'Please enter your full name.'
+);
+
+let r=
+await sb
+.from('profiles')
+.update({
+
+full_name:full,
+phone
+
+})
+.eq(
+'id',
+user.id
+);
+
+if(r.error)
+throw Error(
+r.error.message
+);
+
+profile=
+await loadProfile();
+
+buildNav();
+
+s.className=
+'notice success';
+
+s.textContent=
+'Profile updated successfully.';
+
+setTimeout(
+()=>show(
+'profile',
+false
+),
+400
+);
+
+}catch(err){
+
+s.className=
+'notice error';
+
+s.textContent=
+'Could not save profile: '+
+err.message;
+
+}
+
+}
+
+
+/* =====================================================
+   DELETE PROPERTY
+===================================================== */
+
+async function delProperty(id){
+
+if(
+confirm(
+'Delete this property?'
+)
+){
+
+let r=
+await sb
+.from('properties')
+.delete()
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error)
+return alert(
+r.error.message
+);
+
+show('properties');
+
+}
+
+}
+
+
+/* =====================================================
+   NOTIFICATIONS
+===================================================== */
+
+async function loadNotifications(){
+
+if(!user)
+return;
+
+let r=
+await sb
+.from('notifications')
+.select('*')
+.eq(
+'user_id',
+user.id
+)
+.order(
+'created_at',
+{ascending:false}
+)
+.limit(50);
+
+if(r.error){
+
+console.error(
+'Could not load notifications:',
+r.error
+);
+
+return;
+
+}
+
+notifications=
+r.data||[];
+
+let unread=
+notifications.filter(
+x=>!x.is_read
+).length;
+
+$('notifyCount')
+.textContent=
+unread;
+
+$('notifyCount')
+.classList.toggle(
+'hidden',
+unread===0
+);
+
+$('notificationList').innerHTML=
+notifications.length
+?notifications.map(
+n=>`
+
+<div
+class="notificationItem ${
+n.is_read?'':'unread'
+}"
+onclick="openNotification('${n.id}')">
+
+<div class="notificationTitle">
+${esc(n.title)}
+</div>
+
+<div class="notificationMessage">
+${esc(n.message)}
+</div>
+
+<div class="notificationType">
+${esc(n.type||'notification')}
+</div>
+
+<div class="notificationDate">
+${
+n.created_at
+?new Date(
+n.created_at
+).toLocaleString()
+:''
+}
+</div>
+
+</div>
+
+`
+).join('')
+:`
+
+<div class="empty">
+No notifications yet.
+</div>
+
+`;
+
+}
+
+
+/* =====================================================
+   OPEN NOTIFICATION
+===================================================== */
+
+async function openNotification(id){
+
+let n=
+notifications.find(
+x=>x.id===id
+);
+
+if(!n)
+return;
+
+if(!n.is_read){
+
+await sb
+.from('notifications')
+.update({
+is_read:true
+})
+.eq(
+'id',
+id
+)
+.eq(
+'user_id',
+user.id
+);
+
+}
+
+await loadNotifications();
+
+}
+
+
+/* =====================================================
+   TOGGLE NOTIFICATIONS
+===================================================== */
+
+function toggleNotifications(){
+
+$('notificationPanel')
+.classList.toggle(
+'hidden'
+);
+
+if(
+!$('notificationPanel')
+.classList.contains(
+'hidden'
+)
+)
+loadNotifications();
+
+}
+
+
+/* =====================================================
+   MARK ALL READ
+===================================================== */
+
+async function markAllNotificationsRead(){
+
+await sb
+.from('notifications')
+.update({
+is_read:true
+})
+.eq(
+'user_id',
+user.id
+)
+.eq(
+'is_read',
+false
+);
+
+await loadNotifications();
+
+}
+
+
+/* =====================================================
+   REALTIME NOTIFICATIONS
+===================================================== */
+
+function startRealtime(){
+
+if(channel)
+sb.removeChannel(
+channel
+);
+
+channel=
+sb.channel(
+'mavrent-'+user.id
+)
+.on(
+'postgres_changes',
+{
+
+event:'*',
+schema:'public',
+table:'notifications',
+
+filter:
+'user_id=eq.'+
+user.id
+
+},
+payload=>{
+
+loadNotifications();
+
+/* Browser notification if permission is available */
+
+if(
+payload.eventType==='INSERT' &&
+Notification.permission==='granted'
+){
+
+try{
+
+new Notification(
+payload.new?.title||
+'MavRent Notification',
+{
+body:
+payload.new?.message||
+'You have a new notification.'
+}
+);
+
+}catch(e){
+
+console.log(e);
+
+}
+
+}
+
+}
+)
+.subscribe();
+
+
+/* Ask browser permission */
+
+if(
+'Notification' in window &&
+Notification.permission==='default'
+){
+
+Notification.requestPermission()
+.catch(
+()=>{}
+);
+
+}
+
+}
+
+
+/* =====================================================
+   AUTH STATE
+===================================================== */
+
+sb.auth.onAuthStateChange(
+async(e,s)=>{
+
+if(
+s&&
+!user&&
+!loading
+){
+
+user=s.user;
+
+await loadApp();
+
+}
+
+}
+);
+
+
+/* =====================================================
+   INITIAL SESSION
+===================================================== */
+
+(async()=>{
+
+let r=
+await sb.auth.getSession();
+
+if(
+r.data.session
+){
+
+user=
+r.data.session.user;
+
+await loadApp();
+
+}
+
+})();
+
+</script>
+
 </body>
 </html>
+```
+
+
