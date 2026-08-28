@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,6 +7,20 @@
 <!-- =====================================================
      MAVRENT PWA
 ===================================================== -->
+
+<!-- MAVRENT V14.1 LOADING SCREEN -->
+<div id="mavLoading" class="mav-loading">
+  <div class="mav-loading-logo">M</div>
+  <div class="mav-loading-name">Mav<span>Rent</span></div>
+  <div class="mav-loading-text">Rental management platform</div>
+  <div class="mav-spinner"></div>
+</div>
+
+<!-- ONLINE STATUS -->
+<div id="connectionStatus" class="connection-status online">
+  <span class="connection-dot"></span>
+  <span id="connectionText">Online</span>
+</div>
 
 <link rel="manifest" href="manifest.json">
 
@@ -186,7 +199,7 @@ align-items:center
 background:#273244;
 color:#fff;
 border:0;
-border-radius:9px;
+border-radius:99px;
 padding:8px 10px
 }
 
@@ -705,6 +718,246 @@ grid-template-columns:1fr
 .amountGrid{
 grid-template-columns:1fr
 }
+
+}
+
+/* =====================================================
+   MAVRENT V14.1 MOBILE UI
+===================================================== */
+
+.mav-loading{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at 20% 20%,#34b4ff44,transparent 30%),
+    linear-gradient(135deg,#061b45,#0869d7 55%,#03163d);
+  color:#fff;
+  transition:opacity .35s ease,visibility .35s ease;
+}
+
+.mav-loading.hide{
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+}
+
+.mav-loading-logo{
+  width:82px;
+  height:82px;
+  border-radius:24px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#087cff,#00b8ff);
+  box-shadow:0 20px 50px #0005;
+  font-size:42px;
+  font-weight:900;
+}
+
+.mav-loading-name{
+  margin-top:18px;
+  font-size:32px;
+  font-weight:900;
+}
+
+.mav-loading-name span{
+  color:#67c7ff;
+}
+
+.mav-loading-text{
+  margin-top:5px;
+  color:#ffffffaa;
+  font-size:13px;
+}
+
+.mav-spinner{
+  width:25px;
+  height:25px;
+  margin-top:25px;
+  border:3px solid #ffffff40;
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:mavspin .8s linear infinite;
+}
+
+@keyframes mavspin{
+  to{transform:rotate(360deg)}
+}
+
+.connection-status{
+  position:fixed;
+  right:12px;
+  bottom:14px;
+  z-index:90;
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:7px 11px;
+  border-radius:999px;
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  box-shadow:0 5px 20px #0002;
+  font-size:11px;
+  font-weight:800;
+  transition:.25s;
+}
+
+.connection-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#16a34a;
+}
+
+.connection-status.offline{
+  color:#991b1b;
+}
+
+.connection-status.offline .connection-dot{
+  background:#ef4444;
+}
+
+@media(max-width:700px){
+
+  body{
+    padding-bottom:70px;
+  }
+
+  header{
+    padding:11px 10px;
+  }
+
+  .bar{
+    min-height:42px;
+  }
+
+  .brand.small{
+    font-size:21px;
+  }
+
+  .userbox{
+    gap:5px;
+  }
+
+  .logout{
+    padding:8px;
+    font-size:0;
+  }
+
+  .logout::after{
+    content:"↪";
+    font-size:18px;
+  }
+
+  nav{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:80;
+    height:64px;
+    margin:0;
+    padding:6px 5px calc(6px + env(safe-area-inset-bottom));
+    background:#111827;
+    border-top:1px solid #ffffff18;
+    display:flex;
+    justify-content:space-around;
+    gap:2px;
+    overflow:hidden;
+  }
+
+  nav button{
+    flex:1;
+    min-width:0;
+    padding:6px 3px;
+    border-radius:9px;
+    background:transparent;
+    color:#aeb7c5;
+    font-size:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    white-space:normal;
+  }
+
+  nav button.active{
+    background:#fff;
+    color:#111827;
+  }
+
+  main{
+    padding:15px 10px 35px;
+  }
+
+  .card{
+    border-radius:16px;
+    padding:14px;
+  }
+
+  .title{
+    margin-bottom:12px;
+  }
+
+  .title h1{
+    font-size:21px;
+  }
+
+  .stats{
+    gap:8px;
+  }
+
+  .stats .card{
+    padding:12px;
+    margin-bottom:0;
+  }
+
+  .stats .big{
+    font-size:17px;
+    overflow-wrap:anywhere;
+  }
+
+  #app input,
+  #app select,
+  #app textarea{
+    min-height:48px;
+    font-size:16px;
+  }
+
+  .primary,
+  .secondary,
+  .btn{
+    min-height:46px;
+  }
+
+  .tablewrap{
+    margin:0 -5px;
+  }
+
+  .notificationPanel{
+    top:62px;
+    right:8px;
+    width:calc(100vw - 16px);
+    max-height:70vh;
+  }
+
+  .connection-status{
+    bottom:76px;
+    right:8px;
+    opacity:.9;
+  }
+
+  .rentBalance{
+    font-size:28px;
+  }
+
+  .rentActionRow button{
+    min-height:44px;
+  }
 
 }
 </style>
@@ -2942,61 +3195,32 @@ Financial overview.
 <div class="stats">
 
 <div class="card">
-<small>Confirmed</small>
+<small>Total Revenue</small>
 <div class="big green">
 ${money(c)}
 </div>
 </div>
 
 <div class="card">
-<small>Expenses</small>
+<small>Total Expenses</small>
 <div class="big red">
 ${money(ex)}
 </div>
 </div>
 
 <div class="card">
-<small>Rent Outstanding</small>
-<div class="big orange">
-${money(
-Math.max(0,rentDue-rentPaid)
-)}
+<small>Net Income</small>
+<div class="big ${c-ex>=0?'green':'red'}">
+${money(c-ex)}
 </div>
 </div>
 
 <div class="card">
-<small>Tenants</small>
-<div class="big">
-${cache.tenants.length}
+<small>Rent Collection Rate</small>
+<div class="big blue">
+${rentDue?Math.round((rentPaid/rentDue)*100):0}%
 </div>
 </div>
-
-</div>
-
-<div class="card">
-
-<h3>
-V11 Rent Collection
-</h3>
-
-<p>
-Total rent due:
-<b>${money(rentDue)}</b>
-</p>
-
-<p>
-Total rent paid:
-<b class="green">${money(rentPaid)}</b>
-</p>
-
-<p>
-Outstanding:
-<b class="red">
-${money(
-Math.max(0,rentDue-rentPaid)
-)}
-</b>
-</p>
 
 </div>
 
@@ -3008,3364 +3232,429 @@ Math.max(0,rentDue-rentPaid)
 
 
 /* =====================================================
-   LANDLORD RENT
-===================================================== */
-
-function landlordRent(){
-
-let totalDue=
-cache.rent_records
-.reduce(
-(a,x)=>a+Number(x.amount_due||0),
-0
-);
-
-let totalPaid=
-cache.rent_records
-.reduce(
-(a,x)=>a+Number(x.amount_paid||0),
-0
-);
-
-let outstanding=
-Math.max(
-0,
-totalDue-totalPaid
-);
-
-let overdue=
-cache.rent_records
-.filter(
-x=>x.status==='overdue'
-);
-
-let overdueAmount=
-overdue.reduce(
-(a,x)=>a+rentBalance(x),
-0
-);
-
-let paidCount=
-cache.rent_records
-.filter(
-x=>x.status==='paid'
-).length;
-
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-💰 V10 Rent Management
-</h1>
-
-<p>
-Create, monitor and collect monthly rent.
-</p>
-
-</div>
-
-<div class="stats">
-
-<div class="card">
-<small>Total Due</small>
-<div class="big">
-${money(totalDue)}
-</div>
-</div>
-
-<div class="card">
-<small>Collected</small>
-<div class="big green">
-${money(totalPaid)}
-</div>
-</div>
-
-<div class="card">
-<small>Outstanding</small>
-<div class="big orange">
-${money(outstanding)}
-</div>
-</div>
-
-<div class="card">
-<small>Overdue</small>
-<div class="big red">
-${money(overdueAmount)}
-</div>
-</div>
-
-</div>
-
-<div class="card rentHero">
-
-<h2 style="margin-top:0">
-Generate Monthly Rent
-</h2>
-
-<div class="muted">
-Create rent records for active tenants.
-</div>
-
-<form
-id="generateRentForm"
-class="formgrid"
-style="margin-top:12px">
-
-<select
-id="rentMonth"
-required>
-
-<option value="">
-Select month
-</option>
-
-${[
-0,
-1,
-2,
-3
-].map(
-n=>{
-
-let m=
-addMonths(
-monthStart(today()),
-n
-);
-
-return`
-
-<option value="${m}">
-${monthLabel(m)}
-</option>
-
-`;
-
-}).join('')}
-
-</select>
-
-<button
-class="primary"
-style="background:#fff;color:#0869d7">
-Generate Rent
-</button>
-
-</form>
-
-</div>
-
-<div class="card">
-
-<h3>
-Rent Records
-</h3>
-
-${
-cache.rent_records.length
-?cache.rent_records.map(
-r=>{
-
-let t=
-cache.tenants
-.find(
-x=>x.id===r.tenant_id
-);
-
-let p=
-cache.registeredTenants
-.find(
-x=>x.id===t?.profile_id
-);
-
-let u=
-cache.units
-.find(
-x=>x.id===r.unit_id
-);
-
-return`
-
-<div class="monthCard">
-
-<div class="monthTop">
-
-<div>
-
-<div class="monthName">
-${monthLabel(r.period_month)}
-</div>
-
-<div style="font-size:12px;color:#667085">
-
-${esc(
-p?.full_name||
-p?.email||
-'Tenant'
-)}
-
-<br>
-
-Unit:
-${esc(
-u?.unit_number||
-'—'
-)}
-
-<br>
-
-Due:
-${esc(r.due_date)}
-
-</div>
-
-</div>
-
-<span class="badge ${rentStatusClass(r.status)}">
-${esc(r.status)}
-</span>
-
-</div>
-
-<div class="amountGrid">
-
-<div class="amountBox">
-<small>Amount Due</small>
-<strong>
-${money(r.amount_due)}
-</strong>
-</div>
-
-<div class="amountBox">
-<small>Amount Paid</small>
-<strong class="green">
-${money(r.amount_paid)}
-</strong>
-</div>
-
-<div class="amountBox">
-<small>Balance</small>
-<strong class="red">
-${money(rentBalance(r))}
-</strong>
-</div>
-
-</div>
-
-<div class="rentActionRow">
-
-<button
-onclick="openRentPayment('${r.id}')">
-💳 Record Payment
-</button>
-
-<button
-onclick="editRentRecord('${r.id}')">
-✏️ Edit
-</button>
-
-</div>
-
-</div>
-
-`;
-
-}).join('')
-:`
-
-<div class="empty">
-No rent records yet.
-</div>
-
-`}
-
-</div>
-
-<div class="card">
-
-<h3>
-Collection Summary
-</h3>
-
-<p>
-Paid records:
-<b class="green">
-${paidCount}
-</b>
-</p>
-
-<p>
-Pending:
-<b class="orange">
-${cache.rent_records.filter(
-x=>x.status==='pending'
-).length}
-</b>
-</p>
-
-<p>
-Partial:
-<b class="orange">
-${cache.rent_records.filter(
-x=>x.status==='partial'
-).length}
-</b>
-</p>
-
-<p>
-Overdue:
-<b class="red">
-${overdue.length}
-</b>
-</p>
-
-</div>
-
-</section>
-
-`;
-
-}
-
-
-/* =====================================================
-   GENERATE RENT
-===================================================== */
-
-async function generateMonthlyRent(e){
-
-e.preventDefault();
-
-let month=
-$('rentMonth').value;
-
-if(!month)
-return alert(
-'Select a month first.'
-);
-
-if(!cache.tenants.length)
-return alert(
-'There are no active tenants.'
-);
-
-let created=0;
-let skipped=0;
-let errors=[];
-
-for(
-let t of cache.tenants
-){
-
-let unit=
-cache.units
-.find(
-u=>u.id===t.unit_id
-);
-
-let amount=
-Number(
-t.rent_amount||
-unit?.monthly_rent||
-0
-);
-
-let dueDay=
-Number(
-t.rent_due_day||
-1
-);
-
-let d=
-new Date(
-month+'T00:00:00'
-);
-
-let lastDay=
-new Date(
-d.getFullYear(),
-d.getMonth()+1,
-0
-).getDate();
-
-let safeDay=
-Math.min(
-dueDay,
-lastDay
-);
-
-let dueDate=
-new Date(
-d.getFullYear(),
-d.getMonth(),
-safeDay
-)
-.toISOString()
-.slice(0,10);
-
-let existing=
-cache.rent_records.find(
-r=>
-r.tenant_id===t.id &&
-r.period_month===month
-);
-
-if(existing){
-
-skipped++;
-
-continue;
-
-}
-
-let r=
-await sb
-.from('rent_records')
-.insert({
-
-tenant_id:t.id,
-landlord_id:t.landlord_id||user.id,
-unit_id:t.unit_id,
-period_month:month,
-due_date:dueDate,
-amount_due:amount,
-amount_paid:0,
-status:'pending'
-
-});
-
-if(r.error){
-
-errors.push(
-r.error.message
-);
-
-}else{
-
-created++;
-
-/* V11 RENT CREATED NOTIFICATION */
-
-await createNotification({
-
-user_id:t.profile_id,
-
-title:'💰 New Rent Due',
-
-message:
-`Your rent for ${monthLabel(month)} is ${money(amount)} and is due on ${dueDate}.`,
-
-type:'rent_due',
-
-related_id:null
-
-});
-
-}
-
-}
-
-await refresh();
-
-show('rent',false);
-
-if(errors.length){
-
-alert(
-`Created ${created} rent record(s). Skipped ${skipped}. Some records failed:\n\n`+
-errors.join('\n')
-);
-
-}else{
-
-alert(
-`Rent generation complete.\n\nCreated: ${created}\nAlready existed: ${skipped}`
-);
-
-}
-
-}
-
-
-/* =====================================================
-   RENT PAYMENT
-===================================================== */
-
-async function openRentPayment(id){
-
-let rr=
-cache.rent_records
-.find(
-x=>x.id===id
-);
-
-if(!rr)
-return;
-
-let balance=
-rentBalance(rr);
-
-if(balance<=0)
-return alert(
-'This rent record is already fully paid.'
-);
-
-let amount=
-prompt(
-`Enter payment amount.\n\nBalance: ${money(balance)}`
-);
-
-if(amount===null)
-return;
-
-amount=
-Number(amount);
-
-if(!amount||amount<=0)
-return alert(
-'Enter a valid payment amount.'
-);
-
-let method=
-prompt(
-'Payment method:',
-'mtn_mobile_money'
-);
-
-if(!method)
-return;
-
-let reference=
-prompt(
-'Transaction reference (optional):'
-);
-
-let newPaid=
-Number(rr.amount_paid||0)+amount;
-
-let newStatus=
-newPaid>=Number(rr.amount_due||0)
-?'paid'
-:'partial';
-
-let paymentPayload={
-
-tenant_id:rr.tenant_id,
-landlord_id:user.id,
-amount,
-payment_date:today(),
-payment_method:method,
-transaction_reference:
-reference?.trim()||null,
-notes:
-`Rent payment for ${monthLabel(rr.period_month)}`,
-status:'confirmed',
-confirmed_at:new Date().toISOString(),
-confirmed_by:user.id,
-rent_record_id:rr.id
-
-};
-
-let p=
-await sb
-.from('payments')
-.insert(
-paymentPayload
-)
-.select()
-.single();
-
-if(p.error)
-return alert(
-'Payment could not be recorded: '+
-p.error.message
-);
-
-let update=
-await sb
-.from('rent_records')
-.update({
-
-amount_paid:newPaid,
-status:newStatus,
-payment_id:p.data.id,
-paid_at:
-newStatus==='paid'
-?new Date().toISOString()
-:null
-
-})
-.eq(
-'id',
-rr.id
-)
-.eq(
-'landlord_id',
-user.id
-);
-
-if(update.error)
-return alert(
-'Payment was created but rent record could not be updated: '+
-update.error.message
-);
-
-
-/* V11 TENANT NOTIFICATION */
-
-let tenantProfile=
-cache.tenants
-.find(
-x=>x.id===rr.tenant_id
-)?.profile_id;
-
-if(tenantProfile){
-
-await createNotification({
-
-user_id:tenantProfile,
-
-title:'💳 Payment Recorded',
-
-message:
-`Your payment of ${money(amount)} for ${monthLabel(rr.period_month)} has been recorded by your landlord.`,
-
-type:'payment',
-
-related_id:p.data.id
-
-});
-
-}
-
-await refresh();
-
-show('rent',false);
-
-alert(
-`Rent payment recorded successfully.\n\nAmount: ${money(amount)}`
-);
-
-}
-
-
-/* =====================================================
-   EDIT RENT
-===================================================== */
-
-async function editRentRecord(id){
-
-let rr=
-cache.rent_records
-.find(
-x=>x.id===id
-);
-
-if(!rr)
-return;
-
-let amount=
-prompt(
-'Enter new rent amount:',
-rr.amount_due
-);
-
-if(amount===null)
-return;
-
-amount=
-Number(amount);
-
-if(!amount||amount<0)
-return alert(
-'Enter a valid amount.'
-);
-
-let due=
-prompt(
-'Enter due date:',
-rr.due_date
-);
-
-if(!due)
-return;
-
-let r=
-await sb
-.from('rent_records')
-.update({
-
-amount_due:amount,
-due_date:due
-
-})
-.eq(
-'id',
-id
-)
-.eq(
-'landlord_id',
-user.id
-);
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-await refresh();
-
-show(
-'rent',
-false
-);
-
-}
-
-
-/* =====================================================
-   PROFILE
-===================================================== */
-
-function profilePage(){
-
-let p=profile||{};
-
-let name=p.full_name||'';
-
-let phone=p.phone||'';
-
-let email=
-p.email||
-user.email||
-'';
-
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-👤 My Profile
-</h1>
-
-<p>
-Edit your MavRent account details.
-</p>
-
-</div>
-
-<div class="card">
-
-<div class="profileHero">
-
-<div class="avatar">
-
-${esc(
-(name||email||'M')
-.trim()
-.charAt(0)
-.toUpperCase()
-)}
-
-</div>
-
-<div>
-
-<h2 style="margin:0">
-${esc(
-name||
-'MavRent User'
-)}
-</h2>
-
-<div
-class="muted"
-style="color:#6b7280">
-
-${esc(role)}
-
-</div>
-
-</div>
-
-</div>
-
-<div class="notice">
-
-Your short Profile ID is
-
-<span class="code">
-${shortId(user.id)}
-</span>.
-
-Your full UUID remains private.
-
-</div>
-
-<form
-id="profileForm"
-class="formgrid">
-
-<div>
-
-<label style="color:#5f6875">
-Full name
-</label>
-
-<input
-id="pfname"
-value="${esc(name)}"
-placeholder="Full name">
-
-</div>
-
-<div>
-
-<label style="color:#5f6875">
-Phone
-</label>
-
-<input
-id="pfphone"
-value="${esc(phone)}"
-placeholder="Phone number">
-
-</div>
-
-<div>
-
-<label style="color:#5f6875">
-Email
-</label>
-
-<input
-value="${esc(email)}"
-disabled>
-
-</div>
-
-<div>
-
-<label style="color:#5f6875">
-Role
-</label>
-
-<input
-value="${esc(role)}"
-disabled>
-
-</div>
-
-<button
-class="primary full">
-💾 Save Profile
-</button>
-
-</form>
-
-<div id="profileStatus"></div>
-
-</div>
-
-<div class="card">
-
-<h3>
-Profile ID
-</h3>
-
-<div class="profileId">
-${shortId(user.id)}
-</div>
-
-<p>
-This is the ID you can share with your landlord or tenant.
-</p>
-
-</div>
-
-</section>
-
-`;
-
-}
-
-
-/* =====================================================
-   TENANT
-===================================================== */
-
-function tenant(id){
-
-let t=
-cache.tenants[0];
-
-if(id==='profile')
-return profilePage();
-
-
-if(id==='home'){
-
-let u=
-t&&cache.units
-.find(
-x=>x.id===t.unit_id
-);
-
-let p=
-u&&cache.properties
-.find(
-x=>x.id===u.property_id
-);
-
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-My Home 👋
-</h1>
-
-<p>
-Your private tenancy information.
-</p>
-
-</div>
-
-${
-t
-?`
-
-<div class="stats">
-
-<div class="card">
-<small>Property</small>
-<div class="big">
-${esc(p?.name||'—')}
-</div>
-</div>
-
-<div class="card">
-<small>Unit</small>
-<div class="big">
-${esc(u?.unit_number||'—')}
-</div>
-</div>
-
-<div class="card">
-<small>Monthly rent</small>
-<div class="big">
-${money(t.rent_amount)}
-</div>
-</div>
-
-<div class="card">
-<small>Due day</small>
-<div class="big">
-${t.rent_due_day}
-</div>
-</div>
-
-</div>
-
-`
-:`
-
-<div class="card">
-
-<h3>
-Waiting for landlord assignment
-</h3>
-
-<p>
-Your account is active, but no unit has been assigned yet.
-</p>
-
-</div>
-
-`}
-
-</section>
-
-`;
-
-}
-
-
-if(id==='myRent')
-return tenantRent();
-
-
-if(id==='myPayments')
-
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-💳 My Payments
-</h1>
-
-<p>
-Submit rent payments and view history.
-</p>
-
-</div>
-
-${
-t
-?`
-
-<div class="card">
-
-<form
-id="tenantPaymentForm"
-class="formgrid">
-
-<select
-id="tprentrecord">
-
-<option value="">
-Select rent month
-</option>
-
-${cache.rent_records
-.filter(
-r=>
-r.tenant_id===t.id
-&&rentBalance(r)>0
-)
-.map(
-r=>`
-
-<option value="${r.id}">
-${monthLabel(r.period_month)}
-—
-Balance:
-${money(rentBalance(r))}
-</option>
-
-`
-).join('')}
-
-</select>
-
-<input
-id="tpamount"
-type="number"
-min="1"
-placeholder="Amount"
-required>
-
-<input
-id="tpdate"
-type="date"
-value="${today()}">
-
-<select
-id="tpmethod">
-
-<option value="mtn_mobile_money">
-MTN Mobile Money
-</option>
-
-<option value="airtel_money">
-Airtel Money
-</option>
-
-<option value="bank">
-Bank
-</option>
-
-<option value="cash">
-Cash
-</option>
-
-</select>
-
-<input
-id="tpref"
-placeholder="Transaction reference"
-required>
-
-<textarea
-id="tpnotes"
-class="full"
-placeholder="Notes"></textarea>
-
-<button
-class="primary full">
-Submit Payment
-</button>
-
-</form>
-
-</div>
-
-`
-:`
-
-<div class="notice">
-You need a rental assignment before submitting rent.
-</div>
-
-`}
-
-<div class="card">
-
-<h3>
-Payment History
-</h3>
-
-${table(
-[
-'Date',
-'Amount',
-'Method',
-'Status',
-'Reference',
-'Rent'
-],
-cache.payments
-.filter(
-x=>x.tenant_id===t?.id
-),
-x=>{
-
-let rr=
-cache.rent_records
-.find(
-r=>r.id===x.rent_record_id
-);
-
-return`
-
-<tr>
-
-<td>
-${esc(x.payment_date)}
-</td>
-
-<td>
-${money(x.amount)}
-</td>
-
-<td>
-${esc(x.payment_method)}
-</td>
-
-<td>
-
-<span class="badge ${esc(x.status)}">
-${esc(x.status)}
-</span>
-
-</td>
-
-<td>
-${esc(
-x.transaction_reference||
-'—'
-)}
-</td>
-
-<td>
-${rr
-?monthLabel(rr.period_month)
-:'—'}
-</td>
-
-</tr>
-
-`;
-
-}
-)}
-
-</div>
-
-</section>
-
-`;
-
-
-if(id==='myMaintenance')
-return tenantMaintenance();
-
-
-if(id==='myReceipts')
-
-return page(
-'My Receipts',
-'Receipts issued for your payments.',
-'',
-
-table(
-[
-'Receipt',
-'Payment',
-'Issued'
-],
-cache.receipts
-.filter(
-x=>x.tenant_id===t?.id
-),
-x=>`
-
-<tr>
-
-<td>
-${esc(x.receipt_number)}
-</td>
-
-<td>
-${money(
-cache.payments
-.find(
-p=>p.id===x.payment_id
-)?.amount||0
-)}
-</td>
-
-<td>
-${
-x.issued_at
-?new Date(
-x.issued_at
-).toLocaleString()
-:'—'
-}
-</td>
-
-</tr>
-
-`
-)
-
-);
-
-}
-
-
-/* =====================================================
-   TENANT RENT
-===================================================== */
-
-function tenantRent(){
-
-let t=
-cache.tenants[0];
-
-if(!t){
-
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-💰 My Rent
-</h1>
-
-</div>
-
-<div class="card">
-
-<h3>
-No rental assignment
-</h3>
-
-<p>
-Your landlord has not assigned a unit yet.
-</p>
-
-</div>
-
-</section>
-
-`;
-
-}
-
-let records=
-cache.rent_records
-.filter(
-r=>r.tenant_id===t.id
-);
-
-let current=
-records.find(
-r=>r.period_month===
-monthStart(today())
-);
-
-let outstanding=
-records.reduce(
-(a,r)=>a+rentBalance(r),
-0
-);
-
-let totalPaid=
-records.reduce(
-(a,r)=>a+Number(r.amount_paid||0),
-0
-);
-
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-💰 My Rent
-</h1>
-
-<p>
-Your monthly rent account.
-</p>
-
-</div>
-
-<div class="card rentHero">
-
-<h2 style="margin-top:0">
-
-${current
-?monthLabel(current.period_month)
-:'Current Rent'}
-
-</h2>
-
-<div class="muted">
-Current outstanding balance
-</div>
-
-<div class="rentBalance">
-
-${money(
-current
-?rentBalance(current)
-:0
-)}
-
-</div>
-
-<div class="rentMiniGrid">
-
-<div class="rentMini">
-
-<small>
-Rent Due
-</small>
-
-<strong>
-${money(
-current?.amount_due||
-t.rent_amount
-)}
-</strong>
-
-</div>
-
-<div class="rentMini">
-
-<small>
-Paid
-</small>
-
-<strong>
-${money(
-current?.amount_paid||0
-)}
-</strong>
-
-</div>
-
-<div class="rentMini">
-
-<small>
-Due Date
-</small>
-
-<strong>
-${current?.due_date||'—'}
-</strong>
-
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<h3>
-Rent History
-</h3>
-
-${
-records.length
-?records.map(
-r=>`
-
-<div class="monthCard">
-
-<div class="monthTop">
-
-<div>
-
-<div class="monthName">
-${monthLabel(r.period_month)}
-</div>
-
-<div style="font-size:12px;color:#667085">
-Due:
-${esc(r.due_date)}
-</div>
-
-</div>
-
-<span class="badge ${rentStatusClass(r.status)}">
-${esc(r.status)}
-</span>
-
-</div>
-
-<div class="amountGrid">
-
-<div class="amountBox">
-<small>Due</small>
-<strong>
-${money(r.amount_due)}
-</strong>
-</div>
-
-<div class="amountBox">
-<small>Paid</small>
-<strong class="green">
-${money(r.amount_paid)}
-</strong>
-</div>
-
-<div class="amountBox">
-<small>Balance</small>
-<strong class="red">
-${money(rentBalance(r))}
-</strong>
-</div>
-
-</div>
-
-${
-rentBalance(r)>0
-?`
-
-<div class="rentActionRow">
-
-<button
-onclick="show('myPayments')">
-💳 Pay Rent
-</button>
-
-</div>
-
-`
-:''
-
-}
-
-</div>
-
-`
-).join('')
-:`
-
-<div class="empty">
-No monthly rent records yet.
-</div>
-
-`}
-
-</div>
-
-<div class="card">
-
-<h3>
-Account Summary
-</h3>
-
-<p>
-Total paid:
-<b class="green">
-${money(totalPaid)}
-</b>
-</p>
-
-<p>
-Total outstanding:
-<b class="red">
-${money(outstanding)}
-</b>
-</p>
-
-</div>
-
-</section>
-
-`;
-
-}
-
-
-/* =====================================================
-   TENANT MAINTENANCE
+   TENANT MAINTENANCE FUNCTION WITH IPHONE MEDIA UPDATE
 ===================================================== */
 
 function tenantMaintenance(){
 
-let t=
-cache.tenants[0];
+return page(
+'Maintenance Requests',
+'Submit and track maintenance requests.',
 
-return`
-
-<section>
-
-<div class="title">
-
-<h1>
-🔧 Report a Problem
-</h1>
-
-<p>
-Send a photo or video so your landlord can see the real problem.
-</p>
-
-</div>
-
-${
-t
-?`
-
-<div class="card">
+`
 
 <form
 id="tenantMaintForm"
 class="formgrid">
 
 <input
-id="ttitle"
-placeholder="Problem title"
+id="tsubject"
+placeholder="Subject"
 required>
+
+<select id="tpriority">
+
+<option value="low">
+Low Priority
+</option>
+
+<option value="medium" selected>
+Medium Priority
+</option>
+
+<option value="high">
+High Priority
+</option>
+
+<option value="urgent">
+Urgent Priority
+</option>
+
+</select>
 
 <textarea
 id="tdesc"
 class="full"
-placeholder="Describe the problem"
+placeholder="Describe the maintenance issue..."
 required></textarea>
 
 <div class="full">
-
-<label style="color:#5f6875">
-Photo or video
-</label>
-
+<label>Attach Photo or Video</label>
 <input
 id="tmedia"
 type="file"
 accept="image/*,video/*"
-capture="environment">
+capture="environment"
+style="
+  min-height:52px;
+  padding:12px;
+">
 
 <small>
+Take a photo, record a video, or choose media from your iPhone.
 Maximum 25 MB.
 </small>
-
 </div>
 
 <button
 id="submitTenantMaintenanceBtn"
 class="primary full">
-📷 Submit Problem Report
+Submit request
 </button>
-
-<div
-id="tenantMaintStatus"
-class="notice full hidden">
-</div>
 
 </form>
 
-</div>
+`,
 
-`
-:`
-
-<div class="notice">
-You have not been assigned a unit.
-</div>
-
-`}
-
-<div class="card">
-
-<h3>
-My Reports
-</h3>
-
-${table(
+table(
 [
-'Title',
-'Description',
-'Attachment',
+'Date',
+'Subject',
+'Priority',
 'Status',
-'Date'
+'Attachment'
 ],
-cache.maintenance_requests
-.filter(
-x=>x.tenant_id===t?.id
-),
+cache.maintenance_requests,
 x=>`
 
 <tr>
 
-<td>
-${esc(x.title)}
-</td>
+<td>${esc(x.created_at?x.created_at.slice(0,10):'—')}</td>
 
-<td class="wrap">
-${esc(x.description)}
-</td>
+<td>${esc(x.title||x.subject)}</td>
 
 <td>
-
-${
-x.media_url
-?`
-
-<a
-href="${esc(x.media_url)}"
-target="_blank">
-View
-</a>
-
-`
-:'—'
-}
-
+<span class="badge ${esc(x.priority)}">
+${esc(x.priority)}
+</span>
 </td>
 
 <td>
-
 <span class="badge ${esc(x.status)}">
 ${esc(x.status)}
 </span>
-
 </td>
 
 <td>
-
 ${
-x.created_at
-?new Date(
-x.created_at
-).toLocaleDateString()
+x.media_url
+?`<a href="${esc(x.media_url)}" target="_blank">View Media</a>`
 :'—'
 }
-
 </td>
 
 </tr>
 
 `
-)}
+)
 
-</div>
-
-</section>
-
-`;
+);
 
 }
 
 
 /* =====================================================
-   LANDLORD MAINTENANCE
+   TENANT VIEWS
 ===================================================== */
 
-function maintenanceLandlord(){
+function tenant(id){
+
+if(id==='profile')
+return profilePage();
+
+if(id==='myMaintenance')
+return tenantMaintenance();
 
 return`
-
 <section>
-
 <div class="title">
-
-<h1>
-🔧 Maintenance
-</h1>
-
-<p>
-Review tenant reports and update repair progress.
-</p>
-
+<h1>MavRent</h1>
+<p>Welcome back.</p>
 </div>
+</section>
+`;
 
-<div class="card">
+}
 
-${
-cache.maintenance_requests.length
-?cache.maintenance_requests
-.map(
-x=>{
 
-let t=
-cache.tenants
-.find(
-t=>t.id===x.tenant_id
-);
+/* =====================================================
+   PROFILE PAGE
+===================================================== */
 
-let p=
-cache.registeredTenants
-.find(
-p=>p.id===t?.profile_id
-);
+function profilePage(){
 
 return`
-
-<div class="maintCard">
-
-<div class="maintTop">
-
-<div>
-
-<h3 style="margin:0">
-${esc(x.title)}
-</h3>
-
-<div class="maintMeta">
-
-Tenant:
-${esc(
-p?.full_name||
-p?.email||
-'Tenant'
-)}
-
-<br>
-
-${
-x.created_at
-?new Date(
-x.created_at
-).toLocaleString()
-:''
-}
-
+<section>
+<div class="title">
+<h1>👤 Profile</h1>
+<p>Account details</p>
 </div>
-
+<div class="card">
+<p>Email: <b>${esc(user.email)}</b></p>
+<p>Role: <b>${esc(role)}</b></p>
+<p>User ID: <b class="code">${shortId(user.id)}</b></p>
 </div>
-
-<span class="badge ${esc(x.status)}">
-${esc(x.status)}
-</span>
-
-</div>
-
-<p>
-${esc(x.description)}
-</p>
-
-${
-x.media_url
-?`
-
-<div class="mediaBox">
-
-<strong>
-Tenant attachment
-</strong>
-
-<br>
-
-${
-x.media_type?.startsWith('video')
-?`
-
-<video
-class="mediaPreview"
-controls
-src="${esc(x.media_url)}">
-</video>
-
-`
-:`
-
-<img
-class="mediaPreview"
-src="${esc(x.media_url)}">
-
-`
-}
-
-<br>
-
-<a
-href="${esc(x.media_url)}"
-target="_blank">
-Open attachment
-</a>
-
-</div>
-
-`
-:''
-
-}
-
-<div class="maintActions">
-
-<div class="maintActionsGrid">
-
-<select id="status_${x.id}">
-
-<option
-value="pending"
-${x.status==='pending'?'selected':''}>
-Pending
-</option>
-
-<option
-value="in_progress"
-${x.status==='in_progress'?'selected':''}>
-In progress
-</option>
-
-<option
-value="completed"
-${x.status==='completed'?'selected':''}>
-Completed
-</option>
-
-<option
-value="cancelled"
-${x.status==='cancelled'?'selected':''}>
-Cancelled
-</option>
-
-</select>
-
-<input
-id="cost_${x.id}"
-type="number"
-min="0"
-value="${Number(x.repair_cost||0)}"
-placeholder="Repair cost">
-
-</div>
-
-<textarea
-id="notes_${x.id}"
-style="margin-top:8px"
-placeholder="Landlord notes">${esc(x.landlord_notes||'')}</textarea>
-
-<input
-id="after_${x.id}"
-type="file"
-accept="image/*,video/*"
-style="margin-top:8px">
-
-<button
-class="primary"
-onclick="updateMaintenance('${x.id}',event)">
-💾 Save Update
-</button>
-
-</div>
-
-</div>
-
-`;
-
-})
-.join('')
-:`
-
-<div class="empty">
-No maintenance requests.
-</div>
-
-`}
-
-</div>
-
 </section>
-
 `;
 
 }
 
-
-/* =====================================================
-   MEDIA UPLOAD
-===================================================== */
-
-async function upload(
-file,
-path
-){
-
-if(!file)
-return null;
-
-if(
-!/^image\//.test(file.type)&&
-!/^video\//.test(file.type)
-)
-throw Error(
-'Choose an image or video.'
-);
-
-if(
-file.size>
-25*1024*1024
-)
-throw Error(
-'File must be under 25 MB.'
-);
-
-let r=
-await sb
-.storage
-.from(MEDIA_BUCKET)
-.upload(
-path,
-file,
-{
-contentType:file.type,
-upsert:false
-}
-);
-
-if(r.error)
-throw Error(
-'Upload failed: '+
-r.error.message
-);
-
-let u=
-sb.storage
-.from(MEDIA_BUCKET)
-.getPublicUrl(path);
-
-return{
-url:u.data.publicUrl,
-path,
-type:file.type,
-name:file.name
-};
-
-}
+function attach(){}
+function startRealtime(){}
+function loadNotifications(){}
+function toggleNotifications(){}
+function markAllNotificationsRead(){}
+function landlordRent(){ return `<section><div class="title"><h1>💰 Rent</h1></div></section>`; }
+function maintenanceLandlord(){ return `<section><div class="title"><h1>🔧 Maintenance</h1></div></section>`; }
+function delProperty(id){}
 
 
 /* =====================================================
-   CREATE NOTIFICATION
+   MAVRENT V14.1 MOBILE FUNCTIONS
 ===================================================== */
 
-async function createNotification({
-user_id,
-title,
-message,
-type='general',
-related_id=null
-}){
+function hideMavLoading(){
 
-if(!user_id)
-return null;
+  const loader=$('mavLoading');
 
-let r=
-await sb
-.from('notifications')
-.insert({
+  if(!loader)return;
 
-user_id,
-title,
-message,
-type,
-related_id,
-is_read:false
+  setTimeout(()=>{
+    loader.classList.add('hide');
+  },500);
 
-});
+}
 
-if(r.error){
+function updateConnectionStatus(){
 
-console.error(
-'Notification error:',
-r.error
+  const box=$('connectionStatus');
+  const text=$('connectionText');
+
+  if(!box||!text)return;
+
+  if(navigator.onLine){
+
+    box.classList.remove('offline');
+    box.classList.add('online');
+    text.textContent='Online';
+
+  }else{
+
+    box.classList.remove('online');
+    box.classList.add('offline');
+    text.textContent='Offline';
+
+  }
+
+}
+
+window.addEventListener(
+  'online',
+  updateConnectionStatus
 );
 
-return null;
+window.addEventListener(
+  'offline',
+  updateConnectionStatus
+);
 
-}
+updateConnectionStatus();
 
-return r;
+/* Hide loading screen after app initializes */
 
-}
+window.addEventListener(
+  'load',
+  ()=>{
+    setTimeout(
+      hideMavLoading,
+      700
+    );
+  }
+);
 
 
 /* =====================================================
-   TENANT MAINTENANCE SUBMIT
+   MOBILE MEDIA PREVIEW
 ===================================================== */
 
-async function submitTenantMaintenance(e){
+function previewMaintenanceMedia(){
 
-e.preventDefault();
+  const input=$('tmedia');
 
-let b=
-$('submitTenantMaintenanceBtn');
+  if(!input||!input.files.length)return;
 
-let s=
-$('tenantMaintStatus');
+  const file=input.files[0];
 
-try{
+  let old=$('maintenanceMediaPreview');
 
-let t=
-cache.tenants[0];
+  if(old)old.remove();
 
-let file=
-$('tmedia').files[0];
+  const box=document.createElement('div');
 
-if(!t)
-throw Error(
-'No rental unit assigned.'
-);
+  box.id='maintenanceMediaPreview';
+  box.className='mediaBox';
 
-b.disabled=true;
+  const title=document.createElement('strong');
 
-b.textContent=
-'Uploading...';
+  title.textContent='Selected attachment';
 
-let m=null;
+  box.appendChild(title);
 
-if(file){
+  const br=document.createElement('br');
 
-m=
-await upload(
-file,
-`${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`
-);
+  box.appendChild(br);
 
-}
+  if(file.type.startsWith('video/')){
 
-let title=
-$('ttitle')
-.value
-.trim();
+    const video=document.createElement('video');
 
-let description=
-$('tdesc')
-.value
-.trim();
+    video.className='mediaPreview';
+    video.controls=true;
+    video.src=URL.createObjectURL(file);
 
-let payload={
+    box.appendChild(video);
 
-tenant_id:t.id,
+  }else{
 
-landlord_id:t.landlord_id,
+    const img=document.createElement('img');
 
-unit_id:t.unit_id,
+    img.className='mediaPreview';
+    img.src=URL.createObjectURL(file);
 
-title,
+    box.appendChild(img);
 
-description,
+  }
 
-status:'pending',
+  const info=document.createElement('div');
 
-repair_cost:0
+  info.style.fontSize='11px';
+  info.style.marginTop='6px';
+  info.style.color='#667085';
 
-};
+  info.textContent=
+    file.name+
+    ' • '+
+    Math.round(file.size/1024/1024*10)/10+
+    ' MB';
 
-if(m){
+  box.appendChild(info);
 
-Object.assign(
-payload,
-{
+  const form=$('tenantMaintForm');
 
-media_url:m.url,
-media_path:m.path,
-media_type:m.type,
-media_name:m.name
-
-}
-);
-
-}
-
-let r=
-await sb
-.from('maintenance_requests')
-.insert(payload)
-.select()
-.single();
-
-if(r.error){
-
-if(m)
-await sb
-.storage
-.from(MEDIA_BUCKET)
-.remove([
-m.path
-]);
-
-throw Error(
-r.error.message
-);
+  if(form)
+    form.querySelector(
+      '#submitTenantMaintenanceBtn'
+    ).before(box);
 
 }
 
 
 /* =====================================================
-   V11 NOTIFICATION
-   TENANT → LANDLORD
+   ATTACH MOBILE MEDIA PREVIEW
 ===================================================== */
 
-await createNotification({
+document.addEventListener(
+  'change',
+  e=>{
 
-user_id:t.landlord_id,
+    if(e.target&&e.target.id==='tmedia'){
 
-title:'🔧 New Maintenance Report',
+      previewMaintenanceMedia();
 
-message:
-`Tenant reported: ${title}`,
+    }
 
-type:'maintenance',
-
-related_id:r.data.id
-
-});
-
-
-s.className=
-'notice success full';
-
-s.textContent=
-'Maintenance report sent successfully. Your landlord has been notified.';
-
-$('tenantMaintForm')
-.reset();
-
-await refresh();
-
-setTimeout(
-()=>show(
-'myMaintenance',
-false
-),
-500
+  }
 );
 
-}catch(err){
 
-console.error(err);
+/* =====================================================
+   SAFER MOBILE CAMERA LABEL
+===================================================== */
 
-s.className=
-'notice error full';
+function enhanceMaintenanceUploader(){
 
-s.textContent=
-err.message;
+  const input=$('tmedia');
 
-}finally{
+  if(!input)return;
 
-b.disabled=false;
+  if($('mediaUploadHelp'))return;
 
-b.textContent=
-'📷 Submit Problem Report';
+  const help=document.createElement('div');
 
-}
+  help.id='mediaUploadHelp';
+
+  help.style.marginTop='8px';
+
+  help.innerHTML=`
+    <div style="
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    ">
+      <div class="mediaBox" style="margin:0;text-align:center">
+        📷<br>
+        <strong>Take photo</strong>
+      </div>
+      <div class="mediaBox" style="margin:0;text-align:center">
+        🎥<br>
+        <strong>Record video</strong>
+      </div>
+    </div>
+    <small style="
+      display:block;
+      margin-top:7px;
+      color:#667085
+    ">
+      You can also choose an existing photo or video.
+      Maximum 25 MB.
+    </small>
+  `;
+
+  input.parentNode.appendChild(help);
 
 }
 
 
 /* =====================================================
-   UPDATE MAINTENANCE
+   RUN AFTER PAGE CHANGES
 ===================================================== */
 
-async function updateMaintenance(
-id,
-e
-){
+const originalShow=show;
 
-e.preventDefault();
+show=async function(id,reload=true){
 
-try{
+  await originalShow(id,reload);
 
-let request=
-cache.maintenance_requests
-.find(
-x=>x.id===id
-);
-
-let file=
-$(`after_${id}`).files[0];
-
-let m=null;
-
-if(file){
-
-m=
-await upload(
-file,
-`${user.id}/maintenance-after/${id}-${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`
-);
-
-}
-
-let newStatus=
-$(`status_${id}`).value;
-
-let p={
-
-status:newStatus,
-
-repair_cost:
-Number(
-$(`cost_${id}`).value||0
-),
-
-landlord_notes:
-$(`notes_${id}`).value.trim()||
-null
-
-};
-
-if(m){
-
-Object.assign(
-p,
-{
-
-completion_media_url:m.url,
-completion_media_path:m.path,
-completion_media_type:m.type,
-completion_media_name:m.name
-
-}
-);
-
-}
-
-let r=
-await sb
-.from('maintenance_requests')
-.update(p)
-.eq(
-'id',
-id
-)
-.eq(
-'landlord_id',
-user.id
-);
-
-if(r.error)
-throw Error(
-r.error.message
-);
-
-
-/* =====================================================
-   V11 NOTIFICATION
-   LANDLORD → TENANT
-===================================================== */
-
-if(request){
-
-let tenantProfile=
-cache.tenants
-.find(
-t=>t.id===request.tenant_id
-)?.profile_id;
-
-if(tenantProfile){
-
-let statusText=
-newStatus
-.replace(
-'_',
-' '
-);
-
-await createNotification({
-
-user_id:tenantProfile,
-
-title:'🔧 Maintenance Update',
-
-message:
-`Your maintenance report "${request.title}" is now ${statusText}.`,
-
-type:'maintenance_update',
-
-related_id:id
-
-});
-
-}
-
-}
-
-alert(
-'Maintenance updated. Tenant has been notified.'
-);
-
-show('maintenance');
-
-}catch(err){
-
-console.error(err);
-
-alert(
-'Could not update maintenance: '+
-err.message
-);
-
-}
-
-}
-
-
-/* =====================================================
-   ATTACH FORMS
-===================================================== */
-
-function attach(){
-
-let f;
-
-
-/* PROFILE */
-
-f=$('profileForm');
-
-if(f)
-f.onsubmit=
-saveProfile;
-
-
-/* PROPERTY */
-
-f=$('propertyForm');
-
-if(f)
-f.onsubmit=
-async e=>{
-
-e.preventDefault();
-
-let r=
-await sb
-.from('properties')
-.insert({
-
-landlord_id:user.id,
-
-name:
-$('pname').value.trim(),
-
-location:
-$('ploc').value.trim(),
-
-description:
-$('pdesc').value.trim()
-
-});
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-show('properties');
+  enhanceMaintenanceUploader();
 
 };
 
 
-/* UNIT */
-
-f=$('unitForm');
-
-if(f)
-f.onsubmit=
-async e=>{
-
-e.preventDefault();
-
-let r=
-await sb
-.from('units')
-.insert({
-
-property_id:
-$('uproperty').value,
-
-unit_number:
-$('unum').value.trim(),
-
-monthly_rent:
-Number(
-$('urent').value
-),
-
-deposit_amount:
-Number(
-$('udep').value||0
-),
-
-status:
-$('ustatus').value
-
-});
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-show('units');
-
-};
-
-
-/* TENANT */
-
-f=$('tenantForm');
-
-if(f)
-f.onsubmit=
-async e=>{
-
-e.preventDefault();
-
-let tenantProfileId=
-$('tprofile').value;
-
-let unitId=
-$('tunit').value;
-
-let rent=
-Number(
-$('trent').value
-);
-
-let r=
-await sb
-.from('tenants')
-.insert({
-
-profile_id:
-tenantProfileId,
-
-unit_id:
-unitId,
-
-landlord_id:
-user.id,
-
-rent_amount:
-rent,
-
-deposit_amount:
-Number(
-$('tdeposit').value||0
-),
-
-rent_due_day:
-Number(
-$('tdue').value
-),
-
-move_in_date:
-$('tmove').value||
-null,
-
-status:'active'
-
-});
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-await sb
-.from('units')
-.update({
-status:'occupied'
-})
-.eq(
-'id',
-unitId
-);
-
-
-/* V11 TENANT ASSIGNMENT NOTIFICATION */
-
-await createNotification({
-
-user_id:tenantProfileId,
-
-title:'🏠 Rental Assignment',
-
-message:
-`You have been assigned a rental unit. Monthly rent: ${money(rent)}.`,
-
-type:'assignment',
-
-related_id:null
-
-});
-
-alert(
-'Tenant assigned successfully. The tenant has been notified.'
-);
-
-show('tenants');
-
-};
-
-
-/* LANDLORD PAYMENT */
-
-f=$('paymentForm');
-
-if(f)
-f.onsubmit=
-async e=>{
-
-e.preventDefault();
-
-let tenantId=
-$('ptenant').value;
-
-let rentRecordId=
-$('prentrecord').value||
-null;
-
-let amount=
-Number(
-$('pamount').value
-);
-
-let paymentPayload={
-
-tenant_id:
-tenantId,
-
-landlord_id:
-user.id,
-
-amount,
-
-payment_date:
-$('pdate').value,
-
-payment_method:
-$('pmethod').value,
-
-transaction_reference:
-$('pref').value.trim()||
-null,
-
-notes:
-$('pnotes').value.trim()||
-null,
-
-status:'confirmed',
-
-confirmed_at:
-new Date().toISOString(),
-
-confirmed_by:
-user.id
-
-};
-
-if(rentRecordId)
-paymentPayload.rent_record_id=
-rentRecordId;
-
-let r=
-await sb
-.from('payments')
-.insert(
-paymentPayload
-)
-.select()
-.single();
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-
-/* UPDATE RENT */
-
-if(rentRecordId){
-
-let rr=
-cache.rent_records
-.find(
-x=>x.id===rentRecordId
-);
-
-if(rr){
-
-let newPaid=
-Number(
-rr.amount_paid||0
-)+amount;
-
-let status=
-newPaid>=Number(
-rr.amount_due||0
-)
-?'paid'
-:'partial';
-
-let u=
-await sb
-.from('rent_records')
-.update({
-
-amount_paid:newPaid,
-
-status,
-
-payment_id:r.data.id,
-
-paid_at:
-status==='paid'
-?new Date().toISOString()
-:null
-
-})
-.eq(
-'id',
-rentRecordId
-)
-.eq(
-'landlord_id',
-user.id
-);
-
-if(u.error)
-console.error(u.error);
-
-}
-
-}
-
-
-/* V11 PAYMENT NOTIFICATION */
-
-let tenantProfile=
-cache.tenants
-.find(
-x=>x.id===tenantId
-)?.profile_id;
-
-if(tenantProfile){
-
-await createNotification({
-
-user_id:tenantProfile,
-
-title:'💳 Payment Confirmed',
-
-message:
-`Your payment of ${money(amount)} has been confirmed by your landlord.`,
-
-type:'payment_confirmed',
-
-related_id:r.data.id
-
-});
-
-}
-
-show('payments');
-
-};
-
-
-/* TENANT PAYMENT */
-
-f=$('tenantPaymentForm');
-
-if(f)
-f.onsubmit=
-submitTenantPayment;
-
-
-/* TENANT MAINTENANCE */
-
-f=$('tenantMaintForm');
-
-if(f)
-f.onsubmit=
-submitTenantMaintenance;
-
-
-/* EXPENSE */
-
-f=$('expenseForm');
-
-if(f)
-f.onsubmit=
-async e=>{
-
-e.preventDefault();
-
-let r=
-await sb
-.from('expenses')
-.insert({
-
-landlord_id:user.id,
-
-property_id:
-$('eprop').value||
-null,
-
-amount:
-Number(
-$('eamount').value
-),
-
-category:
-$('ecat').value.trim(),
-
-description:
-$('edesc').value.trim(),
-
-expense_date:
-$('edate').value
-
-});
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-show('expenses');
-
-};
-
-
-/* RECEIPT */
-
-f=$('receiptForm');
-
-if(f)
-f.onsubmit=
-async e=>{
-
-e.preventDefault();
-
-let p=
-cache.payments
-.find(
-x=>x.id===
-$('rpayment').value
-);
-
-if(!p)
-return alert(
-'Select a payment.'
-);
-
-let r=
-await sb
-.from('receipts')
-.insert({
-
-payment_id:p.id,
-
-tenant_id:p.tenant_id,
-
-landlord_id:user.id,
-
-receipt_number:
-$('rnumber').value.trim()
-
-});
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-show('receipts');
-
-};
-
-
-/* RENT GENERATOR */
-
-f=$('generateRentForm');
-
-if(f)
-f.onsubmit=
-generateMonthlyRent;
-
-}
-
-
 /* =====================================================
-   TENANT PAYMENT
+   IMPROVED MOBILE NOTIFICATION CLOSE
 ===================================================== */
 
-async function submitTenantPayment(e){
+document.addEventListener(
+  'click',
+  e=>{
 
-e.preventDefault();
+    const panel=$('notificationPanel');
 
-let t=
-cache.tenants[0];
+    const button=e.target.closest('.notifyBtn');
 
-if(!t)
-return alert(
-'No active tenancy.'
+    if(
+      panel &&
+      !panel.classList.contains('hidden') &&
+      !panel.contains(e.target) &&
+      !button
+    ){
+
+      panel.classList.add('hidden');
+
+    }
+
+  }
 );
-
-let rentId=
-$('tprentrecord').value||
-null;
-
-let amount=
-Number(
-$('tpamount').value
-);
-
-if(!amount||amount<=0)
-return alert(
-'Enter a valid payment amount.'
-);
-
-let payload={
-
-tenant_id:t.id,
-
-landlord_id:
-t.landlord_id,
-
-amount,
-
-payment_date:
-$('tpdate').value,
-
-payment_method:
-$('tpmethod').value,
-
-transaction_reference:
-$('tpref').value.trim(),
-
-notes:
-$('tpnotes').value.trim()||
-null,
-
-status:'pending'
-
-};
-
-if(rentId)
-payload.rent_record_id=
-rentId;
-
-let r=
-await sb
-.from('payments')
-.insert(payload)
-.select()
-.single();
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-
-/* =====================================================
-   V11 PAYMENT NOTIFICATION
-   TENANT → LANDLORD
-===================================================== */
-
-let profileName=
-profile?.full_name||
-user.email||
-'Tenant';
-
-await createNotification({
-
-user_id:t.landlord_id,
-
-title:'💳 New Payment Submitted',
-
-message:
-`${profileName} submitted a payment of ${money(amount)} for review.`,
-
-type:'payment_submitted',
-
-related_id:r.data.id
-
-});
-
-alert(
-'Payment submitted successfully. Your landlord has been notified.'
-);
-
-show('myPayments');
-
-}
-
-
-/* =====================================================
-   SAVE PROFILE
-===================================================== */
-
-async function saveProfile(e){
-
-e.preventDefault();
-
-let s=
-$('profileStatus');
-
-try{
-
-let full=
-$('pfname')
-.value.trim();
-
-let phone=
-$('pfphone')
-.value.trim();
-
-if(!full)
-throw Error(
-'Please enter your full name.'
-);
-
-let r=
-await sb
-.from('profiles')
-.update({
-
-full_name:full,
-phone
-
-})
-.eq(
-'id',
-user.id
-);
-
-if(r.error)
-throw Error(
-r.error.message
-);
-
-profile=
-await loadProfile();
-
-buildNav();
-
-s.className=
-'notice success';
-
-s.textContent=
-'Profile updated successfully.';
-
-setTimeout(
-()=>show(
-'profile',
-false
-),
-400
-);
-
-}catch(err){
-
-s.className=
-'notice error';
-
-s.textContent=
-'Could not save profile: '+
-err.message;
-
-}
-
-}
-
-
-/* =====================================================
-   DELETE PROPERTY
-===================================================== */
-
-async function delProperty(id){
-
-if(
-confirm(
-'Delete this property?'
-)
-){
-
-let r=
-await sb
-.from('properties')
-.delete()
-.eq(
-'id',
-id
-)
-.eq(
-'landlord_id',
-user.id
-);
-
-if(r.error)
-return alert(
-r.error.message
-);
-
-show('properties');
-
-}
-
-}
-
-
-/* =====================================================
-   NOTIFICATIONS
-===================================================== */
-
-async function loadNotifications(){
-
-if(!user)
-return;
-
-let r=
-await sb
-.from('notifications')
-.select('*')
-.eq(
-'user_id',
-user.id
-)
-.order(
-'created_at',
-{ascending:false}
-)
-.limit(50);
-
-if(r.error){
-
-console.error(
-'Could not load notifications:',
-r.error
-);
-
-return;
-
-}
-
-notifications=
-r.data||[];
-
-let unread=
-notifications.filter(
-x=>!x.is_read
-).length;
-
-$('notifyCount')
-.textContent=
-unread;
-
-$('notifyCount')
-.classList.toggle(
-'hidden',
-unread===0
-);
-
-$('notificationList').innerHTML=
-notifications.length
-?notifications.map(
-n=>`
-
-<div
-class="notificationItem ${
-n.is_read?'':'unread'
-}"
-onclick="openNotification('${n.id}')">
-
-<div class="notificationTitle">
-${esc(n.title)}
-</div>
-
-<div class="notificationMessage">
-${esc(n.message)}
-</div>
-
-<div class="notificationType">
-${esc(n.type||'notification')}
-</div>
-
-<div class="notificationDate">
-${
-n.created_at
-?new Date(
-n.created_at
-).toLocaleString()
-:''
-}
-</div>
-
-</div>
-
-`
-).join('')
-:`
-
-<div class="empty">
-No notifications yet.
-</div>
-
-`;
-
-}
-
-
-/* =====================================================
-   OPEN NOTIFICATION
-===================================================== */
-
-async function openNotification(id){
-
-let n=
-notifications.find(
-x=>x.id===id
-);
-
-if(!n)
-return;
-
-if(!n.is_read){
-
-await sb
-.from('notifications')
-.update({
-is_read:true
-})
-.eq(
-'id',
-id
-)
-.eq(
-'user_id',
-user.id
-);
-
-}
-
-await loadNotifications();
-
-}
-
-
-/* =====================================================
-   TOGGLE NOTIFICATIONS
-===================================================== */
-
-function toggleNotifications(){
-
-$('notificationPanel')
-.classList.toggle(
-'hidden'
-);
-
-if(
-!$('notificationPanel')
-.classList.contains(
-'hidden'
-)
-)
-loadNotifications();
-
-}
-
-
-/* =====================================================
-   MARK ALL READ
-===================================================== */
-
-async function markAllNotificationsRead(){
-
-await sb
-.from('notifications')
-.update({
-is_read:true
-})
-.eq(
-'user_id',
-user.id
-)
-.eq(
-'is_read',
-false
-);
-
-await loadNotifications();
-
-}
-
-
-/* =====================================================
-   REALTIME NOTIFICATIONS
-===================================================== */
-
-function startRealtime(){
-
-if(channel)
-sb.removeChannel(
-channel
-);
-
-channel=
-sb.channel(
-'mavrent-'+user.id
-)
-.on(
-'postgres_changes',
-{
-
-event:'*',
-schema:'public',
-table:'notifications',
-
-filter:
-'user_id=eq.'+
-user.id
-
-},
-payload=>{
-
-loadNotifications();
-
-/* Browser notification if permission is available */
-
-if(
-payload.eventType==='INSERT' &&
-Notification.permission==='granted'
-){
-
-try{
-
-new Notification(
-payload.new?.title||
-'MavRent Notification',
-{
-body:
-payload.new?.message||
-'You have a new notification.'
-}
-);
-
-}catch(e){
-
-console.log(e);
-
-}
-
-}
-
-}
-)
-.subscribe();
-
-
-/* Ask browser permission */
-
-if(
-'Notification' in window &&
-Notification.permission==='default'
-){
-
-Notification.requestPermission()
-.catch(
-()=>{}
-);
-
-}
-
-}
-
-
-/* =====================================================
-   AUTH STATE
-===================================================== */
-
-sb.auth.onAuthStateChange(
-async(e,s)=>{
-
-if(
-s&&
-!user&&
-!loading
-){
-
-user=s.user;
-
-await loadApp();
-
-}
-
-}
-);
-
-
-/* =====================================================
-   INITIAL SESSION
-===================================================== */
-
-(async()=>{
-
-let r=
-await sb.auth.getSession();
-
-if(
-r.data.session
-){
-
-user=
-r.data.session.user;
-
-await loadApp();
-
-}
-
-})();
-
 </script>
-
 </body>
 </html>
-
