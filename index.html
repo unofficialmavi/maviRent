@@ -1,10 +1,32 @@
-
+```html
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- =====================================================
+     MAVRENT PWA
+===================================================== -->
+
+<link rel="manifest" href="manifest.json">
+
+<link rel="apple-touch-icon" href="icon-180.png">
+
 <meta name="theme-color" content="#111827">
+
+<meta name="mobile-web-app-capable" content="yes">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<meta
+name="apple-mobile-web-app-status-bar-style"
+content="black-translucent">
+
+<meta
+name="apple-mobile-web-app-title"
+content="MavRent">
+
 <title>MavRent V11</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -838,6 +860,43 @@ Mark all read
 
 
 <script>
+
+/* =====================================================
+   PWA SERVICE WORKER
+===================================================== */
+
+if(
+'serviceWorker' in navigator
+){
+
+window.addEventListener(
+'load',
+()=>{
+
+navigator.serviceWorker
+.register('./sw.js')
+.then(
+registration=>{
+console.log(
+'MavRent service worker registered:',
+registration.scope
+);
+}
+)
+.catch(
+error=>{
+console.error(
+'MavRent service worker registration failed:',
+error
+);
+}
+);
+
+}
+);
+
+}
+
 
 /* =====================================================
    SUPABASE
@@ -4422,6 +4481,7 @@ onclick="show('myPayments')">
 
 `
 :''
+
 }
 
 </div>
@@ -4768,6 +4828,7 @@ Open attachment
 
 `
 :''
+
 }
 
 <div class="maintActions">
@@ -6308,5 +6369,3 @@ await loadApp();
 </body>
 </html>
 ```
-
-
