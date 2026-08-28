@@ -1,759 +1,687 @@
-/* =====================================================
-   MAVRENT V14.2 — GENERATE MONTHLY RENT
-===================================================== */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MavRent V14.2 — Property Management</title>
+  
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-async function generateRentRecords() {
-  if (role !== 'landlord') return;
-  if (!cache.tenants.length) return;
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #2563eb;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
+    #app { max-width: 1100px; margin: 0 auto; }
+    
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+    .brand { font-size: 1.5rem; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+    .nav { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav button { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 6px 14px; border-radius: 6px; }
+    .nav button.active { background: var(--primary); border-color: var(--primary); }
 
-  const currentMonth = monthStart(today());
+    .title { margin-bottom: 24px; }
+    .title h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    .title p { color: var(--muted); }
 
-  for (const tenant of cache.tenants) {
-    if (tenant.status !== 'active') continue;
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .card small { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 600; }
+    .card .big { font-size: 1.6rem; font-weight: 700; margin-top: 6px; }
+    .card .big.green { color: var(--green); }
+    .card .big.red { color: var(--red); }
+    .card .big.blue { color: var(--primary); }
 
-    const rentAmount = Number(tenant.rent_amount || 0);
-    if (rentAmount <= 0) continue;
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    
+    .btn, button { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    button:hover { opacity: 0.9; }
 
-    const dueDay = Math.min(28, Math.max(1, Number(tenant.rent_due_day || 1)));
-    const existing = cache.rent_records.filter(r => r.tenant_id === tenant.id);
+    .monthCard { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border); padding: 16px; border-radius: 8px; margin-top: 12px; }
+    .monthTop { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .monthName { font-weight: 700; font-size: 1.1rem; }
+    .maintMeta { color: var(--muted); font-size: 0.9rem; margin-top: 4px; }
+    
+    .amountGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 6px; margin: 12px 0; }
+    .amountBox small { display: block; color: var(--muted); font-size: 0.75rem; }
+    
+    .statusBadge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+    .statusBadge.paid { background: rgba(34, 197, 94, 0.2); color: var(--green); }
+    .statusBadge.partial { background: rgba(234, 179, 8, 0.2); color: var(--yellow); }
+    .statusBadge.overdue { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    .statusBadge.pending { background: rgba(148, 163, 184, 0.2); color: var(--muted); }
 
-    /*
-      Create the current month record
-      if it does not already exist.
-    */
-    const exists = existing.some(r => r.period_month === currentMonth);
-    if (exists) continue;
+    .rentActionRow { display: flex; gap: 8px; margin-top: 12px; }
+    .rentActionRow button { background: #334155; }
 
-    const dueDate = `${currentMonth.slice(0, 7)}-${String(dueDay).padStart(2, '0')}`;
+    form { display: grid; gap: 12px; margin-top: 12px; }
+    label { font-size: 0.85rem; color: var(--muted); }
+    input, select, textarea { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); }
+    
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; text-align: left; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-size: 0.85rem; text-transform: uppercase; }
+    .empty { color: var(--muted); font-style: italic; padding: 20px 0; text-align: center; }
+  </style>
+</head>
+<body>
 
-    const { data, error } = await sb
-      .from('rent_records')
-      .insert({
-        landlord_id: user.id,
-        tenant_id: tenant.id,
-        period_month: currentMonth,
-        due_date: dueDate,
-        amount_due: rentAmount,
-        amount_paid: 0,
-        status: 'pending'
-      })
-      .select()
-      .single();
+  <div id="app">
+    <header>
+      <div class="brand">MavRent</div>
+      <div class="nav" id="mainNav"></div>
+    </header>
+    <main id="mainContent"></main>
+  </div>
 
-    if (error) {
-      console.error('Rent generation error:', error);
-      continue;
+  <script>
+    /* =====================================================
+       MAVRENT V14.2 — INITIALIZATION & GLOBALS
+    ===================================================== */
+    const SUPABASE_URL = 'https://YOUR_SUPABASE_PROJECT_ID.supabase.co';
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+    
+    const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+    let user = { id: 'mock-landlord-id' };
+    let role = 'landlord'; // 'landlord' or 'tenant'
+    let currentView = 'rent';
+
+    let cache = {
+      properties: [],
+      units: [],
+      tenants: [],
+      rent_records: [],
+      registeredTenants: [],
+      payments: [],
+      expenses: [],
+      receipts: []
+    };
+
+    /* =====================================================
+       MAVRENT V14.2 — HELPER FUNCTIONS
+    ===================================================== */
+    const $ = id => document.getElementById(id);
+    const today = () => new Date().toISOString().split('T')[0];
+    const monthStart = dateStr => `${dateStr.slice(0, 7)}-01`;
+
+    function money(amt) {
+      return '$' + Number(amt || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    cache.rent_records.push(data);
-  }
-}
-
-/* =====================================================
-   MAVRENT V14.2 — UPDATE RENT STATUS
-===================================================== */
-
-async function updateRentStatuses() {
-  if (!cache.rent_records.length) return;
-
-  for (const r of cache.rent_records) {
-    const newStatus = calculateRentStatus(r);
-    if (r.status === newStatus) continue;
-
-    const { error } = await sb
-      .from('rent_records')
-      .update({ status: newStatus })
-      .eq('id', r.id);
-
-    if (error) {
-      console.error('Rent status update error:', error);
-      continue;
+    function esc(str) {
+      return String(str || '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
     }
 
-    r.status = newStatus;
-  }
-}
+    function monthLabel(monthStr) {
+      if (!monthStr) return '—';
+      const [year, month] = monthStr.split('-');
+      const d = new Date(year, month - 1);
+      return d.toLocaleString('default', { month: 'long', year: 'numeric' });
+    }
 
-/* =====================================================
-   MAVRENT V14.2 — REFRESH INTEGRATION (SNIPPET)
-===================================================== */
-/* 
-  Inside your refresh() function, update your landlord rent-record 
-  loading section to match:
+    function rentAmountDue(r) { return Number(r.amount_due || 0); }
+    function rentAmountPaid(r) { return Number(r.amount_paid || 0); }
+    function rentRemaining(r) { return Math.max(0, rentAmountDue(r) - rentAmountPaid(r)); }
 
-  cache.rent_records = r.data || [];
-  await generateRentRecords();
-  await updateRentStatuses();
-*/
+    function calculateRentStatus(r) {
+      const due = rentAmountDue(r);
+      const paid = rentAmountPaid(r);
+      if (paid >= due) return 'paid';
+      if (paid > 0) return 'partial';
+      if (r.due_date && today() > r.due_date) return 'overdue';
+      return 'pending';
+    }
 
-/* =====================================================
-   MAVRENT V14.2 — LANDLORD RENT SYSTEM
-===================================================== */
+    function formatRentStatus(status) {
+      const s = (status || 'pending').toLowerCase();
+      return `<span class="statusBadge ${s}">${s}</span>`;
+    }
 
-function landlordRent() {
-  const records = [...cache.rent_records].sort((a, b) =>
-    String(b.period_month).localeCompare(String(a.period_month))
-  );
+    function table(headers, data, rowFn) {
+      if (!data || !data.length) return `<div class="empty">No records found.</div>`;
+      return `
+        <table>
+          <thead>
+            <tr>${headers.map(h => `<th>${esc(h)}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${data.map(rowFn).join('')}
+          </tbody>
+        </table>
+      `;
+    }
 
-  const totalDue = records.reduce((sum, r) => sum + rentAmountDue(r), 0);
-  const totalPaid = records.reduce((sum, r) => sum + rentAmountPaid(r), 0);
-  const outstanding = Math.max(0, totalDue - totalPaid);
+    /* =====================================================
+       MAVRENT V14.2 — GENERATE & UPDATE RENT
+    ===================================================== */
+    async function generateRentRecords() {
+      if (role !== 'landlord') return;
+      if (!cache.tenants.length) return;
 
-  const overdue = records
-    .filter(r => (r.status || calculateRentStatus(r)) === 'overdue')
-    .reduce((sum, r) => sum + rentRemaining(r), 0);
+      const currentMonth = monthStart(today());
 
-  const paidCount = records.filter(r => (r.status || calculateRentStatus(r)) === 'paid').length;
-  const partialCount = records.filter(r => (r.status || calculateRentStatus(r)) === 'partial').length;
-  const overdueCount = records.filter(r => (r.status || calculateRentStatus(r)) === 'overdue').length;
+      for (const tenant of cache.tenants) {
+        if (tenant.status !== 'active') continue;
 
-  return `
-    <section>
-      <div class="title">
-        <h1>💰 Rent Management</h1>
-        <p>Track monthly rent, payments, balances and overdue accounts.</p>
-      </div>
+        const rentAmount = Number(tenant.rent_amount || 0);
+        if (rentAmount <= 0) continue;
 
-      <!-- RENT SUMMARY -->
-      <div class="stats">
-        <div class="card">
-          <small>Total Rent Due</small>
-          <div class="big">${money(totalDue)}</div>
-        </div>
-        <div class="card">
-          <small>Collected</small>
-          <div class="big green">${money(totalPaid)}</div>
-        </div>
-        <div class="card">
-          <small>Outstanding</small>
-          <div class="big red">${money(outstanding)}</div>
-        </div>
-        <div class="card">
-          <small>Overdue</small>
-          <div class="big red">${money(overdue)}</div>
-        </div>
-      </div>
+        const dueDay = Math.min(28, Math.max(1, Number(tenant.rent_due_day || 1)));
+        const existing = cache.rent_records.filter(r => r.tenant_id === tenant.id);
 
-      <!-- STATUS SUMMARY -->
-      <div class="grid">
-        <div class="card">
-          <h3>📊 Rent Status</h3>
-          <p>🟢 Paid: <b>${paidCount}</b></p>
-          <p>🟡 Partial: <b>${partialCount}</b></p>
-          <p>🔴 Overdue: <b>${overdueCount}</b></p>
-          <p>🔵 Pending: <b>${Math.max(0, records.length - paidCount - partialCount - overdueCount)}</b></p>
-        </div>
+        const exists = existing.some(r => r.period_month === currentMonth);
+        if (exists) continue;
 
-        <div class="card">
-          <h3>⚡ Quick Actions</h3>
-          <div class="actions">
-            <button class="btn" onclick="generateRentRecords().then(()=>show('rent'))">🔄 Generate Current Rent</button>
-            <button class="btn" onclick="show('payments')">💳 Record Payment</button>
-            <button class="btn" onclick="show('tenants')">👥 Manage Tenants</button>
+        const dueDate = `${currentMonth.slice(0, 7)}-${String(dueDay).padStart(2, '0')}`;
+
+        if (sb) {
+          const { data, error } = await sb
+            .from('rent_records')
+            .insert({
+              landlord_id: user.id,
+              tenant_id: tenant.id,
+              period_month: currentMonth,
+              due_date: dueDate,
+              amount_due: rentAmount,
+              amount_paid: 0,
+              status: 'pending'
+            })
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Rent generation error:', error);
+            continue;
+          }
+          cache.rent_records.push(data);
+        }
+      }
+    }
+
+    async function updateRentStatuses() {
+      if (!cache.rent_records.length) return;
+
+      for (const r of cache.rent_records) {
+        const newStatus = calculateRentStatus(r);
+        if (r.status === newStatus) continue;
+
+        if (sb) {
+          const { error } = await sb
+            .from('rent_records')
+            .update({ status: newStatus })
+            .eq('id', r.id);
+
+          if (error) {
+            console.error('Rent status update error:', error);
+            continue;
+          }
+        }
+        r.status = newStatus;
+      }
+    }
+
+    async function refresh() {
+      if (sb) {
+        const [p, u, t, r, pay, exp, rec] = await Promise.all([
+          sb.from('properties').select('*'),
+          sb.from('units').select('*'),
+          sb.from('tenants').select('*'),
+          sb.from('rent_records').select('*'),
+          sb.from('payments').select('*'),
+          sb.from('expenses').select('*'),
+          sb.from('receipts').select('*')
+        ]);
+
+        cache.properties = p.data || [];
+        cache.units = u.data || [];
+        cache.tenants = t.data || [];
+        cache.rent_records = r.data || [];
+        cache.payments = pay.data || [];
+        cache.expenses = exp.data || [];
+        cache.receipts = rec.data || [];
+
+        await generateRentRecords();
+        await updateRentStatuses();
+      }
+    }
+
+    /* =====================================================
+       MAVRENT V14.2 — LANDLORD RENT SYSTEM
+    ===================================================== */
+    function landlordRent() {
+      const records = [...cache.rent_records].sort((a, b) =>
+        String(b.period_month).localeCompare(String(a.period_month))
+      );
+
+      const totalDue = records.reduce((sum, r) => sum + rentAmountDue(r), 0);
+      const totalPaid = records.reduce((sum, r) => sum + rentAmountPaid(r), 0);
+      const outstanding = Math.max(0, totalDue - totalPaid);
+      const overdue = records
+        .filter(r => (r.status || calculateRentStatus(r)) === 'overdue')
+        .reduce((sum, r) => sum + rentRemaining(r), 0);
+
+      const paidCount = records.filter(r => (r.status || calculateRentStatus(r)) === 'paid').length;
+      const partialCount = records.filter(r => (r.status || calculateRentStatus(r)) === 'partial').length;
+      const overdueCount = records.filter(r => (r.status || calculateRentStatus(r)) === 'overdue').length;
+
+      return `
+        <section>
+          <div class="title">
+            <h1>💰 Rent Management</h1>
+            <p>Track monthly rent, payments, balances and overdue accounts.</p>
           </div>
-        </div>
-      </div>
 
-      <!-- RENT RECORDS -->
-      <div class="card">
-        <h3>📅 Monthly Rent Records</h3>
-        ${
-          records.length
-            ? records.map(r => {
-                const tenant = cache.tenants.find(t => t.id === r.tenant_id);
-                const profile = cache.registeredTenants.find(p => p.id === tenant?.profile_id);
-                const status = r.status || calculateRentStatus(r);
-                const due = rentAmountDue(r);
-                const paid = rentAmountPaid(r);
-                const balance = rentRemaining(r);
+          <div class="stats">
+            <div class="card">
+              <small>Total Rent Due</small>
+              <div class="big">${money(totalDue)}</div>
+            </div>
+            <div class="card">
+              <small>Collected</small>
+              <div class="big green">${money(totalPaid)}</div>
+            </div>
+            <div class="card">
+              <small>Outstanding</small>
+              <div class="big red">${money(outstanding)}</div>
+            </div>
+            <div class="card">
+              <small>Overdue</small>
+              <div class="big red">${money(overdue)}</div>
+            </div>
+          </div>
 
-                return `
-                  <div class="monthCard">
-                    <div class="monthTop">
-                      <div>
-                        <div class="monthName">${esc(monthLabel(r.period_month))}</div>
-                        <div class="maintMeta">
-                          Tenant: <b>${esc(profile?.full_name || profile?.email || 'Tenant')}</b><br>
-                          Due: <b>${money(due)}</b><br>
-                          Due date: <b>${esc(r.due_date || '—')}</b>
+          <div class="grid">
+            <div class="card">
+              <h3>📊 Rent Status</h3>
+              <p style="margin-top:8px;">🟢 Paid: <b>${paidCount}</b></p>
+              <p>🟡 Partial: <b>${partialCount}</b></p>
+              <p>🔴 Overdue: <b>${overdueCount}</b></p>
+              <p>🔵 Pending: <b>${Math.max(0, records.length - paidCount - partialCount - overdueCount)}</b></p>
+            </div>
+
+            <div class="card">
+              <h3>⚡ Quick Actions</h3>
+              <div class="actions">
+                <button class="btn" onclick="generateRentRecords().then(()=>show('rent'))">🔄 Generate Current Rent</button>
+                <button class="btn" onclick="show('payments')">💳 Record Payment</button>
+                <button class="btn" onclick="show('tenants')">👥 Manage Tenants</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>📅 Monthly Rent Records</h3>
+            ${
+              records.length
+                ? records.map(r => {
+                    const tenantObj = cache.tenants.find(t => t.id === r.tenant_id);
+                    const profile = cache.registeredTenants.find(p => p.id === tenantObj?.profile_id);
+                    const status = r.status || calculateRentStatus(r);
+                    const due = rentAmountDue(r);
+                    const paid = rentAmountPaid(r);
+                    const balance = rentRemaining(r);
+
+                    return `
+                      <div class="monthCard">
+                        <div class="monthTop">
+                          <div>
+                            <div class="monthName">${esc(monthLabel(r.period_month))}</div>
+                            <div class="maintMeta">
+                              Tenant: <b>${esc(profile?.full_name || profile?.email || 'Tenant')}</b><br>
+                              Due: <b>${money(due)}</b> | Due date: <b>${esc(r.due_date || '—')}</b>
+                            </div>
+                          </div>
+                          <div>${formatRentStatus(status)}</div>
+                        </div>
+
+                        <div class="amountGrid">
+                          <div class="amountBox">
+                            <small>Amount Due</small>
+                            <strong>${money(due)}</strong>
+                          </div>
+                          <div class="amountBox">
+                            <small>Amount Paid</small>
+                            <strong style="color:var(--green)">${money(paid)}</strong>
+                          </div>
+                          <div class="amountBox">
+                            <small>Balance</small>
+                            <strong style="color:${balance > 0 ? 'var(--red)' : 'var(--green)'}">${money(balance)}</strong>
+                          </div>
+                        </div>
+
+                        <div class="rentActionRow">
+                          <button onclick="recordRentPayment('${r.id}')">💳 Record Payment</button>
                         </div>
                       </div>
-                      <div>
-                        ${formatRentStatus(status)}
-                      </div>
-                    </div>
-
-                    <div class="amountGrid">
-                      <div class="amountBox">
-                        <small>Amount Due</small>
-                        <strong>${money(due)}</strong>
-                      </div>
-                      <div class="amountBox">
-                        <small>Amount Paid</small>
-                        <strong class="green">${money(paid)}</strong>
-                      </div>
-                      <div class="amountBox">
-                        <small>Balance</small>
-                        <strong class="${balance > 0 ? 'red' : 'green'}">${money(balance)}</strong>
-                      </div>
-                    </div>
-
-                    <div class="rentActionRow">
-                      <button onclick="recordRentPayment('${r.id}')">💳 Record Payment</button>
-                      <button onclick="showTenantRent('${r.tenant_id}')">👤 View Tenant</button>
-                    </div>
-                  </div>
-                `;
-              }).join('')
-            : `<div class="empty">No rent records yet.</div>`
-        }
-      </div>
-    </section>
-  `;
-}
-
-/* =====================================================
-   MAVRENT V14.2 — RECORD RENT PAYMENT
-===================================================== */
-
-async function recordRentPayment(rentId) {
-  const r = cache.rent_records.find(x => x.id === rentId);
-
-  if (!r) {
-    alert('Rent record not found.');
-    return;
-  }
-
-  const amount = prompt(
-    `Enter payment amount.\n\n` +
-    `Rent due: ${money(r.amount_due)}\n` +
-    `Already paid: ${money(r.amount_paid)}\n` +
-    `Balance: ${money(rentRemaining(r))}`
-  );
-
-  if (amount === null) return;
-
-  const value = Number(amount);
-
-  if (!value || value <= 0) {
-    alert('Enter a valid payment amount.');
-    return;
-  }
-
-  const balance = rentRemaining(r);
-
-  if (value > balance) {
-    alert(`Payment cannot be greater than the remaining balance of ${money(balance)}.`);
-    return;
-  }
-
-  const newPaid = rentAmountPaid(r) + value;
-  const newStatus = newPaid >= rentAmountDue(r) ? 'paid' : 'partial';
-
-  const { data, error } = await sb
-    .from('rent_records')
-    .update({
-      amount_paid: newPaid,
-      status: newStatus
-    })
-    .eq('id', rentId)
-    .select()
-    .single();
-
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  const payment = await sb
-    .from('payments')
-    .insert({
-      landlord_id: user.id,
-      tenant_id: r.tenant_id,
-      rent_record_id: r.id,
-      amount: value,
-      payment_date: today(),
-      payment_method: 'cash',
-      status: 'confirmed',
-      notes: `Rent payment for ${monthLabel(r.period_month)}`
-    })
-    .select()
-    .single();
-
-  if (payment.error) {
-    console.error(payment.error);
-    alert('Rent was updated, but payment history could not be created.');
-    return;
-  }
-
-  alert(
-    `Payment recorded successfully.\n\n` +
-    `Amount: ${money(value)}\n` +
-    `Remaining: ${money(rentAmountDue(data) - rentAmountPaid(data))}`
-  );
-
-  await refresh();
-  await show('rent', false);
-}
-
-/* =====================================================
-   MAVRENT V14.2 — TENANT VIEWS
-===================================================== */
-
-function tenant(id) {
-  if (id === 'profile') return profilePage();
-  if (id === 'myMaintenance') return tenantMaintenance();
-  if (id === 'myRent') return tenantRentPage();
-  if (id === 'myPayments') return tenantPaymentsPage();
-  if (id === 'myReceipts') return tenantReceiptsPage();
-  if (id === 'home') return tenantHomePage();
-
-  return tenantHomePage();
-}
-
-/* =====================================================
-   MAVRENT V14.2 — TENANT RENT PAGE
-===================================================== */
-
-function tenantRentPage() {
-  const records = [...cache.rent_records].sort((a, b) =>
-    String(b.period_month).localeCompare(String(a.period_month))
-  );
-
-  const current = records[0];
-  const totalDue = records.reduce((a, r) => a + rentAmountDue(r), 0);
-  const totalPaid = records.reduce((a, r) => a + rentAmountPaid(r), 0);
-  const totalBalance = Math.max(0, totalDue - totalPaid);
-
-  return `
-    <section>
-      <div class="title">
-        <h1>💰 My Rent</h1>
-        <p>Your rent payments and balances.</p>
-      </div>
-
-      ${
-        current
-          ? `
-            <div class="card rentHero">
-              <small>Current Rent</small>
-              <div class="rentBalance">${money(rentRemaining(current))}</div>
-              <div class="muted">Remaining balance for ${esc(monthLabel(current.period_month))}</div>
-
-              <div class="rentMiniGrid">
-                <div class="rentMini">
-                  <small>Rent Due</small>
-                  <strong>${money(rentAmountDue(current))}</strong>
-                </div>
-                <div class="rentMini">
-                  <small>Paid</small>
-                  <strong>${money(rentAmountPaid(current))}</strong>
-                </div>
-                <div class="rentMini">
-                  <small>Due Date</small>
-                  <strong>${esc(current.due_date || '—')}</strong>
-                </div>
-              </div>
-
-              <div style="margin-top:15px">
-                ${formatRentStatus(current.status || calculateRentStatus(current))}
-              </div>
-            </div>
-          `
-          : `
-            <div class="card">
-              <div class="empty">No rent record available yet.</div>
-            </div>
-          `
-      }
-
-      <div class="stats">
-        <div class="card">
-          <small>Total Due</small>
-          <div class="big">${money(totalDue)}</div>
-        </div>
-        <div class="card">
-          <small>Total Paid</small>
-          <div class="big green">${money(totalPaid)}</div>
-        </div>
-        <div class="card">
-          <small>Total Balance</small>
-          <div class="big red">${money(totalBalance)}</div>
-        </div>
-        <div class="card">
-          <small>Rent Records</small>
-          <div class="big blue">${records.length}</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>📅 Rent History</h3>
-        ${
-          records.length
-            ? records.map(r => `
-                <div class="monthCard">
-                  <div class="monthTop">
-                    <div>
-                      <div class="monthName">${esc(monthLabel(r.period_month))}</div>
-                      <div class="maintMeta">
-                        Due date: <b>${esc(r.due_date || '—')}</b>
-                      </div>
-                    </div>
-                    <div>
-                      ${formatRentStatus(r.status || calculateRentStatus(r))}
-                    </div>
-                  </div>
-
-                  <div class="amountGrid">
-                    <div class="amountBox">
-                      <small>Due</small>
-                      <strong>${money(r.amount_due)}</strong>
-                    </div>
-                    <div class="amountBox">
-                      <small>Paid</small>
-                      <strong class="green">${money(r.amount_paid)}</strong>
-                    </div>
-                    <div class="amountBox">
-                      <small>Balance</small>
-                      <strong class="${rentRemaining(r) > 0 ? 'red' : 'green'}">${money(rentRemaining(r))}</strong>
-                    </div>
-                  </div>
-                </div>
-              `).join('')
-            : `<div class="empty">No rent history yet.</div>`
-        }
-      </div>
-    </section>
-  `;
-}
-
-/* =====================================================
-   MAVRENT V14.2 — TENANT PAYMENTS
-===================================================== */
-
-function tenantPaymentsPage() {
-  return `
-    <section>
-      <div class="title">
-        <h1>💳 My Payments</h1>
-        <p>Your payment history.</p>
-      </div>
-
-      <div class="card">
-        ${table(
-          ['Date', 'Amount', 'Method', 'Status', 'Reference'],
-          cache.payments,
-          p => `
-            <tr>
-              <td>${esc(p.payment_date || '—')}</td>
-              <td>${money(p.amount)}</td>
-              <td>${esc(p.payment_method || '—')}</td>
-              <td>${formatRentStatus(p.status || 'pending')}</td>
-              <td>${esc(p.transaction_reference || '—')}</td>
-            </tr>
-          `
-        )}
-      </div>
-    </section>
-  `;
-}
-
-/* =====================================================
-   MAVRENT V14.2 — TENANT RECEIPTS
-===================================================== */
-
-function tenantReceiptsPage() {
-  return `
-    <section>
-      <div class="title">
-        <h1>🧾 My Receipts</h1>
-        <p>Receipts issued for your rent payments.</p>
-      </div>
-
-      <div class="card">
-        ${table(
-          ['Receipt', 'Payment', 'Issued'],
-          cache.receipts,
-          r => `
-            <tr>
-              <td class="code">${esc(r.receipt_number || '—')}</td>
-              <td>${esc(r.payment_id || '—')}</td>
-              <td>${r.issued_at ? new Date(r.issued_at).toLocaleString() : '—'}</td>
-            </tr>
-          `
-        )}
-      </div>
-    </section>
-  `;
-}
-
-/* =====================================================
-   MAVRENT V14.2 — TENANT HOME
-===================================================== */
-
-function tenantHomePage() {
-  const active =
-    cache.rent_records.find(r => r.period_month === monthStart(today())) ||
-    cache.rent_records[0];
-
-  const balance = active ? rentRemaining(active) : 0;
-  const status = active ? (active.status || calculateRentStatus(active)) : 'pending';
-
-  return `
-    <section>
-      <div class="title">
-        <h1>🏠 My Home</h1>
-        <p>Welcome to MavRent.</p>
-      </div>
-
-      <div class="card rentHero">
-        <small>Current Rent Balance</small>
-        <div class="rentBalance">${money(balance)}</div>
-        <div class="muted">${active ? monthLabel(active.period_month) : 'No rent record'}</div>
-
-        <div style="margin-top:15px">
-          ${formatRentStatus(status)}
-        </div>
-
-        ${
-          active
-            ? `
-              <div class="rentMiniGrid">
-                <div class="rentMini">
-                  <small>Rent</small>
-                  <strong>${money(active.amount_due)}</strong>
-                </div>
-                <div class="rentMini">
-                  <small>Paid</small>
-                  <strong>${money(active.amount_paid)}</strong>
-                </div>
-                <div class="rentMini">
-                  <small>Due</small>
-                  <strong>${esc(active.due_date || '—')}</strong>
-                </div>
-              </div>
-            `
-            : ''
-        }
-      </div>
-
-      <div class="grid">
-        <div class="card">
-          <h3>💰 Rent</h3>
-          <p>View your rent balance and history.</p>
-          <button class="primary" onclick="show('myRent')">Open My Rent</button>
-        </div>
-
-        <div class="card">
-          <h3>🔧 Maintenance</h3>
-          <p>Report a problem with your rental unit.</p>
-          <button class="primary" onclick="show('myMaintenance')">Report Maintenance</button>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
-/* =====================================================
-   MAVRENT V14.2 — FORM ATTACHMENT
-===================================================== */
-
-function attach() {
-  const propertyForm = $('propertyForm');
-  if (propertyForm) {
-    propertyForm.onsubmit = async e => {
-      e.preventDefault();
-      const { error } = await sb.from('properties').insert({
-        landlord_id: user.id,
-        name: $('pname').value.trim(),
-        location: $('ploc').value.trim(),
-        description: $('pdesc').value.trim()
-      });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      propertyForm.reset();
-      await show('properties');
-    };
-  }
-
-  const unitForm = $('unitForm');
-  if (unitForm) {
-    unitForm.onsubmit = async e => {
-      e.preventDefault();
-      const { error } = await sb.from('units').insert({
-        property_id: $('uproperty').value,
-        unit_number: $('unum').value.trim(),
-        monthly_rent: Number($('urent').value),
-        deposit_amount: Number($('udep').value || 0),
-        status: $('ustatus').value
-      });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      unitForm.reset();
-      await show('units');
-    };
-  }
-
-  const tenantForm = $('tenantForm');
-  if (tenantForm) {
-    tenantForm.onsubmit = async e => {
-      e.preventDefault();
-      const profileId = $('tprofile').value;
-      const unitId = $('tunit').value;
-      const rent = Number($('trent').value);
-      const deposit = Number($('tdeposit').value || 0);
-      const dueDay = Number($('tdue').value || 1);
-      const moveDate = $('tmove').value || null;
-
-      const { data, error } = await sb
-        .from('tenants')
-        .insert({
-          landlord_id: user.id,
-          profile_id: profileId,
-          unit_id: unitId,
-          rent_amount: rent,
-          deposit_amount: deposit,
-          rent_due_day: dueDay,
-          move_in_date: moveDate,
-          status: 'active'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      await sb.from('units').update({ status: 'occupied' }).eq('id', unitId);
-
-      /* Create the first rent record */
-      const firstMonth = monthStart(moveDate || today());
-      const dueDate = `${firstMonth.slice(0, 7)}-${String(dueDay).padStart(2, '0')}`;
-
-      await sb.from('rent_records').insert({
-        landlord_id: user.id,
-        tenant_id: data.id,
-        period_month: firstMonth,
-        due_date: dueDate,
-        amount_due: rent,
-        amount_paid: 0,
-        status: 'pending'
-      });
-
-      tenantForm.reset();
-      await show('tenants');
-    };
-  }
-
-  const paymentForm = $('paymentForm');
-  if (paymentForm) {
-    paymentForm.onsubmit = async e => {
-      e.preventDefault();
-      const tenantId = $('ptenant').value;
-      const rentRecordId = $('prentrecord').value || null;
-      const amount = Number($('pamount').value);
-
-      if (!tenantId || amount <= 0) {
-        alert('Select a tenant and enter a valid amount.');
-        return;
-      }
-
-      const { data, error } = await sb
-        .from('payments')
-        .insert({
-          landlord_id: user.id,
-          tenant_id: tenantId,
-          rent_record_id: rentRecordId,
-          amount: amount,
-          payment_date: $('pdate').value || today(),
-          payment_method: $('pmethod').value,
-          transaction_reference: $('pref').value.trim() || null,
-          notes: $('pnotes').value.trim() || null,
-          status: 'confirmed'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      /* Update linked rent record */
-      if (rentRecordId) {
-        const rent = cache.rent_records.find(r => r.id === rentRecordId);
-        if (rent) {
-          const newPaid = rentAmountPaid(rent) + amount;
-          const newStatus = newPaid >= rentAmountDue(rent) ? 'paid' : 'partial';
-
-          await sb
-            .from('rent_records')
-            .update({
-              amount_paid: newPaid,
-              status: newStatus
-            })
-            .eq('id', rentRecordId);
+                    `;
+                  }).join('')
+                : `<div class="empty">No rent records yet.</div>`
+            }
+          </div>
+        </section>
+      `;
+    }
+
+    /* =====================================================
+       MAVRENT V14.2 — RECORD RENT PAYMENT
+    ===================================================== */
+    async function recordRentPayment(rentId) {
+      const r = cache.rent_records.find(x => x.id === rentId);
+      if (!r) return alert('Rent record not found.');
+
+      const amount = prompt(
+        `Enter payment amount.\n\n` +
+        `Rent due: ${money(r.amount_due)}\n` +
+        `Already paid: ${money(r.amount_paid)}\n` +
+        `Balance: ${money(rentRemaining(r))}`
+      );
+
+      if (amount === null) return;
+      const value = Number(amount);
+
+      if (!value || value <= 0) return alert('Enter a valid payment amount.');
+      const balance = rentRemaining(r);
+
+      if (value > balance) return alert(`Payment cannot be greater than remaining balance of ${money(balance)}.`);
+
+      const newPaid = rentAmountPaid(r) + value;
+      const newStatus = newPaid >= rentAmountDue(r) ? 'paid' : 'partial';
+
+      if (sb) {
+        const { data, error } = await sb
+          .from('rent_records')
+          .update({ amount_paid: newPaid, status: newStatus })
+          .eq('id', rentId)
+          .select()
+          .single();
+
+        if (error) return alert(error.message);
+
+        const payment = await sb
+          .from('payments')
+          .insert({
+            landlord_id: user.id,
+            tenant_id: r.tenant_id,
+            rent_record_id: r.id,
+            amount: value,
+            payment_date: today(),
+            payment_method: 'cash',
+            status: 'confirmed',
+            notes: `Rent payment for ${monthLabel(r.period_month)}`
+          })
+          .select()
+          .single();
+
+        if (payment.error) {
+          console.error(payment.error);
+          alert('Rent updated, but payment record could not be saved.');
+          return;
         }
       }
 
-      paymentForm.reset();
-      $('pdate').value = today();
       alert('Payment recorded successfully.');
-      await show('payments');
-    };
-  }
+      await refresh();
+      await show('rent');
+    }
 
-  const expenseForm = $('expenseForm');
-  if (expenseForm) {
-    expenseForm.onsubmit = async e => {
-      e.preventDefault();
-      const { error } = await sb.from('expenses').insert({
-        landlord_id: user.id,
-        property_id: $('eprop').value || null,
-        amount: Number($('eamount').value),
-        category: $('ecat').value.trim(),
-        expense_date: $('edate').value || today(),
-        description: $('edesc').value.trim() || null
-      });
+    /* =====================================================
+       MAVRENT V14.2 — TENANT VIEWS
+    ===================================================== */
+    function tenant(id) {
+      if (id === 'myRent') return tenantRentPage();
+      if (id === 'myPayments') return tenantPaymentsPage();
+      if (id === 'myReceipts') return tenantReceiptsPage();
+      return tenantHomePage();
+    }
 
-      if (error) {
-        alert(error.message);
-        return;
+    function tenantRentPage() {
+      const records = [...cache.rent_records].sort((a, b) =>
+        String(b.period_month).localeCompare(String(a.period_month))
+      );
+      const current = records[0];
+      const totalDue = records.reduce((a, r) => a + rentAmountDue(r), 0);
+      const totalPaid = records.reduce((a, r) => a + rentAmountPaid(r), 0);
+      const totalBalance = Math.max(0, totalDue - totalPaid);
+
+      return `
+        <section>
+          <div class="title">
+            <h1>💰 My Rent</h1>
+            <p>Your rent payments and balances.</p>
+          </div>
+
+          ${
+            current
+              ? `
+                <div class="card">
+                  <small>Current Rent</small>
+                  <div class="big red">${money(rentRemaining(current))}</div>
+                  <div class="muted">Remaining balance for ${esc(monthLabel(current.period_month))}</div>
+                  <div style="margin-top:12px;">${formatRentStatus(current.status || calculateRentStatus(current))}</div>
+                </div>
+              `
+              : `<div class="card"><div class="empty">No rent record available.</div></div>`
+          }
+
+          <div class="stats">
+            <div class="card"><small>Total Due</small><div class="big">${money(totalDue)}</div></div>
+            <div class="card"><small>Total Paid</small><div class="big green">${money(totalPaid)}</div></div>
+            <div class="card"><small>Total Balance</small><div class="big red">${money(totalBalance)}</div></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function tenantPaymentsPage() {
+      return `
+        <section>
+          <div class="title">
+            <h1>💳 My Payments</h1>
+            <p>Your payment history.</p>
+          </div>
+          <div class="card">
+            ${table(
+              ['Date', 'Amount', 'Method', 'Status', 'Reference'],
+              cache.payments,
+              p => `
+                <tr>
+                  <td>${esc(p.payment_date || '—')}</td>
+                  <td>${money(p.amount)}</td>
+                  <td>${esc(p.payment_method || '—')}</td>
+                  <td>${formatRentStatus(p.status || 'pending')}</td>
+                  <td>${esc(p.transaction_reference || '—')}</td>
+                </tr>
+              `
+            )}
+          </div>
+        </section>
+      `;
+    }
+
+    function tenantReceiptsPage() {
+      return `
+        <section>
+          <div class="title">
+            <h1>🧾 My Receipts</h1>
+            <p>Receipts issued for your payments.</p>
+          </div>
+          <div class="card">
+            ${table(
+              ['Receipt', 'Payment', 'Issued'],
+              cache.receipts,
+              r => `
+                <tr>
+                  <td>${esc(r.receipt_number || '—')}</td>
+                  <td>${esc(r.payment_id || '—')}</td>
+                  <td>${r.issued_at ? new Date(r.issued_at).toLocaleString() : '—'}</td>
+                </tr>
+              `
+            )}
+          </div>
+        </section>
+      `;
+    }
+
+    function tenantHomePage() {
+      const active = cache.rent_records.find(r => r.period_month === monthStart(today())) || cache.rent_records[0];
+      const balance = active ? rentRemaining(active) : 0;
+      const status = active ? (active.status || calculateRentStatus(active)) : 'pending';
+
+      return `
+        <section>
+          <div class="title">
+            <h1>🏠 My Home</h1>
+            <p>Welcome to MavRent.</p>
+          </div>
+          <div class="card">
+            <small>Current Rent Balance</small>
+            <div class="big red">${money(balance)}</div>
+            <div style="margin-top:12px;">${formatRentStatus(status)}</div>
+          </div>
+        </section>
+      `;
+    }
+
+    /* =====================================================
+       MAVRENT V14.2 — FORM ATTACHMENTS & EVENT LISTENERS
+    ===================================================== */
+    function attach() {
+      const propertyForm = $('propertyForm');
+      if (propertyForm) {
+        propertyForm.onsubmit = async e => {
+          e.preventDefault();
+          if (sb) {
+            const { error } = await sb.from('properties').insert({
+              landlord_id: user.id,
+              name: $('pname').value.trim(),
+              location: $('ploc').value.trim(),
+              description: $('pdesc').value.trim()
+            });
+            if (error) return alert(error.message);
+          }
+          propertyForm.reset();
+          await show('properties');
+        };
       }
 
-      expenseForm.reset();
-      $('edate').value = today();
-      await show('expenses');
-    };
-  }
+      const tenantForm = $('tenantForm');
+      if (tenantForm) {
+        tenantForm.onsubmit = async e => {
+          e.preventDefault();
+          const profileId = $('tprofile').value;
+          const unitId = $('tunit').value;
+          const rent = Number($('trent').value);
+          const deposit = Number($('tdeposit').value || 0);
+          const dueDay = Number($('tdue').value || 1);
+          const moveDate = $('tmove').value || null;
 
-  const receiptForm = $('receiptForm');
-  if (receiptForm) {
-    receiptForm.onsubmit = async e => {
-      e.preventDefault();
-      const { error } = await sb.from('receipts').insert({
-        landlord_id: user.id,
-        payment_id: $('rpayment').value,
-        receipt_number: $('rnumber').value.trim(),
-        issued_at: new Date().toISOString()
-      });
+          if (sb) {
+            const { data, error } = await sb
+              .from('tenants')
+              .insert({
+                landlord_id: user.id,
+                profile_id: profileId,
+                unit_id: unitId,
+                rent_amount: rent,
+                deposit_amount: deposit,
+                rent_due_day: dueDay,
+                move_in_date: moveDate,
+                status: 'active'
+              })
+              .select()
+              .single();
 
-      if (error) {
-        alert(error.message);
-        return;
+            if (error) return alert(error.message);
+
+            await sb.from('units').update({ status: 'occupied' }).eq('id', unitId);
+
+            const firstMonth = monthStart(moveDate || today());
+            const dueDate = `${firstMonth.slice(0, 7)}-${String(dueDay).padStart(2, '0')}`;
+
+            await sb.from('rent_records').insert({
+              landlord_id: user.id,
+              tenant_id: data.id,
+              period_month: firstMonth,
+              due_date: dueDate,
+              amount_due: rent,
+              amount_paid: 0,
+              status: 'pending'
+            });
+          }
+
+          tenantForm.reset();
+          await show('tenants');
+        };
       }
+    }
 
-      receiptForm.reset();
-      await show('receipts');
-    };
-  }
-}
+    function renderNav() {
+      const nav = $('mainNav');
+      if (role === 'landlord') {
+        nav.innerHTML = `
+          <button class="${currentView === 'rent' ? 'active' : ''}" onclick="show('rent')">Rent</button>
+          <button class="${currentView === 'tenants' ? 'active' : ''}" onclick="show('tenants')">Tenants</button>
+          <button class="${currentView === 'payments' ? 'active' : ''}" onclick="show('payments')">Payments</button>
+        `;
+      } else {
+        nav.innerHTML = `
+          <button class="${currentView === 'home' ? 'active' : ''}" onclick="show('home')">Home</button>
+          <button class="${currentView === 'myRent' ? 'active' : ''}" onclick="show('myRent')">My Rent</button>
+          <button class="${currentView === 'myPayments' ? 'active' : ''}" onclick="show('myPayments')">My Payments</button>
+        `;
+      }
+    }
+
+    async function show(view) {
+      currentView = view;
+      renderNav();
+      const main = $('mainContent');
+
+      if (role === 'tenant') {
+        main.innerHTML = tenant(view);
+      } else {
+        if (view === 'rent') main.innerHTML = landlordRent();
+        else if (view === 'tenants') {
+          main.innerHTML = `
+            <section class="card">
+              <h2>Add Tenant</h2>
+              <form id="tenantForm">
+                <label>Profile ID</label><input id="tprofile" required />
+                <label>Unit ID</label><input id="tunit" required />
+                <label>Rent Amount</label><input type="number" id="trent" required />
+                <label>Deposit</label><input type="number" id="tdeposit" />
+                <label>Due Day (1-28)</label><input type="number" id="tdue" value="1" min="1" max="28" />
+                <label>Move Date</label><input type="date" id="tmove" />
+                <button type="submit">Save Tenant</button>
+              </form>
+            </section>
+          `;
+        } else {
+          main.innerHTML = landlordRent();
+        }
+      }
+      attach();
+    }
+
+    // App Startup
+    window.addEventListener('DOMContentLoaded', async () => {
+      await refresh();
+      await show('rent');
+    });
+  </script>
+</body>
+</html>
