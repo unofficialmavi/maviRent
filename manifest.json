@@ -1,7 +1,7 @@
 {
-  "name": "MaviRent",
-  "short_name": "MaviRent",
-  "description": "MaviRent rental property management",
+  "name": "MavRent",
+  "short_name": "MavRent",
+  "description": "MavRent rental property management",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
