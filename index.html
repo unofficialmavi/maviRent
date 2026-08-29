@@ -1196,6 +1196,13 @@ const SUPABASE_KEY =
 const MEDIA_BUCKET =
 'maintenance-media';
 
+/* =====================================================
+   WEB PUSH / BACKGROUND NOTIFICATIONS
+   Public VAPID key only. NEVER put the private key here.
+===================================================== */
+const MAVRENT_VAPID_PUBLIC_KEY =
+'BPta9_z15Ou9pn1uxOt-uvH5i8hRPO0ARNUx-tZtWTHe5HWoBYgRbkXGl6CudK-VRz7mNHc7WY5BZPfUWOhko2A';
+
 let sb=null;
 if(window.supabase && typeof window.supabase.createClient==='function'){
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
@@ -1599,7 +1606,7 @@ loading=false;
 
 // Prepare missing rent months after the first screen is visible.
 setTimeout(()=>ensureRentSchedules(),250);
-setTimeout(()=>requestRentNotifications(),900);
+
 
 }
 
@@ -3810,10 +3817,63 @@ function maybeBrowserRentReminder(){
   const first=items[0];
   try{new Notification('MavRent — Rent Reminder',{body:first.title+'\n'+first.text,icon:'./icon-180.png',tag:'mavrent-rent-reminder'});}catch(e){console.warn('Browser notification unavailable',e);}
 }
-function requestRentNotifications(){
-  if(!('Notification' in window))return;
-  if(Notification.permission==='default')Notification.requestPermission().then(()=>maybeBrowserRentReminder());
-  else maybeBrowserRentReminder();
+function urlBase64ToUint8Array(base64String){
+  const padding='='.repeat((4-base64String.length%4)%4);
+  const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
+  const rawData=window.atob(base64);
+  return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
+}
+
+async function requestRentNotifications(){
+  try{
+    if(!('serviceWorker' in navigator))throw new Error('This browser does not support service workers.');
+    if(!('PushManager' in window))throw new Error('This browser does not support push notifications.');
+    if(!('Notification' in window))throw new Error('Notifications are not supported on this device/browser.');
+    if(!user)throw new Error('Please log in before enabling notifications.');
+
+    const permission=await Notification.requestPermission();
+    if(permission!=='granted'){
+      alert(permission==='denied'?'Notifications are blocked. Enable them in your browser/device settings.':'Notifications were not enabled.');
+      return false;
+    }
+
+    const registration=await navigator.serviceWorker.ready;
+    let subscription=await registration.pushManager.getSubscription();
+
+    if(!subscription){
+      subscription=await registration.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(MAVRENT_VAPID_PUBLIC_KEY)
+      });
+    }
+
+    const json=subscription.toJSON();
+    const keys=json.keys||{};
+    if(!subscription.endpoint||!keys.p256dh||!keys.auth){
+      throw new Error('The browser did not return a complete push subscription.');
+    }
+
+    const deviceName=/Android/i.test(navigator.userAgent)?'Android':/iPhone|iPad|iPod/i.test(navigator.userAgent)?'iPhone/iPad':/Windows/i.test(navigator.userAgent)?'Windows Browser':'Web Browser';
+
+    const result=await sb.from('push_subscriptions').upsert({
+      user_id:user.id,
+      endpoint:subscription.endpoint,
+      p256dh:keys.p256dh,
+      auth:keys.auth,
+      device_name:deviceName,
+      user_agent:navigator.userAgent,
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id,endpoint'});
+
+    if(result.error)throw result.error;
+
+    alert('MavRent notifications are enabled on this device. You can now close MavRent and receive push notifications when your device has internet.');
+    return true;
+  }catch(e){
+    console.error('MavRent push setup failed:',e);
+    alert('Could not enable notifications: '+(e.message||e));
+    return false;
+  }
 }
 
 async function loadNotifications(){
