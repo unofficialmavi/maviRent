@@ -73,6 +73,29 @@
         </div>
       </div>
 
+      <!-- LANDLORD OVERDUE ALERT BANNER (Shown to Landlords) -->
+      <div id="landlordAlertSection" class="hidden mb-6">
+        <div class="glass-card rounded-2xl p-5 border border-rose-500/30 bg-rose-950/20">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
+              <span class="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse"></span>
+              Overdue Rent Alerts
+            </h3>
+            <span class="text-xs text-rose-300/70 font-medium">Action Required</span>
+          </div>
+          <div id="landlordOverdueContainer" class="space-y-2">
+            <!-- Dynamic Overdue Cards Will Render Here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TENANT RENT SUMMARY CARD (Shown to Tenants) -->
+      <div id="tenantAlertSection" class="hidden mb-6">
+        <div id="tenantStatusCard">
+          <!-- Dynamic Tenant Summary Will Render Here -->
+        </div>
+      </div>
+
       <!-- Action Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
@@ -177,6 +200,8 @@
       updateAuthUI();
       if (currentUser) {
         fetchDashboardData();
+        loadLandlordOverdueAlerts();
+        loadTenantRentSummary(currentUser.id);
       } else {
         renderLoggedOutState();
       }
@@ -191,13 +216,10 @@
       }
 
       if (Notification.permission === 'granted') {
-        // Notification is already active -> Hide button completely
         btn.classList.add('hidden');
       } else if (Notification.permission === 'default') {
-        // Not configured yet -> Show prompt button
         btn.classList.remove('hidden');
       } else {
-        // Denied -> Hide button
         btn.classList.add('hidden');
       }
     }
@@ -242,15 +264,84 @@
             currentUser = data.user;
             updateAuthUI();
             fetchDashboardData();
+            loadLandlordOverdueAlerts();
+            loadTenantRentSummary(currentUser.id);
           }
         }
       }
     }
 
     function renderLoggedOutState() {
+      document.getElementById('landlordAlertSection').classList.add('hidden');
+      document.getElementById('tenantAlertSection').classList.add('hidden');
       document.getElementById('propertiesList').innerHTML = `
         <div class="col-span-full text-center py-16 glass-card rounded-2xl border border-slate-800">
           <p class="text-slate-400 mb-4">Log in to view your properties, update unit parameters, and track automated reminders.</p>
+        </div>
+      `;
+    }
+
+    // 1. Fetch & Render Overdue Rent for Landlord Dashboard
+    async function loadLandlordOverdueAlerts() {
+      const alertSection = document.getElementById('landlordAlertSection');
+      const container = document.getElementById('landlordOverdueContainer');
+      
+      const { data: overdueList, error } = await supabase
+        .from('tenant_rent_summaries')
+        .select(`
+          tenant_id,
+          oldest_unpaid_due_date,
+          oldest_unpaid_balance,
+          oldest_unpaid_status,
+          units ( unit_number )
+        `);
+
+      if (error || !overdueList || overdueList.length === 0) {
+        alertSection.classList.add('hidden');
+        return;
+      }
+
+      alertSection.classList.remove('hidden');
+      container.innerHTML = overdueList.map(item => `
+        <div class="flex items-center justify-between p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10">
+          <div>
+            <p class="text-sm font-semibold text-rose-200">Unit ${item.units?.unit_number || 'N/A'} - Overdue</p>
+            <p class="text-xs text-rose-300/80">Oldest Unpaid Month Due: ${item.oldest_unpaid_due_date}</p>
+          </div>
+          <span class="text-sm font-bold text-rose-300">$${item.oldest_unpaid_balance}</span>
+        </div>
+      `).join('');
+    }
+
+    // 2. Fetch & Render Oldest Unpaid Month for Tenant Dashboard
+    async function loadTenantRentSummary(tenantId) {
+      const alertSection = document.getElementById('tenantAlertSection');
+      const container = document.getElementById('tenantStatusCard');
+
+      const { data: summary, error } = await supabase
+        .from('tenant_rent_summaries')
+        .select('*')
+        .eq('tenant_id', tenantId)
+        .single();
+
+      if (error || !summary) {
+        alertSection.classList.add('hidden');
+        return;
+      }
+
+      const isOverdue = summary.oldest_unpaid_status === 'Overdue';
+      alertSection.classList.remove('hidden');
+
+      container.innerHTML = `
+        <div class="glass-card p-5 rounded-2xl border ${isOverdue ? 'border-rose-500/50 bg-rose-950/20' : 'border-amber-500/50 bg-amber-950/20'}">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider ${isOverdue ? 'text-rose-400' : 'text-amber-400'}">
+              ${isOverdue ? '🔴 Oldest Unpaid Month Overdue' : '⚠️ Unpaid Balance Action Required'}
+            </span>
+            <span class="text-xs text-slate-400">Due Date: ${summary.oldest_unpaid_due_date}</span>
+          </div>
+          <div class="text-2xl font-bold text-white">$${summary.oldest_unpaid_balance} Due</div>
+          <p class="text-xs text-slate-400 mt-1">Your next recurring payment is locked on day ${new Date(summary.oldest_unpaid_due_date).getDate()} of the month.</p>
         </div>
       `;
     }
