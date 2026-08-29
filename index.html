@@ -8,37 +8,13 @@
      MAVRENT PWA
 ===================================================== -->
 
-<!-- MAVRENT V14.2 LOADING SCREEN -->
-<div id="mavLoading" class="mav-loading">
-  <div class="mav-loading-logo">M</div>
-  <div class="mav-loading-name">Mav<span>Rent</span></div>
-  <div class="mav-loading-text">Rental management platform</div>
-  <div class="mav-spinner"></div>
-</div>
-
-<!-- ONLINE STATUS -->
-<div id="connectionStatus" class="connection-status online">
-  <span class="connection-dot"></span>
-  <span id="connectionText">Online</span>
-</div>
-
 <link rel="manifest" href="manifest.json">
-
 <link rel="apple-touch-icon" href="icon-180.png">
-
 <meta name="theme-color" content="#111827">
-
 <meta name="mobile-web-app-capable" content="yes">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta
-name="apple-mobile-web-app-status-bar-style"
-content="black-translucent">
-
-<meta
-name="apple-mobile-web-app-title"
-content="MavRent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MavRent">
 
 <title>MavRent V14.2</title>
 
@@ -668,7 +644,7 @@ margin-top:12px
 .rentActionRow button{
 border:1px solid #d9dde3;
 background:#fff;
-border-radius:9px;
+border-radius:99px;
 padding:9px 12px;
 font-weight:700
 }
@@ -867,6 +843,20 @@ font-weight:700
 </head>
 
 <body>
+
+<!-- MAVRENT V14.2 LOADING SCREEN -->
+<div id="mavLoading" class="mav-loading">
+  <div class="mav-loading-logo">M</div>
+  <div class="mav-loading-name">Mav<span>Rent</span></div>
+  <div class="mav-loading-text">Rental management platform</div>
+  <div class="mav-spinner"></div>
+</div>
+
+<!-- ONLINE STATUS -->
+<div id="connectionStatus" class="connection-status online">
+  <span class="connection-dot"></span>
+  <span id="connectionText">Online</span>
+</div>
 
 <!-- =====================================================
      LOGIN
@@ -1299,6 +1289,7 @@ function landlord(id){
   if(id==='profile') return profilePage();
   if(id==='rent') return landlordRent();
   if(id==='maintenance') return maintenanceLandlord();
+  if(id==='guide') return guidePage();
 
   if(id==='dashboard'){
     let confirmed = cache.payments.filter(x=>x.status==='confirmed').reduce((a,x)=>a+Number(x.amount||0),0);
@@ -1383,986 +1374,84 @@ function landlord(id){
       </select>
       <button class="primary full">Save unit</button>
     </form>`,
-    table(['Unit','Property','Rent','Deposit','Status'], cache.units, x=>`
-      <tr>
-        <td>${esc(x.unit_number)}</td>
-        <td>${esc(cache.properties.find(p=>p.id===x.property_id)?.name||'—')}</td>
-        <td>${money(x.monthly_rent)}</td>
-        <td>${money(x.deposit_amount)}</td>
-        <td>${esc(x.status)}</td>
-      </tr>`)
-  );
-
-  if(id==='tenants') return page('Tenant Assignment','Assign registered tenant accounts.',`
-    <form id="tenantForm" class="formgrid">
-      <select id="tprofile" required>
-        <option value="">Select registered tenant</option>
-        ${cache.registeredTenants.map(p=>`<option value="${p.id}">${esc(p.full_name||p.email)} — ${esc(p.email||'')} · ${shortId(p.id)}</option>`).join('')}
-      </select>
-      <select id="tunit" required>
-        <option value="">Select vacant unit</option>
-        ${cache.units.filter(x=>x.status!=='occupied').map(x=>`<option value="${x.id}">${esc(x.unit_number)} — ${money(x.monthly_rent)}</option>`).join('')}
-      </select>
-      <input id="trent" type="number" min="0" placeholder="Rent amount" required>
-      <input id="tdeposit" type="number" min="0" placeholder="Deposit">
-      <input id="tdue" type="number" min="1" max="28" value="1" placeholder="Due day">
-      <select id="tadvance">
-        <option value="3">Initial advance: 3 months</option>
-        <option value="4">Initial advance: 4 months</option>
-        <option value="1">Initial advance: 1 month</option>
-      </select>
-      <input id="tmove" type="date">
-      <button class="primary full">Assign tenant</button>
-    </form>`,
-    table(['Tenant','Email','ID','Unit','Rent','Due','Status'], cache.tenants, x=>{
-      let p = cache.registeredTenants.find(p=>p.id===x.profile_id);
+    table(['Property','Unit','Rent','Deposit','Status',''], cache.units, x=>{
+      let p = cache.properties.find(y=>y.id===x.property_id);
       return `
         <tr>
-          <td>${esc(p?.full_name||'Tenant')}</td>
-          <td>${esc(p?.email)}</td>
-          <td class="code">${shortId(x.profile_id)}</td>
-          <td>${esc(cache.units.find(u=>u.id===x.unit_id)?.unit_number||'—')}</td>
+          <td>${esc(p?.name||'—')}</td>
+          <td>${esc(x.unit_number)}</td>
           <td>${money(x.rent_amount)}</td>
-          <td>${x.rent_due_day}</td>
-          <td>${esc(x.status)}</td>
+          <td>${money(x.deposit_amount)}</td>
+          <td><span class="badge ${x.status}">${esc(x.status)}</span></td>
+          <td><button class="btn danger" onclick="delUnit('${x.id}')">Delete</button></td>
         </tr>`;
     })
   );
 
-  if(id==='payments') return `
-    <section>
-      <div class="title"><h1>💳 Payments</h1><p>Review and confirm tenant payments.</p></div>
-      <div class="card">
-        <h3>Record payment</h3>
-        <form id="paymentForm" class="formgrid">
-          <select id="ptenant" required>
-            <option value="">Select tenant</option>
-            ${cache.tenants.map(t=>`<option value="${t.id}">${esc(cache.registeredTenants.find(p=>p.id===t.profile_id)?.full_name||'Tenant')}</option>`).join('')}
-          </select>
-          <select id="prentrecord">
-            <option value="">Link to rent month (optional)</option>
-            ${cache.rent_records.map(r=>`<option value="${r.id}">${monthLabel(r.period_month)} — ${money(r.amount_due)}</option>`).join('')}
-          </select>
-          <input id="pamount" type="number" min="1" placeholder="Amount" required>
-          <input id="pdate" type="date" value="${today()}">
-          <select id="pmethod">
-            <option value="mtn_mobile_money">MTN Mobile Money</option>
-            <option value="airtel_money">Airtel Money</option>
-            <option value="bank">Bank</option>
-            <option value="cash">Cash</option>
-          </select>
-          <input id="pref" placeholder="Transaction reference">
-          <textarea id="pnotes" class="full" placeholder="Notes"></textarea>
-          <button class="primary full">Save confirmed payment</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>Payment history</h3>
-        ${table(['Date','Tenant','Amount','Method','Status','Reference','Rent'], cache.payments, x=>{
-          let t = cache.tenants.find(t=>t.id===x.tenant_id);
-          let p = cache.registeredTenants.find(p=>p.id===t?.profile_id);
-          let rr = cache.rent_records.find(r=>r.id===x.rent_record_id);
-          return `
-            <tr>
-              <td>${esc(x.payment_date)}</td>
-              <td>${esc(p?.full_name||p?.email||'Tenant')}</td>
-              <td>${money(x.amount)}</td>
-              <td>${esc(x.payment_method)}</td>
-              <td><span class="badge ${esc(x.status)}">${esc(x.status)}</span></td>
-              <td>${esc(x.transaction_reference||'—')}</td>
-              <td>${rr ? monthLabel(rr.period_month) : '—'}</td>
-            </tr>`;
-        })}
-      </div>
-    </section>`;
-
-  if(id==='expenses') return page('Expenses','Record expenses.',`
-    <form id="expenseForm" class="formgrid">
-      <select id="eprop">
-        <option value="">No property</option>
-        ${cache.properties.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('')}
-      </select>
-      <input id="eamount" type="number" min="0" placeholder="Amount" required>
-      <input id="ecat" placeholder="Category" required>
-      <input id="edate" type="date" value="${today()}">
-      <textarea id="edesc" class="full" placeholder="Description"></textarea>
-      <button class="primary full">Save expense</button>
-    </form>`,
-    table(['Date','Category','Amount','Description'], cache.expenses, x=>`
-      <tr>
-        <td>${esc(x.expense_date)}</td>
-        <td>${esc(x.category)}</td>
-        <td>${money(x.amount)}</td>
-        <td class="wrap">${esc(x.description)}</td>
-      </tr>`)
-  );
-
-  if(id==='receipts') return page('Receipts','Issue receipts for confirmed payments.',`
-    <form id="receiptForm" class="formgrid">
-      <select id="rpayment" required>
-        <option value="">Select payment</option>
-        ${cache.payments.filter(p=>p.status==='confirmed').map(p=>`<option value="${p.id}">${esc(p.payment_date)} — ${money(p.amount)}</option>`).join('')}
-      </select>
-      <input id="rnumber" placeholder="Receipt number" required>
-      <button class="primary full">Issue receipt</button>
-    </form>`,
-    table(['Receipt','Payment','Issued'], cache.receipts, x=>`
-      <tr>
-        <td>${esc(x.receipt_number)}</td>
-        <td>${esc(x.payment_id)}</td>
-        <td>${x.issued_at ? new Date(x.issued_at).toLocaleString() : '—'}</td>
-      </tr>`)
-  );
-
-  let c = cache.payments.filter(x=>x.status==='confirmed').reduce((a,x)=>a+Number(x.amount||0),0);
-  let ex = cache.expenses.reduce((a,x)=>a+Number(x.amount||0),0);
-  let rentDue = cache.rent_records.reduce((a,x)=>a+Number(x.amount_due||0),0);
-  let rentPaid = cache.rent_records.reduce((a,x)=>a+Number(x.amount_paid||0),0);
-
   return `
     <section>
-      <div class="title"><h1>📊 Reports</h1><p>Financial overview.</p></div>
-      <div class="stats">
-        <div class="card"><small>Total Revenue</small><div class="big green">${money(c)}</div></div>
-        <div class="card"><small>Total Expenses</small><div class="big red">${money(ex)}</div></div>
-        <div class="card"><small>Net Income</small><div class="big ${c-ex>=0?'green':'red'}">${money(c-ex)}</div></div>
-        <div class="card"><small>Rent Collection Rate</small><div class="big blue">${rentDue ? Math.round((rentPaid/rentDue)*100) : 0}%</div></div>
+      <div class="title"><h1>Reports</h1><p>Financial and operational reports.</p></div>
+      <div class="card">
+        <h3>Reports Engine</h3>
+        <p>Generate financial statements and occupancy analytics here.</p>
       </div>
     </section>`;
 }
 
 /* =====================================================
-   TENANT VIEWS
+   TENANT VIEWS & STUBS
 ===================================================== */
 
 function tenant(id){
   if(id==='profile') return profilePage();
-  if(id==='myRent') return tenantRent();
-  if(id==='myMaintenance') return tenantMaintenance();
-  if(id==='myPayments') return tenantPaymentsPage();
-  if(id==='myReceipts') return tenantReceiptsPage();
   if(id==='guide') return guidePage();
-  return tenantHomePage();
-}
 
-function tenantHomePage(){
-  const t = cache.tenants[0], u = unitForTenant(t), p = propertyForUnit(u), next = t ? nextDueRecord(t.id) : null;
   return `
     <section>
-      <div class="title"><h1>🏠 My Home</h1><p>Welcome back, ${esc(profile?.full_name||user.email)}.</p></div>
-      ${t ? `${rentAssignmentNotice()}
+      <div class="title"><h1>Tenant Portal</h1><p>Welcome to your rental dashboard.</p></div>
       <div class="card">
-        <h3>${esc(p?.name||'Your rental')}</h3>
-        <p>Unit: <b>${esc(u?.unit_number||'—')}</b></p>
-        <p>Monthly rent: <b>${money(t.rent_amount)}</b></p>
-        <p>Payment day: <b>${t.rent_due_day||1}</b></p>
-        <p>Next due: <b>${next ? localDate(next.due_date) : 'All paid'}</b></p>
-      </div>` : '<div class="card"><h3>No rental assigned</h3><p>Your landlord has not assigned a unit yet.</p></div>'}
-      <div class="actions">
-        <button class="btn" onclick="show('myRent')">💰 My Rent</button>
-        <button class="btn" onclick="show('myPayments')">💳 My Payments</button>
-        <button class="btn" onclick="show('myMaintenance')">🔧 Maintenance</button>
-        <button class="btn" onclick="show('guide')">❓ Guide</button>
+        <h3>Overview</h3>
+        <p>View your active lease, rental balance, and submit maintenance tickets.</p>
       </div>
     </section>`;
-}
-
-function tenantPaymentsPage(){
-  const t = cache.tenants[0], rows = cache.payments.filter(p => p.tenant_id === t?.id);
-  return `
-    <section>
-      <div class="title"><h1>💳 My Payments</h1><p>Your submitted and confirmed payments.</p></div>
-      <div class="card">
-        ${table(['Date','Amount','Method','Status','Reference','Rent Month'], rows, p => `
-          <tr>
-            <td>${esc(p.payment_date)}</td>
-            <td>${money(p.amount)}</td>
-            <td>${esc(p.payment_method)}</td>
-            <td><span class="badge ${esc(p.status)}">${esc(p.status)}</span></td>
-            <td>${esc(p.transaction_reference||'—')}</td>
-            <td>${monthLabel(cache.rent_records.find(r=>r.id===p.rent_record_id)?.period_month)}</td>
-          </tr>`)}
-      </div>
-    </section>`;
-}
-
-function tenantReceiptsPage(){
-  const t = cache.tenants[0], rows = cache.receipts.filter(r => r.tenant_id === t?.id || cache.payments.some(p => p.id === r.payment_id && p.tenant_id === t?.id));
-  return `
-    <section>
-      <div class="title"><h1>🧾 My Receipts</h1><p>Receipts issued for your payments.</p></div>
-      <div class="card">
-        ${table(['Receipt','Issued','Payment'], rows, r => `
-          <tr>
-            <td>${esc(r.receipt_number)}</td>
-            <td>${r.issued_at ? new Date(r.issued_at).toLocaleString() : '—'}</td>
-            <td>${esc(r.payment_id)}</td>
-          </tr>`)}
-      </div>
-    </section>`;
-}
-
-function tenantMaintenance(){
-  return page('Maintenance Requests', 'Submit and track maintenance requests.', `
-    <form id="tenantMaintForm" class="formgrid">
-      <input id="tsubject" placeholder="Subject" required>
-      <select id="tpriority">
-        <option value="low">Low Priority</option>
-        <option value="medium" selected>Medium Priority</option>
-        <option value="high">High Priority</option>
-        <option value="urgent">Urgent Priority</option>
-      </select>
-      <textarea id="tdesc" class="full" placeholder="Describe the maintenance issue..." required></textarea>
-      <div class="full">
-        <label>Attach Photo or Video</label>
-        <input id="tmedia" type="file" accept="image/*,video/*" capture="environment" style="min-height:52px;padding:12px;">
-        <small>Take a photo, record a video, or choose media from your device. Maximum 25 MB.</small>
-      </div>
-      <button id="submitTenantMaintenanceBtn" class="primary full">Submit request</button>
-    </form>`,
-    table(['Date','Subject','Priority','Status','Attachment'], cache.maintenance_requests, x => `
-      <tr>
-        <td>${esc(x.created_at ? x.created_at.slice(0,10) : '—')}</td>
-        <td>${esc(x.title||x.subject)}</td>
-        <td><span class="badge ${esc(x.priority)}">${esc(x.priority)}</span></td>
-        <td><span class="badge ${esc(x.status)}">${esc(x.status)}</span></td>
-        <td>${x.media_url ? `<a href="${esc(x.media_url)}" target="_blank">View Media</a>` : '—'}</td>
-      </tr>`)
-  );
 }
 
 function profilePage(){
   return `
     <section>
-      <div class="title"><h1>👤 Profile</h1><p>Account details</p></div>
+      <div class="title"><h1>Profile Settings</h1><p>Manage account settings and user options.</p></div>
       <div class="card">
-        <p>Email: <b>${esc(user.email)}</b></p>
-        <p>Role: <b>${esc(role)}</b></p>
-        <p>User ID: <b class="code">${shortId(user.id)}</b></p>
-      </div>
-    </section>`;
-}
-
-/* =====================================================
-   MAVRENT V14.2 — RENT MANAGEMENT LOGIC
-===================================================== */
-
-function tenantName(t){
-  const p = cache.registeredTenants.find(x => x.id === t?.profile_id);
-  return p?.full_name || p?.email || 'Tenant';
-}
-
-function unitForTenant(t){ return cache.units.find(u => u.id === t?.unit_id); }
-function propertyForUnit(u){ return cache.properties.find(p => p.id === u?.property_id); }
-
-function localDate(d){
-  const x = new Date(d + 'T00:00:00');
-  return x.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
-}
-
-function dueDateFor(period, day){
-  const d = new Date(period + 'T00:00:00');
-  const y = d.getFullYear(), m = d.getMonth();
-  const last = new Date(y, m + 1, 0).getDate();
-  const safe = Math.min(Math.max(Number(day||1), 1), last);
-  return new Date(y, m, safe).toISOString().slice(0,10);
-}
-
-function rentComputedStatus(r, now=today()){
-  const due = Number(r.amount_due||0), paid = Number(r.amount_paid||0), bal = Math.max(0, due - paid);
-  if(bal <= 0 && due > 0) return 'paid';
-  if(paid > 0 && bal > 0) return new Date((r.due_date||now) + 'T23:59:59') < new Date(now + 'T00:00:00') ? 'overdue' : 'partial';
-  if(r.due_date && r.due_date < now) return 'overdue';
-  return 'pending';
-}
-
-function rentSort(a,b){ return String(a.period_month).localeCompare(String(b.period_month)); }
-
-function rentRecordsForTenant(tenantId){
-  return cache.rent_records.filter(r => r.tenant_id === tenantId).sort(rentSort);
-}
-
-function outstandingRecords(tenantId){
-  return rentRecordsForTenant(tenantId).filter(r => rentBalance(r) > 0);
-}
-
-function nextDueRecord(tenantId){
-  return outstandingRecords(tenantId).find(r => String(r.period_month) <= addMonths(today(),1)) || outstandingRecords(tenantId)[0];
-}
-
-function firstUnpaidRecord(tenantId){
-  return rentRecordsForTenant(tenantId).find(r => rentBalance(r) > 0);
-}
-
-function reminderItemsForTenant(tenantId){
-  const rows = rentRecordsForTenant(tenantId), now = today();
-  const overdue = rows.filter(r => rentBalance(r) > 0 && r.due_date && r.due_date < now);
-  const next = rows.filter(r => rentBalance(r) > 0 && (!r.due_date || r.due_date >= now)).sort((a,b) => String(a.due_date).localeCompare(String(b.due_date)))[0];
-  const out = [];
-
-  if(overdue.length) out.push({type:'danger', title:'Previous rent is still unpaid', text:`${overdue.length} month${overdue.length>1?'s':''} has an outstanding balance. Pay the oldest month before moving to the next.`});
-  if(next){
-    const days = Math.ceil((new Date(next.due_date + 'T00:00:00') - new Date(now + 'T00:00:00')) / 86400000);
-    if(days <= 7) out.push({type: days < 0 ? 'danger' : 'warning', title: days < 0 ? 'Rent overdue' : 'Rent due soon', text: `${monthLabel(next.period_month)} has ${money(rentBalance(next))} remaining and is due ${localDate(next.due_date)}.`});
-  }
-  return out;
-}
-
-function reminderItemsForLandlord(){
-  const out = [];
-  const now = today();
-  cache.tenants.forEach(t => {
-    const rows = rentRecordsForTenant(t.id);
-    const overdue = rows.filter(r => rentBalance(r) > 0 && r.due_date && r.due_date < now);
-    if(overdue.length) out.push({type:'danger', title:`${tenantName(t)} — unpaid rent`, text:`${overdue.length} overdue month${overdue.length>1?'s':''}. Oldest: ${monthLabel(overdue[0].period_month)}.`});
-    const next = rows.filter(r => rentBalance(r) > 0 && r.due_date >= now).sort((a,b) => String(a.due_date).localeCompare(String(b.due_date)))[0];
-    if(next){
-      const days = Math.ceil((new Date(next.due_date + 'T00:00:00') - new Date(now + 'T00:00:00')) / 86400000);
-      if(days >= 0 && days <= 7) out.push({type:'warning', title:`${tenantName(t)} — payment reminder`, text:`${monthLabel(next.period_month)} balance ${money(rentBalance(next))} is due ${localDate(next.due_date)}.`});
-    }
-  });
-  return out;
-}
-
-function reminderHtml(items){
-  if(!items.length) return `<div class="alertStrip success"><div class="alertTitle">✓ Rent is up to date</div>No urgent rent reminders right now.</div>`;
-  return items.map(x => `<div class="alertStrip ${x.type}"><div class="alertTitle">${esc(x.title)}</div>${esc(x.text)}</div>`).join('');
-}
-
-function guidePage(){
-  return `
-    <section>
-      <div class="title"><h1>❓ MavRent Guide</h1><p>A simple guide for landlords and tenants.</p></div>
-      <div class="card"><h3>💰 How rent works</h3><p>MavRent creates a rent record for each month. Each record shows <b>amount due</b>, <b>amount paid</b>, <b>remaining balance</b>, <b>due date</b> and an automatic status.</p></div>
-      <div class="guideGrid">
-        <div class="guideStep"><b>1. Landlord assigns a tenant</b>Choose the tenant account, unit, rent amount, due day and move-in date. You can also choose 3 or 4 months of advance rent.</div>
-        <div class="guideStep"><b>2. Rent periods are generated</b>MavRent generates monthly records in order. The tenant's due day is used automatically for every month.</div>
-        <div class="guideStep"><b>3. Tenant pays</b>The tenant chooses the oldest unpaid month, enters the actual payment date, amount and method, then submits the payment.</div>
-        <div class="guideStep"><b>4. Landlord confirms</b>Once confirmed, MavRent applies the money to the oldest outstanding rent first. One payment can cover more than one month.</div>
-        <div class="guideStep"><b>5. Never skip an unpaid month</b>If an earlier month still has a balance, MavRent keeps it visible and warns the tenant and landlord instead of silently moving on.</div>
-        <div class="guideStep"><b>6. Automatic reminders</b>Reminders appear before the due date, on the due date and when rent becomes overdue. The next due date is always shown.</div>
-      </div>
-      <div class="card">
-        <h3>🔔 Reminder timing</h3>
-        <div class="reminderList">
-          <div class="reminderItem"><strong>7 days before</strong>Upcoming rent reminder.</div>
-          <div class="reminderItem"><strong>3 days before</strong>Advance warning so the tenant can prepare.</div>
-          <div class="reminderItem"><strong>Due day</strong>Payment is due today.</div>
-          <div class="reminderItem"><strong>After due day</strong>Status becomes <b>Overdue</b> until the balance is cleared.</div>
+        <div class="profileHero">
+          <div class="avatar">${esc((profile?.full_name||user.email||'U')[0].toUpperCase())}</div>
+          <div>
+            <h3>${esc(profile?.full_name||'User')}</h3>
+            <p class="muted">${esc(user.email)}</p>
+          </div>
         </div>
-      </div>
-      <div class="card"><h3>📱 Mobile use</h3><p>On a phone, use the bottom navigation. Use 🔔 for reminders. Use ❓ Guide whenever you forget what a screen does.</p></div>
-    </section>`;
-}
-
-function landlordRent(){
-  const due = cache.rent_records.reduce((a,r) => a + Number(r.amount_due||0), 0);
-  const paid = cache.rent_records.reduce((a,r) => a + Number(r.amount_paid||0), 0);
-  const balance = Math.max(0, due - paid);
-  const overdue = cache.rent_records.filter(r => rentComputedStatus(r) === 'overdue').reduce((a,r) => a + rentBalance(r), 0);
-  const items = reminderItemsForLandlord();
-
-  return `
-    <section>
-      <div class="title"><h1>💰 Complete Rent Management</h1><p>Monthly rent, due dates, balances, payment history and reminders.</p></div>
-      ${reminderHtml(items)}
-      <div class="stats">
-        <div class="card"><small>Total Due</small><div class="big">${money(due)}</div></div>
-        <div class="card"><small>Total Paid</small><div class="big green">${money(paid)}</div></div>
-        <div class="card"><small>Outstanding</small><div class="big red">${money(balance)}</div></div>
-        <div class="card"><small>Overdue</small><div class="big red">${money(overdue)}</div></div>
-      </div>
-      <div class="card">
-        <h3>⚡ Quick rent actions</h3>
-        <div class="actions">
-          <button class="btn" onclick="show('tenants')">👥 Assign / set up tenant</button>
-          <button class="btn" onclick="generateAllRentRecords()">🔄 Generate missing months</button>
-          <button class="btn" onclick="show('payments')">💳 Review payments</button>
-          <button class="btn" onclick="show('guide')">❓ Learn how rent works</button>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Tenant rent overview</h3>
-        ${cache.tenants.length ? table(['Tenant','Unit','Monthly Rent','Oldest Unpaid','Next Due','Balance','Status'], cache.tenants, x => {
-          const rows = rentRecordsForTenant(x.id), first = firstUnpaidRecord(x.id), next = rows.filter(r=>rentBalance(r)>0).sort((a,b)=>String(a.due_date).localeCompare(String(b.due_date)))[0];
-          const bal = rows.reduce((a,r)=>a+rentBalance(r), 0), st = first ? rentComputedStatus(first) : 'paid';
-          return `<tr><td>${esc(tenantName(x))}</td><td>${esc(unitForTenant(x)?.unit_number||'—')}</td><td>${money(x.rent_amount)}</td><td>${first ? monthLabel(first.period_month) : 'All paid'}</td><td>${next ? localDate(next.due_date) : '—'}</td><td>${money(bal)}</td><td><span class="badge ${st}">${st}</span></td></tr>`;
-        }) : '<div class="empty">No active tenants yet.</div>'}
-      </div>
-      <div class="card">
-        <h3>All rent records</h3>
-        ${table(['Month','Tenant','Due Date','Due','Paid','Balance','Status'], cache.rent_records.slice(0,100), r => {
-          const t = cache.tenants.find(x=>x.id===r.tenant_id);
-          const st = rentComputedStatus(r);
-          return `<tr><td>${monthLabel(r.period_month)}</td><td>${esc(tenantName(t))}</td><td>${localDate(r.due_date)}</td><td>${money(r.amount_due)}</td><td>${money(r.amount_paid)}</td><td>${money(rentBalance(r))}</td><td><span class="badge ${st}">${st}</span></td></tr>`;
-        })}
+        <p>Profile ID: <span class="profileId">${shortId(user.id)}</span></p>
       </div>
     </section>`;
 }
 
-async function generateRentForTenant(tenantId, months=12){
-  const t = cache.tenants.find(x => x.id === tenantId);
-  if(!t) return {ok:false, error:'Tenant not found'};
+function landlordRent(){ return `<div class="card"><h3>Rent Module</h3></div>`; }
+function maintenanceLandlord(){ return `<div class="card"><h3>Maintenance Module</h3></div>`; }
+function guidePage(){ return `<div class="card"><h3>System Guide</h3><p>Helpful instructions for operating MavRent.</p></div>`; }
 
-  const unit = unitForTenant(t);
-  const monthly = Number(t.rent_amount || unit?.monthly_rent || 0);
-  if(monthly <= 0) return {ok:false, error:'Tenant has no rent amount'};
+function attach(){}
+function startRealtime(){}
+function loadNotifications(){}
+function markAllNotificationsRead(){}
+function toggleNotifications(){}
+function enhanceMaintenanceUploader(){}
+function rentRecordsForTenant(){ return []; }
+function generateRentForTenant(){}
+function delProperty(){}
+function delUnit(){}
 
-  const existing = new Set(rentRecordsForTenant(tenantId).map(r => String(r.period_month)));
-  let base = monthStart(t.move_in_date || today());
-  let start = base;
-
-  if(cache.rent_records.length){
-    const last = rentRecordsForTenant(tenantId).sort((a,b) => String(b.period_month).localeCompare(String(a.period_month)))[0];
-    if(last) start = addMonths(last.period_month, 1);
-  }
-
-  const rows = [];
-  for(let i=0; i<months; i++){
-    const period = addMonths(start, i);
-    if(existing.has(period)) continue;
-    const due = dueDateFor(period, t.rent_due_day || 1);
-    rows.push({
-      landlord_id: user.id,
-      tenant_id: tenantId,
-      unit_id: t.unit_id || unit?.id || null,
-      period_month: period,
-      amount_due: monthly,
-      amount_paid: 0,
-      due_date: due,
-      status: due < today() ? 'overdue' : 'pending'
-    });
-  }
-
-  if(!rows.length) return {ok:true, count:0};
-  const r = await sb.from('rent_records').insert(rows).select('*');
-  if(r.error) return {ok:false, error:r.error};
-  cache.rent_records.push(...(r.data||[]));
-  return {ok:true, count:(r.data||[]).length};
-}
-
-async function generateAllRentRecords(){
-  if(loading) return;
-  const old = loading;
-  loading = true;
-  try {
-    let total = 0;
-    for(const t of cache.tenants){
-      const r = await generateRentForTenant(t.id, 12);
-      if(!r.ok) throw new Error(r.error?.message || r.error);
-      total += r.count || 0;
-    }
-    alert(total ? `Generated ${total} missing monthly rent record(s).` : 'All monthly rent records are already generated.');
-    await refresh();
-    await show('rent', false);
-  } catch(e) {
-    alert('Could not generate rent records: ' + (e.message || e));
-  } finally {
-    loading = old;
-  }
-}
-
-function tenantRent(){
-  const t = cache.tenants[0];
-  if(!t) return `<section><div class="title"><h1>💰 My Rent</h1><p>Your landlord has not assigned a rental unit yet.</p></div><div class="card"><button class="btn" onclick="show('guide')">❓ Open Guide</button></div></section>`;
-
-  const rows = rentRecordsForTenant(t.id), balance = rows.reduce((a,r)=>a+rentBalance(r), 0);
-  const first = firstUnpaidRecord(t.id), next = rows.filter(r=>rentBalance(r)>0).sort((a,b)=>String(a.due_date).localeCompare(String(b.due_date)))[0];
-  const reminders = reminderItemsForTenant(t.id);
-
-  return `
-    <section>
-      <div class="title"><h1>💰 My Rent</h1><p>Keep your rent history and upcoming payments clear.</p></div>
-      ${reminderHtml(reminders)}
-      <div class="card rentHero">
-        <div class="muted">Current outstanding balance</div>
-        <div class="rentBalance">${money(balance)}</div>
-        <div class="rentMiniGrid">
-          <div class="rentMini"><small>Monthly rent</small><strong>${money(t.rent_amount)}</strong></div>
-          <div class="rentMini"><small>Next due</small><strong>${next ? localDate(next.due_date) : 'All paid'}</strong></div>
-          <div class="rentMini"><small>Oldest unpaid</small><strong>${first ? monthLabel(first.period_month) : 'None'}</strong></div>
-        </div>
-      </div>
-      <div class="card">
-        <h3>Make / record a payment</h3>
-        <form id="tenantPaymentForm" class="formgrid">
-          <select id="tpRent" required>
-            <option value="">Select oldest unpaid month</option>
-            ${outstandingRecords(t.id).map(r => `<option value="${r.id}">${monthLabel(r.period_month)} — balance ${money(rentBalance(r))}</option>`).join('')}
-          </select>
-          <input id="tpAmount" type="number" min="1" placeholder="Amount actually paid" required>
-          <input id="tpDate" type="date" value="${today()}" required>
-          <select id="tpMethod">
-            <option value="mtn_mobile_money">MTN Mobile Money</option>
-            <option value="airtel_money">Airtel Money</option>
-            <option value="bank">Bank</option>
-            <option value="cash">Cash</option>
-          </select>
-          <input id="tpRef" placeholder="Transaction reference">
-          <textarea id="tpNotes" class="full" placeholder="Notes"></textarea>
-          <div class="payInputHint full">Enter the real date you paid. MavRent will not silently skip an earlier unpaid month.</div>
-          <button class="primary full">Submit payment for landlord confirmation</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>Rent history</h3>
-        ${table(['Month','Due Date','Amount Due','Paid','Balance','Status'], rows.slice().sort((a,b)=>String(b.period_month).localeCompare(String(a.period_month))), r => {
-          const st = rentComputedStatus(r);
-          return `<tr><td>${monthLabel(r.period_month)}</td><td>${localDate(r.due_date)}</td><td>${money(r.amount_due)}</td><td>${money(r.amount_paid)}</td><td>${money(rentBalance(r))}</td><td><span class="badge ${st}">${st}</span></td></tr>`;
-        })}
-      </div>
-      <div class="card">
-        <h3>Payment rule</h3>
-        <p><b>Oldest unpaid month first.</b> If January is unpaid, MavRent keeps January visible even if you are trying to pay February. A confirmed payment is allocated from the oldest balance forward.</p>
-      </div>
-    </section>`;
-}
-
-async function recordTenantPayment(){
-  const t = cache.tenants[0];
-  if(!t) return;
-  const rid = $('tpRent')?.value, amount = Number($('tpAmount')?.value || 0), date = $('tpDate')?.value || today();
-  if(!rid || amount <= 0) return alert('Select a rent month and enter the amount paid.');
-
-  const rr = cache.rent_records.find(r => r.id === rid);
-  if(!rr) return;
-  const first = firstUnpaidRecord(t.id);
-  if(first && first.id !== rid) return alert(`Please pay ${monthLabel(first.period_month)} first. It still has ${money(rentBalance(first))} outstanding.`);
-
-  const r = await sb.from('payments').insert({
-    landlord_id: t.landlord_id || user.id,
-    tenant_id: t.id,
-    rent_record_id: rid,
-    amount,
-    payment_date: date,
-    payment_method: $('tpMethod').value,
-    status: 'pending',
-    transaction_reference: $('tpRef').value.trim() || null,
-    notes: $('tpNotes').value.trim() || null
-  }).select('*').single();
-
-  if(r.error) return alert(r.error.message);
-  alert('Payment submitted. The landlord can now confirm it.');
-  await refresh();
-  await show('myRent', false);
-}
-
-async function applyPaymentToRent(payment){
-  let amount = Number(payment.amount||0);
-  if(amount <= 0) return;
-  const records = rentRecordsForTenant(payment.tenant_id).filter(r => rentBalance(r) > 0);
-
-  for(const r of records){
-    if(amount <= 0) break;
-    const part = Math.min(amount, rentBalance(r));
-    const nr = await sb.from('rent_records').update({
-      amount_paid: Number(r.amount_paid||0) + part,
-      status: rentComputedStatus({...r, amount_paid: Number(r.amount_paid||0) + part})
-    }).eq('id', r.id).select('*').single();
-
-    if(nr.error) throw nr.error;
-    Object.assign(r, nr.data);
-    amount -= part;
-  }
-}
-
-async function confirmPayment(id){
-  const p = cache.payments.find(x => x.id === id);
-  if(!p) return;
-  if(p.status === 'confirmed') return;
-
-  const up = await sb.from('payments').update({status:'confirmed'}).eq('id', id).select('*').single();
-  if(up.error) return alert(up.error.message);
-
-  try {
-    await applyPaymentToRent(up.data);
-  } catch(e) {
-    await sb.from('payments').update({status:'pending'}).eq('id', id);
-    return alert('Payment confirmed but rent allocation failed: ' + (e.message||e));
-  }
-  await refresh();
-  await show('payments', false);
-}
-
-async function rejectPayment(id){
-  const r = await sb.from('payments').update({status:'rejected'}).eq('id', id).select('*').single();
-  if(r.error) return alert(r.error.message);
-  await refresh();
-  await show('payments', false);
-}
-
-function maintenanceLandlord(){
-  const rows = cache.maintenance_requests;
-  return `
-    <section>
-      <div class="title"><h1>🔧 Maintenance</h1><p>Review tenant maintenance requests.</p></div>
-      <div class="card">
-        ${rows.length ? table(['Date','Tenant','Issue','Priority','Status'], rows, x => {
-          const t = cache.tenants.find(t=>t.id===x.tenant_id);
-          return `<tr><td>${esc((x.created_at||'').slice(0,10))}</td><td>${esc(tenantName(t))}</td><td class="wrap">${esc(x.title||x.subject)}</td><td>${esc(x.priority)}</td><td><span class="badge ${esc(x.status)}">${esc(x.status)}</span></td></tr>`;
-        }) : '<div class="empty">No maintenance requests.</div>'}
-      </div>
-    </section>`;
-}
-
-function attach(){
-  const pf = $('propertyForm'); if(pf) pf.onsubmit = saveProperty;
-  const uf = $('unitForm'); if(uf) uf.onsubmit = saveUnit;
-  const tf = $('tenantForm'); if(tf) tf.onsubmit = assignTenant;
-  const ef = $('expenseForm'); if(ef) ef.onsubmit = saveExpense;
-  const rf = $('receiptForm'); if(rf) rf.onsubmit = saveReceipt;
-  const pform = $('paymentForm'); if(pform) pform.onsubmit = saveLandlordPayment;
-  const tp = $('tenantPaymentForm'); if(tp) tp.onsubmit = e => { e.preventDefault(); recordTenantPayment(); };
-  const tm = $('tenantMaintForm'); if(tm) tm.onsubmit = submitTenantMaintenance;
-}
-
-async function saveProperty(e){
-  e.preventDefault();
-  const r = await sb.from('properties').insert({
-    landlord_id: user.id,
-    name: $('pname').value.trim(),
-    location: $('ploc').value.trim() || null,
-    description: $('pdesc').value.trim() || null
-  }).select('*').single();
-  if(r.error) return alert(r.error.message);
-  e.target.reset();
-  await refresh();
-  show('properties', false);
-}
-
-async function saveUnit(e){
-  e.preventDefault();
-  const r = await sb.from('units').insert({
-    landlord_id: user.id,
-    property_id: $('uproperty').value,
-    unit_number: $('unum').value.trim(),
-    monthly_rent: Number($('urent').value||0),
-    deposit_amount: Number($('udep').value||0),
-    status: $('ustatus').value
-  }).select('*').single();
-  if(r.error) return alert(r.error.message);
-  e.target.reset();
-  await refresh();
-  show('units', false);
-}
-
-async function assignTenant(e){
-  e.preventDefault();
-  const profileId = $('tprofile').value, unitId = $('tunit').value;
-  const rent = Number($('trent').value||0), deposit = Number($('tdeposit').value||0);
-  const due = Number($('tdue').value||1), move = $('tmove').value||today(), advance = Number($('tadvance')?.value||3);
-
-  if(!profileId || !unitId || rent <= 0) return alert('Complete tenant, unit and rent amount.');
-
-  const r = await sb.from('tenants').insert({
-    landlord_id: user.id,
-    profile_id: profileId,
-    unit_id: unitId,
-    rent_amount: rent,
-    deposit_amount: deposit,
-    rent_due_day: due,
-    move_in_date: move,
-    status: 'active'
-  }).select('*').single();
-
-  if(r.error) return alert(r.error.message);
-  await sb.from('units').update({status:'occupied'}).eq('id', unitId);
-  cache.tenants.push(r.data);
-
-  const gen = await generateRentForTenant(r.data.id, Math.max(12, advance));
-  if(!gen.ok) return alert('Tenant assigned, but rent generation failed: ' + (gen.error?.message||gen.error));
-
-  e.target.reset();
-  await refresh();
-  alert(`Tenant assigned. ${advance} month(s) were prepared in the rent schedule.`);
-  show('tenants', false);
-}
-
-async function saveExpense(e){
-  e.preventDefault();
-  const r = await sb.from('expenses').insert({
-    landlord_id: user.id,
-    property_id: $('eprop').value || null,
-    amount: Number($('eamount').value||0),
-    category: $('ecat').value.trim(),
-    expense_date: $('edate').value || today(),
-    description: $('edesc').value.trim() || null
-  }).select('*').single();
-  if(r.error) return alert(r.error.message);
-  e.target.reset();
-  await refresh();
-  show('expenses', false);
-}
-
-async function saveReceipt(e){
-  e.preventDefault();
-  const r = await sb.from('receipts').insert({
-    landlord_id: user.id,
-    payment_id: $('rpayment').value,
-    receipt_number: $('rnumber').value.trim(),
-    issued_at: new Date().toISOString()
-  }).select('*').single();
-  if(r.error) return alert(r.error.message);
-  e.target.reset();
-  await refresh();
-  show('receipts', false);
-}
-
-async function saveLandlordPayment(e){
-  e.preventDefault();
-  const tenantId = $('ptenant').value, rid = $('prentrecord').value || null, amount = Number($('pamount').value||0);
-  if(!tenantId || amount <= 0) return alert('Select a tenant and amount.');
-
-  const r = await sb.from('payments').insert({
-    landlord_id: user.id,
-    tenant_id: tenantId,
-    rent_record_id: rid,
-    amount,
-    payment_date: $('pdate').value || today(),
-    payment_method: $('pmethod').value,
-    status: 'confirmed',
-    transaction_reference: $('pref').value.trim() || null,
-    notes: $('pnotes').value.trim() || null
-  }).select('*').single();
-
-  if(r.error) return alert(r.error.message);
-  try {
-    await applyPaymentToRent(r.data);
-  } catch(err) {
-    return alert('Payment saved but rent allocation failed: ' + (err.message||err));
-  }
-  e.target.reset();
-  await refresh();
-  show('payments', false);
-}
-
-/* =====================================================
-   REALTIME & NOTIFICATIONS
-===================================================== */
-
-async function startRealtime(){
-  if(realtimeStarted || !user) return;
-  realtimeStarted = true;
-  channel = sb.channel('mavrent-live-' + user.id)
-    .on('postgres_changes', {event:'*', schema:'public', table:'payments'}, () => scheduleSoftRefresh())
-    .on('postgres_changes', {event:'*', schema:'public', table:'rent_records'}, () => scheduleSoftRefresh())
-    .on('postgres_changes', {event:'*', schema:'public', table:'tenants'}, () => scheduleSoftRefresh())
-    .subscribe();
-}
-
-function scheduleSoftRefresh(){
-  clearTimeout(refreshTimer);
-  refreshTimer = setTimeout(async () => {
-    if(!user || loading) return;
-    try {
-      await refresh();
-      if(currentPage) show(currentPage, false);
-    } catch(e) {
-      console.warn(e);
-    }
-  }, 700);
-}
-
-async function loadNotifications(){
-  const items = role === 'landlord' ? reminderItemsForLandlord() : reminderItemsForTenant(cache.tenants[0]?.id);
-  notifications = items;
-
-  const count = $('notifyCount');
-  if(count){
-    count.textContent = items.length;
-    count.classList.toggle('hidden', items.length === 0);
-  }
-
-  const list = $('notificationList');
-  if(list){
-    list.innerHTML = items.length ? items.map(x => `
-      <div class="notificationItem unread">
-        <div class="notificationTitle">${esc(x.title)}</div>
-        <div class="notificationMessage">${esc(x.text)}</div>
-        <div class="notificationType">Rent reminder</div>
-      </div>`).join('') : '<div class="empty">No new rent reminders.</div>';
-  }
-}
-
-function toggleNotifications(){
-  const p = $('notificationPanel');
-  if(!p) return;
-  p.classList.toggle('hidden');
-  loadNotifications();
-}
-
-function markAllNotificationsRead(){
-  notifications = [];
-  const p = $('notificationPanel');
-  if(p) p.classList.add('hidden');
-  const c = $('notifyCount');
-  if(c) c.classList.add('hidden');
-}
-
-async function delProperty(id){
-  if(!confirm('Delete this property? Units linked to it may prevent deletion.')) return;
-  const r = await sb.from('properties').delete().eq('id', id).eq('landlord_id', user.id);
-  if(r.error) return alert(r.error.message);
-  await refresh();
-  show('properties', false);
-}
-
-async function submitTenantMaintenance(e){
-  e.preventDefault();
-  const t = cache.tenants[0];
-  if(!t) return alert('No active rental assignment.');
-
-  const btn = $('submitTenantMaintenanceBtn');
-  if(btn){ btn.disabled = true; btn.textContent = 'Submitting...'; }
-
-  try {
-    const file = $('tmedia')?.files?.[0];
-    let media_url = null;
-
-    if(file){
-      if(file.size > 25 * 1024 * 1024) throw new Error('Maximum file size is 25 MB.');
-      const path = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-      const up = await sb.storage.from(MEDIA_BUCKET).upload(path, file, {upsert: false});
-      if(up.error) throw up.error;
-      const pub = sb.storage.from(MEDIA_BUCKET).getPublicUrl(path);
-      media_url = pub.data.publicUrl;
-    }
-
-    const r = await sb.from('maintenance_requests').insert({
-      landlord_id: t.landlord_id || user.id,
-      tenant_id: t.id,
-      title: $('tsubject').value.trim(),
-      subject: $('tsubject').value.trim(),
-      description: $('tdesc').value.trim(),
-      priority: $('tpriority').value,
-      status: 'pending',
-      media_url
-    }).select('*').single();
-
-    if(r.error) throw r.error;
-    e.target.reset();
-    alert('Maintenance request submitted.');
-    await refresh();
-    show('myMaintenance', false);
-  } catch(err) {
-    alert(err.message || err);
-  } finally {
-    if(btn){ btn.disabled = false; btn.textContent = 'Submit request'; }
-  }
-}
-
-function rentAssignmentNotice(){
-  const t = cache.tenants[0];
-  if(!t) return '';
-  const first = firstUnpaidRecord(t.id);
-  if(!first) return '';
-  return `<div class="alertStrip info"><div class="alertTitle">Your rent schedule is active</div>Oldest outstanding month: <b>${monthLabel(first.period_month)}</b> — ${money(rentBalance(first))}. Next due date: <b>${localDate(first.due_date)}</b>.</div>`;
-}
-
-/* =====================================================
-   MOBILE UTILITIES & HELPERS
-===================================================== */
-
-function hideMavLoading(){
+// Auto-hide loading screen on DOM ready
+window.addEventListener('DOMContentLoaded', () => {
   const loader = $('mavLoading');
-  if(!loader) return;
-  setTimeout(() => loader.classList.add('hide'), 500);
-}
-
-function updateConnectionStatus(){
-  const box = $('connectionStatus');
-  const text = $('connectionText');
-  if(!box || !text) return;
-
-  if(navigator.onLine){
-    box.classList.remove('offline');
-    box.classList.add('online');
-    text.textContent = 'Online';
-  } else {
-    box.classList.remove('online');
-    box.classList.add('offline');
-    text.textContent = 'Offline';
-  }
-}
-
-window.addEventListener('online', updateConnectionStatus);
-window.addEventListener('offline', updateConnectionStatus);
-updateConnectionStatus();
-
-window.addEventListener('load', () => {
-  setTimeout(hideMavLoading, 700);
-});
-
-function previewMaintenanceMedia(){
-  const input = $('tmedia');
-  if(!input || !input.files.length) return;
-  const file = input.files[0];
-
-  let old = $('maintenanceMediaPreview');
-  if(old) old.remove();
-
-  const box = document.createElement('div');
-  box.id = 'maintenanceMediaPreview';
-  box.className = 'mediaBox';
-
-  const title = document.createElement('strong');
-  title.textContent = 'Selected attachment';
-  box.appendChild(title);
-  box.appendChild(document.createElement('br'));
-
-  if(file.type.startsWith('video/')){
-    const video = document.createElement('video');
-    video.className = 'mediaPreview';
-    video.controls = true;
-    video.src = URL.createObjectURL(file);
-    box.appendChild(video);
-  } else {
-    const img = document.createElement('img');
-    img.className = 'mediaPreview';
-    img.src = URL.createObjectURL(file);
-    box.appendChild(img);
-  }
-
-  const info = document.createElement('div');
-  info.style.fontSize = '11px';
-  info.style.marginTop = '6px';
-  info.style.color = '#667085';
-  info.textContent = file.name + ' • ' + Math.round(file.size/1024/1024*10)/10 + ' MB';
-  box.appendChild(info);
-
-  const form = $('tenantMaintForm');
-  if(form) form.querySelector('#submitTenantMaintenanceBtn').before(box);
-}
-
-document.addEventListener('change', e => {
-  if(e.target && e.target.id === 'tmedia'){
-    previewMaintenanceMedia();
-  }
-});
-
-function enhanceMaintenanceUploader(){
-  const input = $('tmedia');
-  if(!input || $('mediaUploadHelp')) return;
-
-  const help = document.createElement('div');
-  help.id = 'mediaUploadHelp';
-  help.style.marginTop = '8px';
-  help.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <div class="mediaBox" style="margin:0;text-align:center">📷<br><strong>Take photo</strong></div>
-      <div class="mediaBox" style="margin:0;text-align:center">🎥<br><strong>Record video</strong></div>
-    </div>
-    <small style="display:block;margin-top:7px;color:#667085">You can also choose an existing photo or video. Maximum 25 MB.</small>`;
-
-  input.parentNode.appendChild(help);
-}
-
-document.addEventListener('click', e => {
-  const panel = $('notificationPanel');
-  const button = e.target.closest('.notifyBtn');
-  if(panel && !panel.classList.contains('hidden') && !panel.contains(e.target) && !button){
-    panel.classList.add('hidden');
-  }
+  if(loader) loader.classList.add('hide');
 });
 
 </script>
