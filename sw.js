@@ -1,9 +1,12 @@
-const CACHE_NAME = "MavRent-v16";
+const CACHE_NAME = "MavRent-v17";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon-180.png",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 /* =====================================================
@@ -16,7 +19,6 @@ self.addEventListener("install", event => {
       return cache.addAll(FILES_TO_CACHE);
     })
   );
-
   self.skipWaiting();
 });
 
@@ -34,7 +36,6 @@ self.addEventListener("activate", event => {
       );
     })
   );
-
   self.clients.claim();
 });
 
@@ -55,10 +56,9 @@ self.addEventListener("fetch", event => {
 ===================================================== */
 
 self.addEventListener("push", event => {
-
   let data = {
-    title: "MavRent",
-    body: "You have a new notification.",
+    title: "MavRent Alert",
+    body: "You have a new property or rent update.",
     icon: "./icon-192.png",
     badge: "./icon-192.png",
     url: "./"
@@ -80,15 +80,14 @@ self.addEventListener("push", event => {
       body: data.body,
       icon: data.icon || "./icon-192.png",
       badge: data.badge || "./icon-192.png",
-      tag: data.tag || "mavrent-notification",
+      tag: data.tag || "mavrent-rent-reminder",
       data: {
         url: data.url || "./"
       },
       vibrate: [200, 100, 200],
-      requireInteraction: false
+      requireInteraction: true
     })
   );
-
 });
 
 /* =====================================================
@@ -96,34 +95,24 @@ self.addEventListener("push", event => {
 ===================================================== */
 
 self.addEventListener("notificationclick", event => {
-
   event.notification.close();
 
-  const url =
-    event.notification.data?.url || "./";
+  const urlToOpen = event.notification.data?.url || "./";
 
   event.waitUntil(
-
     clients.matchAll({
       type: "window",
       includeUncontrolled: true
     }).then(clientList => {
-
       for (const client of clientList) {
-
         if ("focus" in client) {
-          client.navigate(url);
+          client.navigate(urlToOpen);
           return client.focus();
         }
-
       }
-
       if (clients.openWindow) {
-        return clients.openWindow(url);
+        return clients.openWindow(urlToOpen);
       }
-
     })
-
   );
-
 });
