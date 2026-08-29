@@ -3824,56 +3824,124 @@ function urlBase64ToUint8Array(base64String){
   return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
 }
 
-async function requestRentNotifications(){
-  try{
-    if(!('serviceWorker' in navigator))throw new Error('This browser does not support service workers.');
-    if(!('PushManager' in window))throw new Error('This browser does not support push notifications.');
-    if(!('Notification' in window))throw new Error('Notifications are not supported on this device/browser.');
-    if(!user)throw new Error('Please log in before enabling notifications.');
+async async function requestRentNotifications(){
 
-    const permission=await Notification.requestPermission();
-    if(permission!=='granted'){
-      alert(permission==='denied'?'Notifications are blocked. Enable them in your browser/device settings.':'Notifications were not enabled.');
-      return false;
+  try{
+
+    if(!window.isSecureContext){
+      alert('MavRent notifications require a secure connection (HTTPS).');
+      return;
     }
 
-    const registration=await navigator.serviceWorker.ready;
-    let subscription=await registration.pushManager.getSubscription();
+    if(!('serviceWorker' in navigator)){
+      alert('This browser does not support service workers.');
+      return;
+    }
+
+    if(!('PushManager' in window)){
+      alert('This browser does not support push notifications.');
+      return;
+    }
+
+    if(!('Notification' in window)){
+      alert('Notifications are not supported on this browser.');
+      return;
+    }
+
+    if(!sb){
+      alert('MavRent could not connect to Supabase. Please refresh and try again.');
+      return;
+    }
+
+    if(!user){
+      alert('Please log in to MavRent before enabling notifications.');
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+
+    if(permission !== 'granted'){
+      if(permission === 'denied'){
+        alert('Notifications are blocked for MavRent. Open your browser site settings and allow notifications, then try again.');
+      }else{
+        alert('Notification permission was not granted.');
+      }
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.ready;
+
+    let subscription =
+      await registration.pushManager.getSubscription();
 
     if(!subscription){
-      subscription=await registration.pushManager.subscribe({
-        userVisibleOnly:true,
-        applicationServerKey:urlBase64ToUint8Array(MAVRENT_VAPID_PUBLIC_KEY)
-      });
+
+      subscription =
+        await registration.pushManager.subscribe({
+          userVisibleOnly:true,
+          applicationServerKey:
+            urlBase64ToUint8Array(
+              MAVRENT_VAPID_PUBLIC_KEY
+            )
+        });
+
     }
 
-    const json=subscription.toJSON();
-    const keys=json.keys||{};
-    if(!subscription.endpoint||!keys.p256dh||!keys.auth){
+    const json = subscription.toJSON();
+
+    const endpoint = subscription.endpoint;
+    const p256dh = json.keys && json.keys.p256dh;
+    const auth = json.keys && json.keys.auth;
+
+    if(!endpoint || !p256dh || !auth){
       throw new Error('The browser did not return a complete push subscription.');
     }
 
-    const deviceName=/Android/i.test(navigator.userAgent)?'Android':/iPhone|iPad|iPod/i.test(navigator.userAgent)?'iPhone/iPad':/Windows/i.test(navigator.userAgent)?'Windows Browser':'Web Browser';
+    const {error} = await sb
+      .from('push_subscriptions')
+      .upsert({
+        user_id:user.id,
+        endpoint:endpoint,
+        p256dh:p256dh,
+        auth:auth,
+        device_name:
+          /Android/i.test(navigator.userAgent)
+            ? 'Android'
+            : /iPhone|iPad|iPod/i.test(navigator.userAgent)
+              ? 'iPhone/iPad'
+              : 'Web Browser',
+        user_agent:navigator.userAgent,
+        updated_at:new Date().toISOString()
+      },{
+        onConflict:'user_id,endpoint'
+      });
 
-    const result=await sb.from('push_subscriptions').upsert({
-      user_id:user.id,
-      endpoint:subscription.endpoint,
-      p256dh:keys.p256dh,
-      auth:keys.auth,
-      device_name:deviceName,
-      user_agent:navigator.userAgent,
-      updated_at:new Date().toISOString()
-    },{onConflict:'user_id,endpoint'});
+    if(error) throw error;
 
-    if(result.error)throw result.error;
+    alert('✅ MavRent phone notifications are enabled on this device.');
 
-    alert('MavRent notifications are enabled on this device. You can now close MavRent and receive push notifications when your device has internet.');
-    return true;
-  }catch(e){
-    console.error('MavRent push setup failed:',e);
-    alert('Could not enable notifications: '+(e.message||e));
-    return false;
+    console.log(
+      'MavRent push subscription saved successfully.'
+    );
+
+  }catch(error){
+
+    console.error(
+      'MavRent push notification setup failed:',
+      error
+    );
+
+    alert(
+      'MavRent could not enable notifications.
+
+' +
+      (error && error.message
+        ? error.message
+        : 'Please refresh the app and try again.')
+    );
+
   }
+
 }
 
 async function loadNotifications(){
