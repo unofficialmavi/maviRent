@@ -1,494 +1,302 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MavRent - Premium Landlord Portal</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS Client -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mavrent Dashboard</title>
+  <link rel="manifest" href="/manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-    }
-    .glass-card {
-      background: rgba(30, 41, 59, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .modal-backdrop {
-      background-color: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(8px);
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="bg-gray-100 text-gray-900 antialiased min-h-screen">
 
-  <div>
-    <!-- Premium Top Navigation Bar -->
-    <header class="glass-card sticky top-0 z-40 border-b border-slate-800/80 px-4 py-3.5 md:px-8">
-      <div class="max-w-7xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-violet-400 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
-            M
-          </div>
-          <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
-            MavRent
-          </h1>
-        </div>
-
-        <div id="authStatus" class="flex items-center gap-4">
-          <!-- Invisible when permission is active/granted -->
-          <button id="pushToggleBtn" onclick="requestPushPermission()" class="hidden text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1.5 rounded-lg hover:bg-indigo-500/20 transition-all">
-            Enable Notifications
-          </button>
-          
-          <span id="userEmail" class="text-xs font-medium text-slate-400 hidden sm:inline-block">Not logged in</span>
-          <button id="authBtn" onclick="toggleAuth()" class="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-all shadow-md shadow-indigo-950">
-            Login
-          </button>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="max-w-7xl mx-auto p-4 md:p-8 w-full">
-      
-      <!-- System Automation Status Indicator -->
-      <div class="glass-card rounded-xl p-4 mb-8 flex flex-wrap items-center justify-between gap-4 border-l-4 border-l-emerald-500">
-        <div class="flex items-center gap-3">
-          <span class="relative flex h-3 w-3">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-          </span>
-          <div>
-            <h4 class="text-sm font-semibold text-slate-200">Automated Systems Active</h4>
-            <p class="text-xs text-slate-400">Rent reminders, ledger updates, and background triggers are operational.</p>
-          </div>
-        </div>
-        <div class="text-xs text-slate-400 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/50">
-          Service Worker Live
-        </div>
-      </div>
-
-      <!-- LANDLORD OVERDUE ALERT BANNER (Shown to Landlords) -->
-      <div id="landlordAlertSection" class="hidden mb-6">
-        <div class="glass-card rounded-2xl p-5 border border-rose-500/30 bg-rose-950/20">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-sm font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
-              <span class="h-2.5 w-2.5 rounded-full bg-rose-500 animate-pulse"></span>
-              Overdue Rent Alerts
-            </h3>
-            <span class="text-xs text-rose-300/70 font-medium">Action Required</span>
-          </div>
-          <div id="landlordOverdueContainer" class="space-y-2">
-            <!-- Dynamic Overdue Cards Will Render Here -->
-          </div>
-        </div>
-      </div>
-
-      <!-- TENANT RENT SUMMARY CARD (Shown to Tenants) -->
-      <div id="tenantAlertSection" class="hidden mb-6">
-        <div id="tenantStatusCard">
-          <!-- Dynamic Tenant Summary Will Render Here -->
-        </div>
-      </div>
-
-      <!-- Action Header -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-        <div>
-          <h2 class="text-2xl font-bold text-white tracking-tight">Property Portfolio</h2>
-          <p class="text-sm text-slate-400">Manage real estate assets, tenant units, and pricing schedules</p>
-        </div>
-        <button onclick="openAddPropertyModal()" class="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-5 py-2.5 rounded-xl font-medium shadow-lg shadow-indigo-600/25 transition-all flex items-center justify-center gap-2">
-          <span class="text-lg font-bold">+</span> Add Property
+  <!-- Header Navigation -->
+  <header class="bg-blue-600 text-white shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold tracking-tight">Mavrent Portal</h1>
+      <div id="auth-controls">
+        <button id="auth-btn" onclick="handleAuthAction()" class="bg-white text-blue-600 px-4 py-1.5 rounded-md font-medium text-sm hover:bg-gray-100 transition">
+          Loading...
         </button>
       </div>
+    </div>
+  </header>
 
-      <!-- Properties Grid -->
-      <div id="propertiesList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="col-span-full text-center py-16 text-slate-500 font-medium">
-          Loading property records...
-        </div>
+  <main class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- Alert Containers for Dynamic Notifications -->
+    <section id="landlord-approval-container" class="space-y-3 mb-6"></section>
+    <section id="tenant-alert-container" class="mb-6"></section>
+
+    <!-- Main Dashboard Body -->
+    <div id="dashboard-content" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 class="text-lg font-bold mb-4">Dashboard Overview</h2>
+      <p class="text-gray-600">Select an action or review your current unit summaries above.</p>
+    </div>
+
+  </main>
+
+  <!-- Payment Proof Modal -->
+  <div id="payment-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+      <h3 class="text-lg font-bold text-gray-900">Submit Rent Payment</h3>
+      <p class="text-sm text-gray-600">Enter your Mobile Money, Bank Reference, or Receipt transaction ID below for landlord verification.</p>
+      
+      <input type="hidden" id="modal-ledger-id" />
+      
+      <div>
+        <label for="modal-tx-ref" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1">
+          Transaction Reference / Receipt #
+        </label>
+        <input 
+          type="text" 
+          id="modal-tx-ref" 
+          placeholder="e.g. TXN-9840283 or MM-84920" 
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
-    </main>
-  </div>
 
-  <!-- Footer -->
-  <footer class="text-center py-6 text-xs text-slate-600 border-t border-slate-900">
-    MavRent PWA Platform &bull; Landlord Dashboard
-  </footer>
-
-  <!-- ADD PROPERTY MODAL -->
-  <div id="addPropertyModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center p-4 z-50">
-    <div class="glass-card bg-slate-900/90 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-800">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-bold text-white">Add Property</h3>
-        <button onclick="closeModal('addPropertyModal')" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button 
+          onclick="closePaymentModal()" 
+          class="px-4 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition font-medium"
+        >
+          Cancel
+        </button>
+        <button 
+          onclick="submitPaymentProof()" 
+          id="submit-proof-btn"
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition"
+        >
+          Submit for Approval
+        </button>
       </div>
-      <form id="addPropertyForm" onsubmit="handleAddProperty(event)">
-        <div class="mb-4">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Property Name</label>
-          <input type="text" id="propName" required class="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-sm" placeholder="e.g. Sunset Heights">
-        </div>
-        <div class="mb-6">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Location / Address</label>
-          <input type="text" id="propLocation" required class="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all text-sm" placeholder="e.g. Kampala, Sector 4">
-        </div>
-        <div class="flex justify-end gap-3">
-          <button type="button" onclick="closeModal('addPropertyModal')" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 text-sm font-medium transition-all">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl text-sm font-semibold shadow-md hover:from-indigo-500 hover:to-violet-500 transition-all">Save Property</button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <!-- EDIT UNIT MODAL -->
-  <div id="editUnitModal" class="fixed inset-0 modal-backdrop hidden flex items-center justify-center p-4 z-50">
-    <div class="glass-card bg-slate-900/90 rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-800">
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-bold text-white">Edit Unit Details</h3>
-        <button onclick="closeModal('editUnitModal')" class="text-slate-400 hover:text-white text-xl font-bold">&times;</button>
-      </div>
-      <form id="editUnitForm" onsubmit="handleEditUnit(event)">
-        <input type="hidden" id="editUnitId">
-        <div class="mb-4">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Unit Code / Identifier</label>
-          <input type="text" id="editUnitNumber" required class="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm">
-        </div>
-        <div class="mb-4">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Rent Price</label>
-          <input type="number" id="editUnitRent" required class="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm">
-        </div>
-        <div class="mb-6">
-          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Occupancy Status</label>
-          <select id="editUnitStatus" class="w-full bg-slate-800/80 border border-slate-700/80 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm">
-            <option value="Vacant" class="bg-slate-900 text-white">Vacant</option>
-            <option value="Occupied" class="bg-slate-900 text-white">Occupied</option>
-            <option value="Maintenance" class="bg-slate-900 text-white">Maintenance</option>
-          </select>
-        </div>
-        <div class="flex justify-end gap-3">
-          <button type="button" onclick="closeModal('editUnitModal')" class="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 text-sm font-medium transition-all">Cancel</button>
-          <button type="submit" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-xl text-sm font-semibold shadow-md hover:from-indigo-500 hover:to-violet-500 transition-all">Update Unit</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- JavaScript Logic -->
   <script>
-    const SUPABASE_URL = 'https://your-supabase-project.supabase.co';
-    const SUPABASE_ANON_KEY = 'your-anon-key';
+    // Supabase Client Config - Replace with your project details
+    const SUPABASE_URL = "YOUR_SUPABASE_URL";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentUser = null;
+    let currentUserRole = null;
 
+    // --- DOM Loaded Setup ---
     window.addEventListener('DOMContentLoaded', async () => {
-      // Register Service Worker for PWA & Background Automation
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW Registration failed:', err));
       }
 
-      // Check Notification status and hide control if active
-      checkPushNotificationStatus();
-
       const { data: { user } } = await supabase.auth.getUser();
       currentUser = user;
-      updateAuthUI();
+
       if (currentUser) {
-        fetchDashboardData();
-        loadLandlordOverdueAlerts();
-        loadTenantRentSummary(currentUser.id);
+        // Fetch User Profile Role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', currentUser.id)
+          .single();
+        
+        currentUserRole = profile ? profile.role : 'tenant';
+        updateAuthUI(true);
+        await initDashboardData();
       } else {
-        renderLoggedOutState();
+        updateAuthUI(false);
       }
     });
 
-    // PUSH NOTIFICATION CONTROLLER (Invisible if active)
-    async function checkPushNotificationStatus() {
-      const btn = document.getElementById('pushToggleBtn');
-      if (!('Notification' in window)) {
-        btn.classList.add('hidden');
-        return;
-      }
+    // --- UI Data Ingestion ---
+    async function initDashboardData() {
+      if (!currentUser) return;
 
-      if (Notification.permission === 'granted') {
-        btn.classList.add('hidden');
-      } else if (Notification.permission === 'default') {
-        btn.classList.remove('hidden');
+      if (currentUserRole === 'landlord') {
+        await loadLandlordApprovalAlerts();
       } else {
-        btn.classList.add('hidden');
+        await loadTenantRentSummary(currentUser.id);
       }
     }
 
-    async function requestPushPermission() {
-      if ('Notification' in window) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          checkPushNotificationStatus();
-        }
-      }
-    }
-
-    // AUTH & INTERFACE SYNC
-    function updateAuthUI() {
-      const emailSpan = document.getElementById('userEmail');
-      const authBtn = document.getElementById('authBtn');
-
-      if (currentUser) {
-        emailSpan.textContent = currentUser.email;
-        authBtn.textContent = 'Logout';
-      } else {
-        emailSpan.textContent = 'Not logged in';
-        authBtn.textContent = 'Login';
-      }
-    }
-
-    async function toggleAuth() {
-      if (currentUser) {
-        await supabase.auth.signOut();
-        currentUser = null;
-        updateAuthUI();
-        renderLoggedOutState();
-      } else {
-        const email = prompt("Enter your email:");
-        const password = prompt("Enter your password:");
-        if (email && password) {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) {
-            alert('Login failed: ' + error.message);
-          } else {
-            currentUser = data.user;
-            updateAuthUI();
-            fetchDashboardData();
-            loadLandlordOverdueAlerts();
-            loadTenantRentSummary(currentUser.id);
-          }
-        }
-      }
-    }
-
-    function renderLoggedOutState() {
-      document.getElementById('landlordAlertSection').classList.add('hidden');
-      document.getElementById('tenantAlertSection').classList.add('hidden');
-      document.getElementById('propertiesList').innerHTML = `
-        <div class="col-span-full text-center py-16 glass-card rounded-2xl border border-slate-800">
-          <p class="text-slate-400 mb-4">Log in to view your properties, update unit parameters, and track automated reminders.</p>
-        </div>
-      `;
-    }
-
-    // 1. Fetch & Render Overdue Rent for Landlord Dashboard
-    async function loadLandlordOverdueAlerts() {
-      const alertSection = document.getElementById('landlordAlertSection');
-      const container = document.getElementById('landlordOverdueContainer');
-      
-      const { data: overdueList, error } = await supabase
-        .from('tenant_rent_summaries')
-        .select(`
-          tenant_id,
-          oldest_unpaid_due_date,
-          oldest_unpaid_balance,
-          oldest_unpaid_status,
-          units ( unit_number )
-        `);
-
-      if (error || !overdueList || overdueList.length === 0) {
-        alertSection.classList.add('hidden');
-        return;
-      }
-
-      alertSection.classList.remove('hidden');
-      container.innerHTML = overdueList.map(item => `
-        <div class="flex items-center justify-between p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10">
-          <div>
-            <p class="text-sm font-semibold text-rose-200">Unit ${item.units?.unit_number || 'N/A'} - Overdue</p>
-            <p class="text-xs text-rose-300/80">Oldest Unpaid Month Due: ${item.oldest_unpaid_due_date}</p>
-          </div>
-          <span class="text-sm font-bold text-rose-300">$${item.oldest_unpaid_balance}</span>
-        </div>
-      `).join('');
-    }
-
-    // 2. Fetch & Render Oldest Unpaid Month for Tenant Dashboard
+    // --- Tenant Alert View ---
     async function loadTenantRentSummary(tenantId) {
-      const alertSection = document.getElementById('tenantAlertSection');
-      const container = document.getElementById('tenantStatusCard');
+      const alertContainer = document.getElementById('tenant-alert-container');
+      if (!alertContainer) return;
 
       const { data: summary, error } = await supabase
         .from('tenant_rent_summaries')
         .select('*')
         .eq('tenant_id', tenantId)
-        .single();
+        .maybeSingle();
 
       if (error || !summary) {
-        alertSection.classList.add('hidden');
+        alertContainer.innerHTML = '';
         return;
       }
 
-      const isOverdue = summary.oldest_unpaid_status === 'Overdue';
-      alertSection.classList.remove('hidden');
-
-      container.innerHTML = `
-        <div class="glass-card p-5 rounded-2xl border ${isOverdue ? 'border-rose-500/50 bg-rose-950/20' : 'border-amber-500/50 bg-amber-950/20'}">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-xs font-bold uppercase tracking-wider ${isOverdue ? 'text-rose-400' : 'text-amber-400'}">
-              ${isOverdue ? '🔴 Oldest Unpaid Month Overdue' : '⚠️ Unpaid Balance Action Required'}
-            </span>
-            <span class="text-xs text-slate-400">Due Date: ${summary.oldest_unpaid_due_date}</span>
+      if (summary.oldest_unpaid_status === 'Pending Approval') {
+        alertContainer.innerHTML = `
+          <div class="alert bg-blue-50 border border-blue-200 text-blue-900 p-4 rounded-xl flex items-center justify-between shadow-sm">
+            <div>
+              <p class="font-bold text-sm">Payment Verification Pending</p>
+              <p class="text-xs text-blue-700 mt-0.5">
+                Ref Code: <span class="font-mono font-semibold">${summary.transaction_ref || 'N/A'}</span>. Waiting for landlord confirmation.
+              </p>
+            </div>
+            <span class="text-xs bg-blue-200 text-blue-800 font-bold px-2.5 py-1 rounded-full">Pending Approval</span>
           </div>
-          <div class="text-2xl font-bold text-white">$${summary.oldest_unpaid_balance} Due</div>
-          <p class="text-xs text-slate-400 mt-1">Your next recurring payment is locked on day ${new Date(summary.oldest_unpaid_due_date).getDate()} of the month.</p>
+        `;
+        return;
+      }
+
+      alertContainer.innerHTML = `
+        <div class="alert bg-amber-50 border border-amber-200 text-amber-900 p-4 rounded-xl flex items-center justify-between shadow-sm">
+          <div>
+            <p class="font-bold text-sm">Outstanding Rent Due</p>
+            <p class="text-xs text-amber-800 mt-0.5">
+              Balance: <strong class="text-sm font-semibold text-amber-950">$${summary.oldest_unpaid_balance}</strong> | Due Date: <strong>${summary.oldest_unpaid_due_date}</strong>
+            </p>
+          </div>
+          <button 
+            onclick="openPaymentModal('${summary.oldest_unpaid_ledger_id}')" 
+            class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-semibold text-xs transition-all shadow-sm"
+          >
+            Pay Now / Submit Ref
+          </button>
         </div>
       `;
     }
 
-    // FETCH PROPERTIES & UNITS
-    async function fetchDashboardData() {
-      const container = document.getElementById('propertiesList');
-      container.innerHTML = `<div class="col-span-full text-center py-16 text-slate-500">Loading portfolio data...</div>`;
+    // --- Landlord Approval View ---
+    async function loadLandlordApprovalAlerts() {
+      const container = document.getElementById('landlord-approval-container');
+      if (!container) return;
 
-      const { data: properties, error } = await supabase
-        .from('properties')
-        .select(`
-          id,
-          name,
-          location,
-          units (
-            id,
-            unit_number,
-            rent_amount,
-            status
-          )
-        `)
-        .eq('landlord_id', currentUser.id);
+      const { data: pendingLedgers, error } = await supabase
+        .from('rent_ledgers')
+        .select('*, profiles:tenant_id(full_name)')
+        .eq('status', 'Pending Approval');
 
-      if (error) {
-        console.error('Error loading data:', error.message);
-        container.innerHTML = `<div class="col-span-full text-center py-16 text-rose-400">Failed to fetch properties. Please verify database RLS configuration.</div>`;
+      if (error || !pendingLedgers || pendingLedgers.length === 0) {
+        container.innerHTML = '';
         return;
       }
 
-      renderProperties(properties);
+      container.innerHTML = pendingLedgers.map(item => `
+        <div class="bg-indigo-50 border border-indigo-200 text-indigo-950 p-4 rounded-xl flex items-center justify-between shadow-sm">
+          <div>
+            <p class="font-bold text-sm">${item.profiles?.full_name || 'Tenant'} submitted a payment</p>
+            <p class="text-xs text-indigo-800 mt-0.5">
+              Ref Code: <span class="font-mono font-bold bg-indigo-100 px-1.5 py-0.5 rounded text-indigo-900">${item.transaction_ref || 'None'}</span> | Amount: <strong>$${item.amount_due}</strong>
+            </p>
+          </div>
+          <div class="flex space-x-2">
+            <button 
+              onclick="processLandlordDecision('${item.id}', 'Paid')" 
+              class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg font-semibold text-xs transition"
+            >
+              Approve
+            </button>
+            <button 
+              onclick="processLandlordDecision('${item.id}', 'Overdue')" 
+              class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg font-semibold text-xs transition"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      `).join('');
     }
 
-    // RENDER PROPERTY & UNIT CARDS
-    function renderProperties(properties) {
-      const container = document.getElementById('propertiesList');
-      container.innerHTML = '';
+    // --- Payment Proof Modal Handling ---
+    function openPaymentModal(ledgerId) {
+      document.getElementById('modal-ledger-id').value = ledgerId;
+      document.getElementById('modal-tx-ref').value = '';
+      document.getElementById('payment-modal').classList.remove('hidden');
+      document.getElementById('payment-modal').classList.add('flex');
+    }
 
-      if (!properties || properties.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full text-center py-16 glass-card rounded-2xl border border-slate-800">
-            <p class="text-slate-400 mb-2">No properties found in your account.</p>
-            <button onclick="openAddPropertyModal()" class="text-indigo-400 font-medium underline hover:text-indigo-300">Add your first property</button>
-          </div>
-        `;
+    function closePaymentModal() {
+      document.getElementById('payment-modal').classList.add('hidden');
+      document.getElementById('payment-modal').classList.remove('flex');
+    }
+
+    async function submitPaymentProof() {
+      const ledgerId = document.getElementById('modal-ledger-id').value;
+      const txRef = document.getElementById('modal-tx-ref').value.trim();
+
+      if (!txRef) {
+        alert("Please enter a valid transaction reference code or receipt number.");
         return;
       }
 
-      properties.forEach(prop => {
-        const propCard = document.createElement('div');
-        propCard.className = 'glass-card rounded-2xl p-6 flex flex-col justify-between border border-slate-800/80 hover:border-slate-700/80 transition-all';
+      const btn = document.getElementById('submit-proof-btn');
+      btn.disabled = true;
+      btn.innerText = "Submitting...";
 
-        let unitsHTML = '';
-        if (prop.units && prop.units.length > 0) {
-          unitsHTML = prop.units.map(unit => `
-            <div class="flex justify-between items-center py-3 border-b border-slate-800/60 last:border-0">
-              <div class="flex items-center gap-2.5">
-                <span class="font-medium text-slate-200 text-sm">Unit ${unit.unit_number}</span>
-                <span class="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-semibold ${getStatusBadgeClass(unit.status)}">${unit.status}</span>
-              </div>
-              <div class="flex items-center gap-4">
-                <span class="text-sm font-semibold text-slate-300">$${unit.rent_amount}</span>
-                <button onclick="openEditUnitModal('${unit.id}', '${unit.unit_number}', ${unit.rent_amount}, '${unit.status}')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-all">Edit</button>
-              </div>
-            </div>
-          `).join('');
-        } else {
-          unitsHTML = `<p class="text-xs text-slate-500 italic py-3">No units created for this property yet.</p>`;
+      try {
+        const { error } = await supabase
+          .from('rent_ledgers')
+          .update({
+            status: 'Pending Approval',
+            transaction_ref: txRef
+          })
+          .eq('id', ledgerId);
+
+        if (error) throw error;
+
+        closePaymentModal();
+        await initDashboardData();
+        alert("Payment proof submitted successfully! Pending landlord approval.");
+      } catch (err) {
+        alert("Submission failed: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Submit for Approval";
+      }
+    }
+
+    // --- Landlord Approve/Reject Handler ---
+    async function processLandlordDecision(ledgerId, newStatus) {
+      const actionText = newStatus === 'Paid' ? 'approve' : 'reject';
+      if (!confirm(`Are you sure you want to ${actionText} this payment?`)) return;
+
+      try {
+        const updateData = { status: newStatus };
+        if (newStatus === 'Paid') {
+          updateData.amount_paid = supabase.raw ? supabase.raw('amount_due') : undefined;
         }
 
-        propCard.innerHTML = `
-          <div>
-            <div class="border-b border-slate-800 pb-4 mb-4">
-              <h3 class="text-lg font-bold text-white tracking-tight">${prop.name}</h3>
-              <p class="text-xs text-slate-400 mt-0.5">${prop.location}</p>
-            </div>
-            <div>
-              <h4 class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-3">Units & Occupancy</h4>
-              ${unitsHTML}
-            </div>
-          </div>
-        `;
-        container.appendChild(propCard);
-      });
-    }
+        const { error } = await supabase
+          .from('rent_ledgers')
+          .update(updateData)
+          .eq('id', ledgerId);
 
-    function getStatusBadgeClass(status) {
-      switch (status) {
-        case 'Occupied': return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
-        case 'Vacant': return 'bg-sky-500/10 text-sky-400 border border-sky-500/20';
-        default: return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+        if (error) throw error;
+
+        await initDashboardData();
+      } catch (err) {
+        alert("Decision update failed: " + err.message);
       }
     }
 
-    // MODAL & HANDLERS
-    function openAddPropertyModal() {
-      if (!currentUser) return alert('Please login first.');
-      document.getElementById('addPropertyModal').classList.remove('hidden');
-    }
-
-    function openEditUnitModal(id, unitNum, rent, status) {
-      document.getElementById('editUnitId').value = id;
-      document.getElementById('editUnitNumber').value = unitNum;
-      document.getElementById('editUnitRent').value = rent;
-      document.getElementById('editUnitStatus').value = status;
-      document.getElementById('editUnitModal').classList.remove('hidden');
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.add('hidden');
-    }
-
-    async function handleAddProperty(e) {
-      e.preventDefault();
-      const name = document.getElementById('propName').value;
-      const location = document.getElementById('propLocation').value;
-
-      const { data, error } = await supabase
-        .from('properties')
-        .insert([{ name, location, landlord_id: currentUser.id }]);
-
-      if (error) {
-        alert('Error adding property: ' + error.message);
+    // --- Authentication Helper ---
+    function updateAuthUI(isLoggedIn) {
+      const btn = document.getElementById('auth-btn');
+      if (isLoggedIn) {
+        btn.innerText = "Log Out";
       } else {
-        closeModal('addPropertyModal');
-        document.getElementById('addPropertyForm').reset();
-        fetchDashboardData();
+        btn.innerText = "Log In";
       }
     }
 
-    async function handleEditUnit(e) {
-      e.preventDefault();
-      const unitId = document.getElementById('editUnitId').value;
-      const unit_number = document.getElementById('editUnitNumber').value;
-      const rent_amount = document.getElementById('editUnitRent').value;
-      const status = document.getElementById('editUnitStatus').value;
-
-      const { data, error } = await supabase
-        .from('units')
-        .update({ unit_number, rent_amount, status })
-        .eq('id', unitId);
-
-      if (error) {
-        alert('Error updating unit: ' + error.message);
+    function handleAuthAction() {
+      if (currentUser) {
+        supabase.auth.signOut().then(() => location.reload());
       } else {
-        closeModal('editUnitModal');
-        fetchDashboardData();
+        // Redirect to your login page or open login modal
+        alert("Redirecting to login...");
       }
     }
   </script>
