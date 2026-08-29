@@ -99,14 +99,21 @@
 
     label { display: block; font-size: 12px; margin: 12px 0 6px; color: #ffffffd0; }
 
-    .login input {
+    .login input, .form-control {
       width: 100%;
-      padding: 13px;
+      padding: 11px 13px;
       border: 1px solid #ffffff4d;
       border-radius: 12px;
       background: #ffffff12;
       color: #fff;
       outline: 0;
+    }
+
+    .form-control {
+      background: #fff;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      margin-bottom: 12px;
     }
 
     .login input::placeholder { color: #ffffff99; }
@@ -287,9 +294,6 @@
       padding: 20px 14px 50px;
     }
 
-    .app-view { display: none; }
-    .app-view.active-view { display: block; }
-
     .title { margin-bottom: 15px; }
     .title h1 { margin: 0; font-size: 25px; }
     .title p { margin: 5px 0; color: #6b7280; }
@@ -322,8 +326,14 @@
       color: #17202a;
       border-radius: 10px;
       padding: 11px;
-      text-align: left;
+      text-align: center;
       font-weight: 700;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
     }
 
     .btn-small {
@@ -340,6 +350,7 @@
     .activity-item {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 12px 0;
       border-bottom: 1px solid var(--border-color);
       font-size: 0.9rem;
@@ -355,6 +366,33 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-success { background: #dcfce7; color: #15803d; }
+    .badge-warning { background: #fef9c3; color: #a16207; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; }
+
+    /* Dynamic Forms & Tables */
+    .table-container { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+    th { background: #f1f5f9; color: var(--text-muted); font-weight: 600; }
+
+    /* Modal Form Overlay */
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-content {
+      background: #fff; width: min(500px, 100%); border-radius: 16px; padding: 20px; max-height: 90vh; overflow-y: auto;
     }
 
     /* =====================================================
@@ -548,7 +586,7 @@
     </header>
 
     <div id="app-layout">
-      <!-- Off-Canvas Menu Drawer -->
+      <!-- Off-Canvas Navigation Drawer -->
       <aside id="mobile-drawer" class="mobile-drawer">
         <div class="drawer-header">
           <h3>Navigation</h3>
@@ -580,6 +618,17 @@
       <button class="btn-small" onclick="markAllNotificationsRead()">Mark all read</button>
     </div>
     <div id="notificationList"></div>
+  </div>
+
+  <!-- MODAL CONTAINER FOR DYNAMIC CREATION FORMS -->
+  <div id="modalContainer" class="modal hidden">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 id="modalTitle">Modal Header</h3>
+        <button onclick="closeModal()" style="background:none; border:none; font-size:20px;">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
   </div>
 
   <script>
@@ -772,7 +821,7 @@
     }
 
     // =====================================================
-    // 5. DATA FETCHING & RENDERING
+    // 5. DATA FETCHING & COMPLETE VIEW RENDERING
     // =====================================================
     async function refresh() {
       cache = {
@@ -810,86 +859,517 @@
       }
     }
 
+    function openModal(title, bodyHtml) {
+      $('modalTitle').textContent = title;
+      $('modalBody').innerHTML = bodyHtml;
+      $('modalContainer').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      $('modalContainer').classList.add('hidden');
+    }
+
     function renderView(id) {
       const container = $('view-container');
 
-      if (id === 'dashboard') {
-        let paid = cache.rent_records.reduce((a, x) => a + Number(x.amount_paid || 0), 0);
-        let due = cache.rent_records.reduce((a, x) => a + Number(x.amount_due || 0), 0);
-        let outstanding = Math.max(0, due - paid);
+      // 1. DASHBOARD / HOME VIEW
+      if (id === 'dashboard' || id === 'home') {
+        if (role === 'landlord') {
+          let paid = cache.rent_records.reduce((a, x) => a + Number(x.amount_paid || 0), 0);
+          let due = cache.rent_records.reduce((a, x) => a + Number(x.amount_due || 0), 0);
+          let outstanding = Math.max(0, due - paid);
 
-        container.innerHTML = `
-          <div class="title">
-            <h1>Landlord Dashboard</h1>
-            <p>Rental Overview and Analytics</p>
-          </div>
-          <div class="stats">
-            <div class="card"><small>Properties</small><div class="big">${cache.properties.length}</div></div>
-            <div class="card"><small>Units</small><div class="big">${cache.units.length}</div></div>
-            <div class="card"><small>Rent Collected</small><div class="big green">${money(paid)}</div></div>
-            <div class="card"><small>Outstanding</small><div class="big red">${money(outstanding)}</div></div>
-          </div>
-          <div class="grid">
-            <div class="card">
-              <h3>Quick Actions</h3>
-              <div class="actions" style="margin-top:12px;">
-                <button class="btn" onclick="navigateTo('rent')">💰 Rent</button>
-                <button class="btn" onclick="navigateTo('properties')">🏘️ Properties</button>
-                <button class="btn" onclick="navigateTo('tenants')">👥 Tenants</button>
-                <button class="btn" onclick="navigateTo('payments')">💳 Payments</button>
+          container.innerHTML = `
+            <div class="title">
+              <h1>Landlord Dashboard</h1>
+              <p>Rental Overview and Analytics</p>
+            </div>
+            <div class="stats">
+              <div class="card"><small>Properties</small><div class="big">${cache.properties.length}</div></div>
+              <div class="card"><small>Units</small><div class="big">${cache.units.length}</div></div>
+              <div class="card"><small>Rent Collected</small><div class="big green">${money(paid)}</div></div>
+              <div class="card"><small>Outstanding</small><div class="big red">${money(outstanding)}</div></div>
+            </div>
+            <div class="grid">
+              <div class="card">
+                <h3>Quick Actions</h3>
+                <div class="actions" style="margin-top:12px;">
+                  <button class="btn" onclick="navigateTo('rent')">💰 Rent</button>
+                  <button class="btn" onclick="navigateTo('properties')">🏘️ Properties</button>
+                  <button class="btn" onclick="navigateTo('tenants')">👥 Tenants</button>
+                  <button class="btn" onclick="navigateTo('payments')">💳 Payments</button>
+                </div>
+              </div>
+              <div class="card">
+                <h3>Recent Payments</h3>
+                <ul class="activity-list" style="margin-top:8px;">
+                  ${cache.payments.length === 0 ? '<li class="activity-item"><span>No transactions found.</span></li>' :
+                    cache.payments.slice(0, 5).map(p => `
+                      <li class="activity-item">
+                        <span>${esc(p.tenant_name || 'Payment')}</span>
+                        <strong class="green">${money(p.amount)}</strong>
+                      </li>
+                    `).join('')
+                  }
+                </ul>
               </div>
             </div>
-            <div class="card">
-              <h3>Recent Payments</h3>
-              <ul class="activity-list" style="margin-top:8px;">
-                ${cache.payments.length === 0 ? '<li class="activity-item"><span>No transactions found.</span></li>' :
-                  cache.payments.slice(0, 5).map(p => `
-                    <li class="activity-item">
-                      <span>${esc(p.tenant_name || 'Payment')}</span>
-                      <strong>${money(p.amount)}</strong>
-                    </li>
+          `;
+        } else {
+          let tenantInfo = cache.tenants[0] || {};
+          let myRent = cache.rent_records.reduce((a, x) => a + Number(x.amount_due || 0), 0);
+          let myPaid = cache.payments.reduce((a, x) => a + Number(x.amount || 0), 0);
+          let due = Math.max(0, myRent - myPaid);
+
+          container.innerHTML = `
+            <div class="title">
+              <h1>Tenant Home</h1>
+              <p>Welcome back, ${esc(profile?.full_name || user.email)}</p>
+            </div>
+            <div class="stats">
+              <div class="card"><small>Current Unit</small><div class="big">${esc(tenantInfo.unit_name || 'N/A')}</div></div>
+              <div class="card"><small>Total Rent Paid</small><div class="big green">${money(myPaid)}</div></div>
+              <div class="card"><small>Balance Due</small><div class="big red">${money(due)}</div></div>
+            </div>
+            <div class="grid">
+              <div class="card">
+                <h3>Quick Actions</h3>
+                <div class="actions" style="margin-top:12px;">
+                  <button class="btn" onclick="navigateTo('myPayments')">💳 Pay Rent</button>
+                  <button class="btn" onclick="navigateTo('myMaintenance')">🔧 Maintenance Request</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        return;
+      }
+
+      // 2. RENT / MY RENT VIEW
+      if (id === 'rent' || id === 'myRent') {
+        container.innerHTML = `
+          <div class="title"><h1>${role === 'landlord' ? 'Rent Ledger' : 'My Rent Ledger'}</h1></div>
+          <div class="card table-container">
+            <table>
+              <thead>
+                <tr><th>Tenant</th><th>Month/Period</th><th>Amount Due</th><th>Amount Paid</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${cache.rent_records.length === 0 ? '<tr><td colspan="5">No rent records found.</td></tr>' :
+                  cache.rent_records.map(r => `
+                    <tr>
+                      <td>${esc(r.tenant_name || 'Tenant')}</td>
+                      <td>${esc(r.period || 'N/A')}</td>
+                      <td>${money(r.amount_due)}</td>
+                      <td class="green">${money(r.amount_paid)}</td>
+                      <td><span class="badge ${r.amount_paid >= r.amount_due ? 'badge-success' : 'badge-danger'}">${r.amount_paid >= r.amount_due ? 'Paid' : 'Pending'}</span></td>
+                    </tr>
                   `).join('')
                 }
-              </ul>
-            </div>
+              </tbody>
+            </table>
           </div>
         `;
         return;
       }
 
+      // 3. PROPERTIES VIEW
+      if (id === 'properties') {
+        container.innerHTML = `
+          <div class="title" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Properties</h1>
+            <button class="btn-small" onclick="showAddPropertyModal()">+ Add Property</button>
+          </div>
+          <div class="grid">
+            ${cache.properties.length === 0 ? '<div class="card"><p>No properties added yet.</p></div>' :
+              cache.properties.map(p => `
+                <div class="card">
+                  <h3>🏘️ ${esc(p.name)}</h3>
+                  <p style="color:#64748b; font-size:13px; margin-top:4px;">📍 ${esc(p.address || 'No address specified')}</p>
+                  <div style="margin-top:10px; font-weight:700;">Units: ${cache.units.filter(u => u.property_id === p.id).length}</div>
+                </div>
+              `).join('')
+            }
+          </div>
+        `;
+        return;
+      }
+
+      // 4. UNITS VIEW
+      if (id === 'units') {
+        container.innerHTML = `
+          <div class="title" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Units</h1>
+            <button class="btn-small" onclick="showAddUnitModal()">+ Add Unit</button>
+          </div>
+          <div class="card table-container">
+            <table>
+              <thead>
+                <tr><th>Unit Name</th><th>Property</th><th>Rent Rate</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${cache.units.length === 0 ? '<tr><td colspan="4">No units created yet.</td></tr>' :
+                  cache.units.map(u => {
+                    let prop = cache.properties.find(p => p.id === u.property_id);
+                    return `
+                      <tr>
+                        <td><strong>${esc(u.name)}</strong></td>
+                        <td>${esc(prop?.name || 'Unassigned')}</td>
+                        <td>${money(u.rent_amount)}</td>
+                        <td><span class="badge ${u.status === 'occupied' ? 'badge-success' : 'badge-warning'}">${esc(u.status || 'Vacant')}</span></td>
+                      </tr>
+                    `;
+                  }).join('')
+                }
+              </tbody>
+            </table>
+          </div>
+        `;
+        return;
+      }
+
+      // 5. TENANTS VIEW
+      if (id === 'tenants') {
+        container.innerHTML = `
+          <div class="title" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Tenants</h1>
+            <button class="btn-small" onclick="showAddTenantModal()">+ Add Tenant</button>
+          </div>
+          <div class="card table-container">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email / Phone</th><th>Assigned Unit</th></tr>
+              </thead>
+              <tbody>
+                ${cache.tenants.length === 0 ? '<tr><td colspan="3">No tenants onboarded.</td></tr>' :
+                  cache.tenants.map(t => `
+                    <tr>
+                      <td><strong>${esc(t.name)}</strong></td>
+                      <td>${esc(t.email || t.phone || 'N/A')}</td>
+                      <td>${esc(t.unit_name || 'Unassigned')}</td>
+                    </tr>
+                  `).join('')
+                }
+              </tbody>
+            </table>
+          </div>
+        `;
+        return;
+      }
+
+      // 6. PAYMENTS / MY PAYMENTS VIEW
       if (id === 'payments' || id === 'myPayments') {
         container.innerHTML = `
-          <div class="title"><h1>Payment Records</h1></div>
-          <div class="card">
-            <ul class="activity-list">
-              ${cache.payments.length === 0 ? '<li class="activity-item"><span>No payments found.</span></li>' :
-                cache.payments.map(p => `
-                  <li class="activity-item">
-                    <span>${esc(p.tenant_name || 'Payment')} - ${esc(p.date || '')}</span>
-                    <strong class="green">${money(p.amount)}</strong>
-                  </li>
-                `).join('')
-              }
-            </ul>
+          <div class="title" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Payment Records</h1>
+            ${role === 'tenant' ? '<button class="btn-small" onclick="showMakePaymentModal()">+ Submit Payment</button>' : ''}
+          </div>
+          <div class="card table-container">
+            <table>
+              <thead>
+                <tr><th>Tenant</th><th>Date</th><th>Amount</th><th>Method</th></tr>
+              </thead>
+              <tbody>
+                ${cache.payments.length === 0 ? '<tr><td colspan="4">No payments recorded.</td></tr>' :
+                  cache.payments.map(p => `
+                    <tr>
+                      <td>${esc(p.tenant_name || 'Payment')}</td>
+                      <td>${esc(p.date || 'N/A')}</td>
+                      <td class="green"><strong>${money(p.amount)}</strong></td>
+                      <td>${esc(p.method || 'Cash / Mobile Money')}</td>
+                    </tr>
+                  `).join('')
+                }
+              </tbody>
+            </table>
           </div>
         `;
         return;
       }
 
-      // Fallback Module View Generator for structural consistency
-      container.innerHTML = `
-        <div class="title">
-          <h1>${id.charAt(0).toUpperCase() + id.slice(1)}</h1>
-          <p>MavRent V14.3 Active View</p>
-        </div>
-        <div class="card">
-          <p>Data loaded for <strong>${esc(id)}</strong>. All components ready.</p>
-        </div>
-      `;
+      // 7. MAINTENANCE / MY MAINTENANCE VIEW
+      if (id === 'maintenance' || id === 'myMaintenance') {
+        container.innerHTML = `
+          <div class="title" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Maintenance</h1>
+            <button class="btn-small" onclick="showAddMaintenanceModal()">+ New Ticket</button>
+          </div>
+          <div class="card table-container">
+            <table>
+              <thead>
+                <tr><th>Issue</th><th>Requested By</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                ${cache.maintenance_requests.length === 0 ? '<tr><td colspan="3">No active maintenance requests.</td></tr>' :
+                  cache.maintenance_requests.map(m => `
+                    <tr>
+                      <td><strong>${esc(m.title || m.description)}</strong></td>
+                      <td>${esc(m.tenant_name || 'Tenant')}</td>
+                      <td><span class="badge ${m.status === 'completed' ? 'badge-success' : 'badge-warning'}">${esc(m.status || 'Pending')}</span></td>
+                    </tr>
+                  `).join('')
+                }
+              </tbody>
+            </table>
+          </div>
+        `;
+        return;
+      }
+
+      // 8. EXPENSES VIEW
+      if (id === 'expenses') {
+        container.innerHTML = `
+          <div class="title" style="display:flex; justify-content:space-between; align-items:center;">
+            <h1>Property Expenses</h1>
+            <button class="btn-small" onclick="showAddExpenseModal()">+ Add Expense</button>
+          </div>
+          <div class="card table-container">
+            <table>
+              <thead>
+                <tr><th>Category</th><th>Description</th><th>Amount</th></tr>
+              </thead>
+              <tbody>
+                ${cache.expenses.length === 0 ? '<tr><td colspan="3">No expenses recorded.</td></tr>' :
+                  cache.expenses.map(e => `
+                    <tr>
+                      <td><strong>${esc(e.category || 'General')}</strong></td>
+                      <td>${esc(e.description || '-')}</td>
+                      <td class="red">${money(e.amount)}</td>
+                    </tr>
+                  `).join('')
+                }
+              </tbody>
+            </table>
+          </div>
+        `;
+        return;
+      }
+
+      // 9. RECEIPTS / MY RECEIPTS VIEW
+      if (id === 'receipts' || id === 'myReceipts') {
+        container.innerHTML = `
+          <div class="title"><h1>Receipts</h1></div>
+          <div class="grid">
+            ${cache.receipts.length === 0 ? '<div class="card"><p>No issued receipts available.</p></div>' :
+              cache.receipts.map(r => `
+                <div class="card">
+                  <h3>Receipt #${esc(r.id.slice(0, 8))}</h3>
+                  <p style="margin-top:6px;">Paid: <strong>${money(r.amount)}</strong></p>
+                  <p style="font-size:12px; color:#64748b;">Issued on: ${esc(r.created_at || 'N/A')}</p>
+                </div>
+              `).join('')
+            }
+          </div>
+        `;
+        return;
+      }
+
+      // 10. REPORTS VIEW
+      if (id === 'reports') {
+        let totalIncome = cache.payments.reduce((a, x) => a + Number(x.amount || 0), 0);
+        let totalExpenses = cache.expenses.reduce((a, x) => a + Number(x.amount || 0), 0);
+        let netProfit = totalIncome - totalExpenses;
+
+        container.innerHTML = `
+          <div class="title"><h1>Financial Reports</h1></div>
+          <div class="stats">
+            <div class="card"><small>Gross Revenue</small><div class="big green">${money(totalIncome)}</div></div>
+            <div class="card"><small>Total Expenses</small><div class="big red">${money(totalExpenses)}</div></div>
+            <div class="card"><small>Net Operating Income</small><div class="big ${netProfit >= 0 ? 'green' : 'red'}">${money(netProfit)}</div></div>
+          </div>
+        `;
+        return;
+      }
+
+      // 11. GUIDE VIEW
+      if (id === 'guide') {
+        container.innerHTML = `
+          <div class="title"><h1>System Guide & Help</h1></div>
+          <div class="card">
+            <h3>How MavRent Works</h3>
+            <p style="margin-top:8px; line-height:1.5;">Welcome to MavRent. Use the side navigation drawer to manage rental properties, view tenant payment records, generate rent receipts, track expenses, and respond to maintenance tickets seamlessly.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // 12. PROFILE VIEW
+      if (id === 'profile') {
+        container.innerHTML = `
+          <div class="title"><h1>Profile Settings</h1></div>
+          <div class="card" style="max-width:500px;">
+            <form onsubmit="saveProfile(event)">
+              <label>Full Name</label>
+              <input id="profileName" class="form-control" type="text" value="${esc(profile?.full_name || '')}" placeholder="Your Full Name">
+              
+              <label>Phone Number</label>
+              <input id="profilePhone" class="form-control" type="text" value="${esc(profile?.phone || '')}" placeholder="Your Phone Number">
+              
+              <button class="btn btn-primary" type="submit" style="width:100%; margin-top:10px;">Save Profile</button>
+            </form>
+          </div>
+        `;
+        return;
+      }
     }
 
     // =====================================================
-    // 6. NOTIFICATIONS & PWA PUSH SYSTEM
+    // 6. ACTION MODALS & DATA MUTATION HANDLERS
+    // =====================================================
+    function showAddPropertyModal() {
+      openModal('Add Property', `
+        <form onsubmit="saveProperty(event)">
+          <label>Property Name</label>
+          <input id="propName" class="form-control" required placeholder="e.g. Sunrise Apartments">
+          <label>Address</label>
+          <input id="propAddress" class="form-control" required placeholder="e.g. Plot 12, Kampala">
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" type="submit">Save Property</button>
+        </form>
+      `);
+    }
+
+    async function saveProperty(e) {
+      e.preventDefault();
+      let name = $('propName').value.trim();
+      let address = $('propAddress').value.trim();
+      await sb.from('properties').insert({ name, address, landlord_id: user.id });
+      closeModal();
+      navigateTo('properties');
+    }
+
+    function showAddUnitModal() {
+      let props = cache.properties;
+      openModal('Add Unit', `
+        <form onsubmit="saveUnit(event)">
+          <label>Select Property</label>
+          <select id="unitPropId" class="form-control" required>
+            ${props.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('')}
+          </select>
+          <label>Unit Name/Number</label>
+          <input id="unitName" class="form-control" required placeholder="e.g. Unit A1">
+          <label>Monthly Rent (UGX)</label>
+          <input id="unitRent" class="form-control" type="number" required placeholder="e.g. 500000">
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" type="submit">Save Unit</button>
+        </form>
+      `);
+    }
+
+    async function saveUnit(e) {
+      e.preventDefault();
+      let property_id = $('unitPropId').value;
+      let name = $('unitName').value.trim();
+      let rent_amount = $('unitRent').value;
+      await sb.from('units').insert({ property_id, name, rent_amount, status: 'vacant' });
+      closeModal();
+      navigateTo('units');
+    }
+
+    function showAddTenantModal() {
+      let units = cache.units;
+      openModal('Add Tenant', `
+        <form onsubmit="saveTenant(event)">
+          <label>Tenant Name</label>
+          <input id="tenantName" class="form-control" required placeholder="e.g. John Doe">
+          <label>Email</label>
+          <input id="tenantEmail" class="form-control" type="email" placeholder="tenant@example.com">
+          <label>Assign Unit</label>
+          <select id="tenantUnit" class="form-control">
+            ${units.map(u => `<option value="${u.name}">${esc(u.name)}</option>`).join('')}
+          </select>
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" type="submit">Save Tenant</button>
+        </form>
+      `);
+    }
+
+    async function saveTenant(e) {
+      e.preventDefault();
+      let name = $('tenantName').value.trim();
+      let email = $('tenantEmail').value.trim();
+      let unit_name = $('tenantUnit').value;
+      await sb.from('tenants').insert({ name, email, unit_name, landlord_id: user.id });
+      closeModal();
+      navigateTo('tenants');
+    }
+
+    function showAddExpenseModal() {
+      openModal('Add Expense', `
+        <form onsubmit="saveExpense(event)">
+          <label>Category</label>
+          <input id="expCat" class="form-control" required placeholder="e.g. Repairs, Utilities">
+          <label>Description</label>
+          <input id="expDesc" class="form-control" required placeholder="e.g. Fixed water pipe">
+          <label>Amount (UGX)</label>
+          <input id="expAmt" class="form-control" type="number" required placeholder="e.g. 50000">
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" type="submit">Save Expense</button>
+        </form>
+      `);
+    }
+
+    async function saveExpense(e) {
+      e.preventDefault();
+      let category = $('expCat').value.trim();
+      let description = $('expDesc').value.trim();
+      let amount = $('expAmt').value;
+      await sb.from('expenses').insert({ category, description, amount, landlord_id: user.id });
+      closeModal();
+      navigateTo('expenses');
+    }
+
+    function showAddMaintenanceModal() {
+      openModal('Request Maintenance', `
+        <form onsubmit="saveMaintenance(event)">
+          <label>Issue Description</label>
+          <input id="maintTitle" class="form-control" required placeholder="e.g. Leaking Faucet">
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" type="submit">Submit Request</button>
+        </form>
+      `);
+    }
+
+    async function saveMaintenance(e) {
+      e.preventDefault();
+      let title = $('maintTitle').value.trim();
+      let tenant_name = profile?.full_name || user.email;
+      let tenant_id = cache.tenants[0]?.id || user.id;
+      let landlord_id = cache.tenants[0]?.landlord_id || user.id;
+      await sb.from('maintenance_requests').insert({ title, description: title, tenant_name, tenant_id, landlord_id, status: 'pending' });
+      closeModal();
+      navigateTo(role === 'landlord' ? 'maintenance' : 'myMaintenance');
+    }
+
+    function showMakePaymentModal() {
+      openModal('Submit Rent Payment', `
+        <form onsubmit="savePayment(event)">
+          <label>Amount (UGX)</label>
+          <input id="payAmt" class="form-control" type="number" required placeholder="e.g. 500000">
+          <button class="btn btn-primary" style="width:100%; margin-top:10px;" type="submit">Pay Now</button>
+        </form>
+      `);
+    }
+
+    async function savePayment(e) {
+      e.preventDefault();
+      let amount = $('payAmt').value;
+      let tenant_name = profile?.full_name || user.email;
+      let tenant_id = cache.tenants[0]?.id || user.id;
+      let landlord_id = cache.tenants[0]?.landlord_id || user.id;
+      let date = new Date().toISOString().split('T')[0];
+      await sb.from('payments').insert({ amount, tenant_name, tenant_id, landlord_id, date, method: 'Mobile Money' });
+      closeModal();
+      navigateTo('myPayments');
+    }
+
+    async function saveProfile(e) {
+      e.preventDefault();
+      let full_name = $('profileName').value.trim();
+      let phone = $('profilePhone').value.trim();
+      await sb.from('profiles').upsert({ id: user.id, full_name, phone, role });
+      profile = { ...profile, full_name, phone };
+      buildNav();
+      alert('Profile updated successfully!');
+    }
+
+    // =====================================================
+    // 7. NOTIFICATIONS & PWA PUSH SYSTEM
     // =====================================================
     function toggleNotifications() {
       $('notificationPanel').classList.toggle('hidden');
