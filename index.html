@@ -1,1290 +1,425 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<!-- =====================================================
-     MAVRENT PWA V14.3 STABLE
-===================================================== -->
-
-<!-- MAVRENT V14.3 STABLE LOADING SCREEN -->
-<div id="mavLoading" class="mav-loading">
-  <div class="mav-loading-logo">M</div>
-  <div class="mav-loading-name">Mav<span>Rent</span></div>
-  <div class="mav-loading-text">Rental management platform</div>
-  <div class="mav-spinner"></div>
-</div>
-
-<!-- ONLINE STATUS -->
-<div id="connectionStatus" class="connection-status online">
-  <span class="connection-dot"></span>
-  <span id="connectionText">Online</span>
-</div>
-
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-180.png">
-<meta name="theme-color" content="#111827">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MavRent">
-
-<title>MavRent V14.3</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-*{box-sizing:border-box}
-
-body{
-margin:0;
-font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-background:#f4f5f7;
-color:#17202a
-}
-
-button,input,select,textarea{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-
-.auth{
-min-height:100vh;
-display:grid;
-place-items:center;
-padding:25px;
-background:
-radial-gradient(circle at 15% 15%,#34b4ff55,transparent 30%),
-radial-gradient(circle at 85% 20%,#0062ff66,transparent 34%),
-linear-gradient(135deg,#061b45,#0a4da2 48%,#03163d)
-}
-
-.login{
-width:min(450px,100%);
-padding:30px;
-color:#fff;
-border:1px solid #ffffff44;
-border-radius:26px;
-background:#ffffff18;
-backdrop-filter:blur(22px);
-box-shadow:0 28px 80px #00000055
-}
-
-.brand{font-size:32px;font-weight:900}
-.brand span{color:#67c7ff}
-.muted{color:#ffffffb8;font-size:13px}
-
-.role{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:9px;
-margin:22px 0
-}
-
-.role button,.secondary{
-padding:13px;
-border:1px solid #ffffff44;
-background:#ffffff12;
-color:#fff;
-border-radius:12px
-}
-
-.role .sel{
-background:#fff;
-color:#0869d7
-}
-
-label{
-display:block;
-font-size:12px;
-margin:12px 0 6px;
-color:#ffffffd0
-}
-
-.login input{
-width:100%;
-padding:13px;
-border:1px solid #ffffff4d;
-border-radius:12px;
-background:#ffffff12;
-color:#fff;
-outline:0
-}
-
-.login input::placeholder{color:#ffffff99}
-
-.primary{
-width:100%;
-margin-top:12px;
-padding:13px;
-border:0;
-border-radius:12px;
-background:linear-gradient(135deg,#087cff,#00b8ff);
-color:#fff;
-font-weight:800
-}
-
-.secondary{
-width:100%;
-margin-top:10px;
-font-weight:700
-}
-
-.link{
-background:none;
-border:0;
-color:#bfe7ff;
-margin-top:12px;
-text-decoration:underline
-}
-
-.message,.notice{
-padding:11px;
-border-radius:10px;
-font-size:13px;
-margin-top:12px
-}
-
-.error{
-background:#fff0f0;
-color:#8f2222
-}
-
-.success{
-background:#ecfdf3;
-color:#08743f
-}
-
-header{
-background:#111827;
-color:#fff;
-padding:15px;
-position:sticky;
-top:0;
-z-index:20
-}
-
-.bar,nav,main{
-max-width:1100px;
-margin:auto
-}
-
-.bar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px
-}
-
-.small{font-size:22px}
-
-.userbox{
-font-size:12px;
-display:flex;
-gap:7px;
-align-items:center
-}
-
-.logout,.notifyBtn{
-background:#273244;
-color:#fff;
-border:0;
-border-radius:99px;
-padding:8px 10px
-}
-
-.notifyBtn{
-position:relative;
-font-size:17px
-}
-
-.notifyCount{
-position:absolute;
-right:-5px;
-top:-6px;
-background:#ef4444;
-border-radius:50%;
-font-size:10px;
-min-width:18px;
-height:18px;
-display:grid;
-place-items:center;
-border:2px solid #111827
-}
-
-nav{
-display:flex;
-gap:6px;
-overflow:auto;
-margin-top:12px
-}
-
-nav button{
-border:0;
-background:#273244;
-color:#dbe1e8;
-border-radius:99px;
-padding:9px 15px;
-white-space:nowrap
-}
-
-nav button.active{
-background:#fff;
-color:#111827
-}
-
-main{
-padding:20px 14px 50px
-}
-
-.title{margin-bottom:15px}
-
-.title h1{
-margin:0;
-font-size:25px
-}
-
-.title p{
-margin:5px 0;
-color:#6b7280
-}
-
-.stats{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px
-}
-
-.card{
-background:#fff;
-border:1px solid #e3e6ea;
-border-radius:14px;
-padding:16px;
-margin-bottom:14px
-}
-
-.big{
-font-size:22px;
-font-weight:800;
-margin-top:6px
-}
-
-.green{color:#13844b}
-.orange{color:#b86b00}
-.red{color:#c93636}
-.blue{color:#1769d1}
-
-.grid,.formgrid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px
-}
-
-.full{grid-column:1/-1}
-
-.actions{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:9px
-}
-
-.btn{
-border:1px solid #d9dde3;
-background:#fff;
-color:#17202a;
-border-radius:10px;
-padding:11px;
-text-align:left;
-font-weight:700
-}
-
-.danger{
-background:#fff0f0;
-color:#a72828
-}
-
-.successBtn{
-background:#ecfdf3;
-color:#08743f
-}
-
-.warningBtn{
-background:#fff8e6;
-color:#966100
-}
-
-#app input,
-#app select,
-#app textarea{
-width:100%;
-padding:13px 14px;
-border:1px solid #d9dde3;
-border-radius:12px;
-background:#fff;
-color:#17202a!important;
-caret-color:#17202a;
-outline:0
-}
-
-#app input:focus,
-#app select:focus,
-#app textarea:focus{
-border-color:#087cff;
-box-shadow:0 0 0 3px #087cff1f
-}
-
-.tablewrap{overflow:auto}
-
-.table{
-width:100%;
-border-collapse:collapse;
-font-size:13px
-}
-
-.table th,.table td{
-padding:10px 7px;
-border-bottom:1px solid #eceef1;
-text-align:left;
-vertical-align:top;
-white-space:nowrap
-}
-
-.wrap{
-white-space:normal!important;
-min-width:200px
-}
-
-.badge{
-display:inline-block;
-padding:4px 8px;
-border-radius:20px;
-background:#eef1f5;
-font-size:11px
-}
-
-.badge.pending{
-background:#fff4d6;
-color:#956300
-}
-
-.badge.confirmed,
-.badge.completed,
-.badge.paid{
-background:#dcfce7;
-color:#166534
-}
-
-.badge.rejected,
-.badge.cancelled,
-.badge.overdue{
-background:#fee2e2;
-color:#991b1b
-}
-
-.badge.partial{
-background:#fef3c7;
-color:#92400e
-}
-
-.badge.in_progress{
-background:#dbeafe;
-color:#1d4ed8
-}
-
-.empty,.loading{
-text-align:center;
-padding:30px;
-color:#737b87
-}
-
-.code{
-font-family:monospace;
-font-weight:800;
-letter-spacing:.5px
-}
-
-.profileHero{
-display:flex;
-align-items:center;
-gap:15px;
-margin-bottom:16px
-}
-
-.avatar{
-width:68px;
-height:68px;
-border-radius:50%;
-display:grid;
-place-items:center;
-background:linear-gradient(135deg,#087cff,#00b8ff);
-color:#fff;
-font-size:25px;
-font-weight:900
-}
-
-.profileId{
-background:#eef2ff;
-border-radius:10px;
-padding:10px;
-font-family:monospace;
-font-weight:800
-}
-
-/* =====================================================
-   NOTIFICATIONS
-===================================================== */
-
-.notificationPanel{
-position:fixed;
-right:20px;
-top:75px;
-width:min(390px,calc(100vw - 30px));
-max-height:75vh;
-overflow:auto;
-background:#fff;
-border:1px solid #e2e5e9;
-border-radius:16px;
-box-shadow:0 20px 60px #0003;
-z-index:100
-}
-
-.notificationHead{
-padding:15px;
-border-bottom:1px solid #eceef1;
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px
-}
-
-.notificationItem{
-padding:14px;
-border-bottom:1px solid #eceef1;
-cursor:pointer
-}
-
-.notificationItem:hover{
-background:#f8fafc
-}
-
-.notificationItem.unread{
-background:#eff6ff
-}
-
-.notificationTitle{
-font-weight:800
-}
-
-.notificationMessage{
-font-size:12px;
-color:#5f6875;
-margin-top:4px
-}
-
-.notificationDate{
-font-size:10px;
-color:#9299a3;
-margin-top:7px
-}
-
-/* =====================================================
-   MOBILE & LOADING STYLES
-===================================================== */
-
-.mav-loading{
-position:fixed;
-inset:0;
-z-index:9999;
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-background:
-  radial-gradient(circle at 20% 20%,#34b4ff44,transparent 30%),
-  linear-gradient(135deg,#061b45,#0869d7 55%,#03163d);
-color:#fff;
-transition:opacity .35s ease,visibility .35s ease;
-}
-
-.mav-loading.hide{
-opacity:0;
-visibility:hidden;
-pointer-events:none;
-}
-
-.mav-loading-logo{
-width:82px;
-height:82px;
-border-radius:24px;
-display:grid;
-place-items:center;
-background:linear-gradient(135deg,#087cff,#00b8ff);
-box-shadow:0 20px 50px #0005;
-font-size:42px;
-font-weight:900;
-}
-
-.mav-loading-name{
-margin-top:18px;
-font-size:32px;
-font-weight:900;
-}
-
-.mav-loading-name span{
-color:#67c7ff;
-}
-
-.mav-loading-text{
-margin-top:5px;
-color:#ffffffaa;
-font-size:13px;
-}
-
-.mav-spinner{
-width:25px;
-height:25px;
-margin-top:25px;
-border:3px solid #ffffff40;
-border-top-color:#fff;
-border-radius:50%;
-animation:mavspin .8s linear infinite;
-}
-
-@keyframes mavspin{
-to{transform:rotate(360deg)}
-}
-
-.connection-status{
-position:fixed;
-right:12px;
-bottom:14px;
-z-index:90;
-display:flex;
-align-items:center;
-gap:7px;
-padding:7px 11px;
-border-radius:999px;
-background:#ffffff;
-border:1px solid #e5e7eb;
-box-shadow:0 5px 20px #0002;
-font-size:11px;
-font-weight:800;
-transition:.25s;
-}
-
-.connection-dot{
-width:8px;
-height:8px;
-border-radius:50%;
-background:#16a34a;
-}
-
-.connection-status.offline{
-color:#991b1b;
-}
-
-.connection-status.offline .connection-dot{
-background:#ef4444;
-}
-
-@media(max-width:700px){
-body{
-  padding-bottom:70px;
-}
-
-header{
-  padding:11px 10px;
-}
-
-.bar{
-  min-height:42px;
-}
-
-.brand.small{
-  font-size:21px;
-}
-
-.userbox{
-  gap:5px;
-}
-
-.logout{
-  padding:8px;
-  font-size:0;
-}
-
-.logout::after{
-  content:"↪";
-  font-size:18px;
-}
-
-nav{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  z-index:80;
-  height:64px;
-  margin:0;
-  padding:6px 5px calc(6px + env(safe-area-inset-bottom));
-  background:#111827;
-  border-top:1px solid #ffffff18;
-  display:flex;
-  justify-content:space-around;
-  gap:2px;
-  overflow:hidden;
-}
-
-nav button{
-  flex:1;
-  min-width:0;
-  padding:6px 3px;
-  border-radius:9px;
-  background:transparent;
-  color:#aeb7c5;
-  font-size:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  white-space:normal;
-}
-
-nav button.active{
-  background:#fff;
-  color:#111827;
-}
-
-main{
-  padding:15px 10px 35px;
-}
-
-.card{
-  border-radius:16px;
-  padding:14px;
-}
-
-.title{
-  margin-bottom:12px;
-}
-
-.title h1{
-  font-size:21px;
-}
-
-.stats{
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-}
-
-.stats .card{
-  padding:12px;
-  margin-bottom:0;
-}
-
-.stats .big{
-  font-size:17px;
-  overflow-wrap:anywhere;
-}
-
-#app input,
-#app select,
-#app textarea{
-  min-height:48px;
-  font-size:16px;
-}
-
-.primary,
-.secondary,
-.btn{
-  min-height:46px;
-}
-
-.tablewrap{
-  margin:0 -5px;
-}
-
-.notificationPanel{
-  top:62px;
-  right:8px;
-  width:calc(100vw - 16px);
-  max-height:70vh;
-}
-
-.connection-status{
-  bottom:76px;
-  right:8px;
-  opacity:.9;
-}
-}
-</style>
-</head>
-
-<body>
-
-<!-- =====================================================
-     LOGIN
-===================================================== -->
-
-<div id="auth" class="auth">
-  <div class="login">
-    <div class="brand">Mav<span>Rent</span></div>
-    <div class="muted">Rental management platform</div>
-
-    <div class="role">
-      <button id="landlordRole" class="sel" type="button" onclick="chooseRole('landlord')">🏢 Landlord</button>
-      <button id="tenantRole" type="button" onclick="chooseRole('tenant')">👤 Tenant</button>
-    </div>
-
-    <form id="loginForm">
-      <label>Email</label>
-      <input id="email" type="email" required placeholder="you@example.com">
-
-      <label>Password</label>
-      <input id="password" type="password" required placeholder="Enter password">
-
-      <button class="primary" type="submit">Login</button>
-    </form>
-
-    <button class="secondary" onclick="signup()">Create account</button>
-    <button class="link" onclick="resetPassword()">Forgot password?</button>
-
-    <div id="authMsg" class="message hidden"></div>
-  </div>
-</div>
-
-<!-- =====================================================
-     APPLICATION
-===================================================== -->
-
-<div id="app" class="hidden">
-  <header>
-    <div class="bar">
-      <div class="brand small">Mav<span>Rent</span></div>
-
-      <div class="userbox">
-        <span id="who"></span>
-
-        <button class="notifyBtn" onclick="toggleNotifications()" title="Notifications">
-          🔔
-          <span id="notifyCount" class="notifyCount hidden">0</span>
-        </button>
-
-        <button class="logout" onclick="logout()">Log out</button>
-      </div>
-    </div>
-
-    <nav id="nav"></nav>
-  </header>
-
-  <main id="main"></main>
-</div>
-
-<!-- =====================================================
-     NOTIFICATION PANEL
-===================================================== -->
-
-<div id="notificationPanel" class="notificationPanel hidden">
-  <div class="notificationHead">
-    <h3 style="margin:0">🔔 Notifications</h3>
-    <button class="btn" onclick="markAllNotificationsRead()">Mark all read</button>
-  </div>
-  <div id="notificationList"></div>
-</div>
-
-<script>
-
-/* =====================================================
-   STARTUP SAFETY
-===================================================== */
-window.addEventListener('load',()=>{
-  const loader=document.getElementById('mavLoading');
-  if(loader){
-    setTimeout(()=>loader.classList.add('hide'),700);
-  }
-});
-
-/* =====================================================
-   ONLINE STATUS MONITOR
-===================================================== */
-function updateOnlineStatus(){
-  const statusEl = $('connectionStatus');
-  const textEl = $('connectionText');
-  if(!statusEl) return;
-  if(navigator.onLine){
-    statusEl.className = 'connection-status online';
-    textEl.textContent = 'Online';
-  } else {
-    statusEl.className = 'connection-status offline';
-    textEl.textContent = 'Offline';
-  }
-}
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-/* =====================================================
-   PWA SERVICE WORKER
-===================================================== */
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js')
-      .then(reg=>console.log('MavRent SW registered:', reg.scope))
-      .catch(err=>console.error('MavRent SW registration failed:', err));
-  });
-}
-
-/* =====================================================
-   SUPABASE INITIALIZATION
-===================================================== */
-const SUPABASE_URL = 'https://wborvbuqdiscoasnsrwa.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
-
-let sb=null;
-if(window.supabase && typeof window.supabase.createClient==='function'){
-  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-}else{
-  console.error('MavRent: Supabase library did not load.');
-  window.addEventListener('load',()=>{
-    const box=document.getElementById('authMsg');
-    if(box){
-      box.textContent='MavRent could not connect to its login service. Please refresh.';
-      box.className='message error';
-      box.classList.remove('hidden');
-    }
-  });
-}
-
-/* =====================================================
-   GLOBAL STATE
-===================================================== */
-let role='landlord';
-let user=null;
-let profile=null;
-let notifications=[];
-let channel=null;
-let loading=false;
-
-let cache={
-  properties:[],
-  units:[],
-  tenants:[],
-  registeredTenants:[],
-  payments:[],
-  maintenance_requests:[],
-  expenses:[],
-  receipts:[],
-  rent_records:[]
-};
-
-/* =====================================================
-   HELPERS
-===================================================== */
-const $=x=>document.getElementById(x);
-const money=n=>'UGX '+Number(n||0).toLocaleString('en-US');
-const today=()=>new Date().toISOString().slice(0,10);
-
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({
-  '&':'&amp;',
-  '<':'&lt;',
-  '>':'&gt;',
-  '"':'&quot;',
-  "'":'&#039;'
-}[m]));
-
-function rentBalance(r){
-  return Math.max(0, Number(r.amount_due||0)-Number(r.amount_paid||0));
-}
-
-function msg(t,c='error'){
-  let x=$('authMsg');
-  if(!x) return;
-  x.textContent=t;
-  x.className='message '+c;
-  x.classList.remove('hidden');
-}
-
-/* =====================================================
-   LOGIN & AUTH
-===================================================== */
-function chooseRole(r){
-  role=r;
-  $('landlordRole').classList.toggle('sel',r==='landlord');
-  $('tenantRole').classList.toggle('sel',r==='tenant');
-}
-
-async function signup(){
-  let email=$('email').value.trim();
-  let password=$('password').value;
-
-  if(!email) return msg('Enter your email.');
-  if(password.length<6) return msg('Password must be at least 6 characters.');
-
-  msg('Creating account...','success');
-
-  let r=await sb.auth.signUp({
-    email,
-    password,
-    options:{ data:{ role, full_name:'', phone:'' } }
-  });
-
-  if(r.error) return msg(r.error.message);
-
-  if(r.data.session){
-    user=r.data.user;
-    await loadApp();
-  }else{
-    msg('Account created. Check your email to confirm, then log in.','success');
-  }
-}
-
-async function resetPassword(){
-  let e=$('email').value.trim();
-  if(!e) return msg('Enter your email first.');
-
-  let r=await sb.auth.resetPasswordForEmail(e,{ redirectTo:location.origin });
-  if(r.error) return msg(r.error.message);
-
-  msg('Password reset email sent.','success');
-}
-
-$('loginForm').onsubmit=async e=>{
-  e.preventDefault();
-  msg('Logging in...','success');
-
-  let r=await sb.auth.signInWithPassword({
-    email:$('email').value.trim(),
-    password:$('password').value
-  });
-
-  if(r.error) return msg(r.error.message);
-
-  user=r.data.user;
-  await loadApp();
-};
-
-/* =====================================================
-   PROFILE & APP INITIALIZATION
-===================================================== */
-async function loadProfile(){
-  let r=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
-  if(r.error){
-    console.error(r.error);
-    return null;
-  }
-  return r.data;
-}
-
-async function loadApp(){
-  if(!user||loading) return;
-  loading=true;
-
-  profile=await loadProfile();
-  role=profile?.role || user.user_metadata?.role || role;
-  if(!['landlord','tenant'].includes(role)) role='tenant';
-
-  $('auth').classList.add('hidden');
-  $('app').classList.remove('hidden');
-
-  buildNav();
-  await refresh();
-  await loadNotifications();
-
-  show(role==='landlord'?'dashboard':'home',false);
-  startRealtime();
-
-  loading=false;
-}
-
-async function logout(){
-  if(channel) await sb.removeChannel(channel);
-  await sb.auth.signOut();
-  location.reload();
-}
-
-/* =====================================================
-   DATA FETCHING & REFRESH
-===================================================== */
-function dbErr(t,e){
-  console.error(t,e);
-  $('main').innerHTML=`
-    <div class="card">
-      <h2>Database error</h2>
-      <div class="notice error">
-        <b>${esc(t)}</b><br>${esc(e?.message||e)}
-      </div>
-    </div>
-  `;
-}
-
-async function refresh(){
-  cache={
-    properties:[], units:[], tenants:[], registeredTenants:[],
-    payments:[], maintenance_requests:[], expenses:[], receipts:[], rent_records:[]
-  };
-
-  if(role==='landlord'){
-    let r=await sb.from('profiles').select('*').eq('role','tenant');
-    if(r.error) return dbErr('profiles',r.error);
-    cache.registeredTenants=r.data||[];
-
-    r=await sb.from('properties').select('*').eq('landlord_id',user.id);
-    if(r.error) return dbErr('properties',r.error);
-    cache.properties=r.data||[];
-
-    let ids=cache.properties.map(x=>x.id);
-    if(ids.length){
-      r=await sb.from('units').select('*').in('property_id',ids);
-      if(r.error) return dbErr('units',r.error);
-      cache.units=r.data||[];
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MavRent - Property Management</title>
+  
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <link rel="apple-touch-icon" href="/icon-180.png" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* Global Styles & Variables */
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --drawer-width: 280px;
     }
 
-    for(let t of ['tenants','payments','maintenance_requests','expenses','receipts']){
-      r=await sb.from(t).select('*').eq('landlord_id',user.id);
-      if(r.error) return dbErr(t,r.error);
-      cache[t]=r.data||[];
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    r=await sb.from('rent_records').select('*').eq('landlord_id',user.id);
-    if(r.error) return dbErr('rent_records',r.error);
-    cache.rent_records=r.data||[];
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      -webkit-tap-highlight-color: transparent;
+      -webkit-overflow-scrolling: touch;
+    }
 
-  }else{
-    let r=await sb.from('tenants').select('*').eq('profile_id',user.id);
-    if(r.error) return dbErr('tenants',r.error);
-    cache.tenants=r.data||[];
+    /* Mobile Navigation Header */
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      padding: 0 16px;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
 
-    let tids=cache.tenants.map(x=>x.id);
-    if(tids.length){
-      for(let t of ['payments','maintenance_requests','receipts','rent_records']){
-        r=await sb.from(t).select('*').in('tenant_id',tids);
-        if(r.error) return dbErr(t,r.error);
-        cache[t]=r.data||[];
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+    }
+
+    .app-title {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+
+    /* Off-Canvas Slide-Out Mobile Menu (GPU Accelerated) */
+    .mobile-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--drawer-width);
+      height: 100vh;
+      background-color: var(--card-bg);
+      z-index: 1000;
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mobile-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .drawer-header h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .drawer-links {
+      display: flex;
+      flex-direction: column;
+      padding: 12px 0;
+    }
+
+    .drawer-links a {
+      padding: 14px 20px;
+      color: var(--text-main);
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      border-left: 4px solid transparent;
+      transition: background 0.15s ease;
+    }
+
+    .drawer-links a:active, .drawer-links a.active {
+      background-color: #eff6ff;
+      border-left-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Drawer Overlay Backdrop */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Lightweight Dashboard Container */
+    .dashboard-container {
+      padding: 16px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    /* Notification Banner Prompt */
+    .notification-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .notification-banner p {
+      font-size: 0.9rem;
+      color: #1e40af;
+    }
+
+    .btn-small {
+      background-color: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Top Summary Metrics Cards */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .metric-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: left;
+    }
+
+    .metric-card span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-card h2 {
+      font-size: 1.4rem;
+      margin-top: 4px;
+      color: var(--text-main);
+    }
+
+    /* Recent Activity List */
+    .section-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .activity-list {
+      list-style: none;
+    }
+
+    .activity-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.9rem;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    /* Responsive Desktop Sidebar */
+    @media (min-width: 768px) {
+      .mobile-header { display: none; }
+      .drawer-overlay { display: none !important; }
+      
+      body {
+        display: flex;
+      }
+
+      .mobile-drawer {
+        position: static;
+        transform: translateX(0);
+        box-shadow: none;
+        border-right: 1px solid var(--border-color);
+        height: 100vh;
+      }
+
+      .close-btn { display: none; }
+
+      .dashboard-container {
+        flex: 1;
+        padding: 32px;
       }
     }
-  }
-}
+  </style>
+</head>
+<body>
 
-/* =====================================================
-   NAVIGATION & UI ROUTING
-===================================================== */
-function buildNav(){
-  $('who').textContent=(role==='landlord'?'Landlord: ':'Tenant: ') + (profile?.full_name||user.email);
+  <header class="mobile-header">
+    <button class="icon-btn" onclick="toggleMobileMenu()" aria-label="Open Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    <span class="app-title">MavRent</span>
+    <div style="width: 24px;"></div>
+  </header>
 
-  const landlordItems = [
-    'dashboard:🏠 Dashboard','rent:💰 Rent','properties:🏘️ Properties',
-    'units:🚪 Units','tenants:👥 Tenants','payments:💳 Payments',
-    'maintenance:🔧 Maintenance','expenses:🧾 Expenses','receipts:🧾 Receipts',
-    'reports:📊 Reports','guide:❓ Guide','profile:👤 Profile'
-  ];
+  <aside id="mobile-drawer" class="mobile-drawer">
+    <div class="drawer-header">
+      <h3>MavRent</h3>
+      <button class="close-btn" onclick="toggleMobileMenu()">&times;</button>
+    </div>
+    <nav class="drawer-links">
+      <a href="#dashboard" class="active" onclick="toggleMobileMenu()">Dashboard</a>
+      <a href="#properties" onclick="toggleMobileMenu()">Properties</a>
+      <a href="#tenants" onclick="toggleMobileMenu()">Tenants</a>
+      <a href="#payments" onclick="toggleMobileMenu()">Payments</a>
+      <a href="#settings" onclick="toggleMobileMenu()">Settings</a>
+    </nav>
+  </aside>
+  <div id="drawer-overlay" class="drawer-overlay" onclick="toggleMobileMenu()"></div>
 
-  const tenantItems = [
-    'home:🏠 My Home','myRent:💰 My Rent','myPayments:💳 My Payments',
-    'myMaintenance:🔧 Maintenance','myReceipts:🧾 My Receipts',
-    'guide:❓ Guide','profile:👤 My Profile'
-  ];
+  <main class="dashboard-container">
+    
+    <div id="notif-banner" class="notification-banner" style="display: none;">
+      <p>Enable push notifications for payment updates even when the app is closed.</p>
+      <button class="btn-small" onclick="enablePushNotifications()">Enable</button>
+    </div>
 
-  const items = role==='landlord' ? landlordItems : tenantItems;
-
-  $('nav').innerHTML=items.map(x=>{
-    let[a,b]=x.split(':');
-    return `<button data-p="${a}">${b}</button>`;
-  }).join('');
-
-  document.querySelectorAll('#nav button').forEach(b=>{
-    b.onclick=()=>show(b.dataset.p);
-  });
-}
-
-async function show(id,reload=true){
-  if(reload) await refresh();
-
-  $('main').innerHTML= (role==='landlord') ? landlord(id) : tenant(id);
-
-  document.querySelectorAll('#nav button').forEach(b=>
-    b.classList.toggle('active', b.dataset.p===id)
-  );
-}
-
-/* =====================================================
-   LANDLORD VIEWS
-===================================================== */
-function landlord(id){
-  if(id==='dashboard') return landlordDashboard();
-  if(id==='rent') return pageTemplate('Rent Management', 'Manage rent schedules & tracking');
-  if(id==='properties') return pageTemplate('Properties', 'Manage your buildings');
-  if(id==='units') return pageTemplate('Units', 'Manage rooms and apartments');
-  if(id==='tenants') return pageTemplate('Tenants', 'Manage active tenant profiles');
-  if(id==='payments') return pageTemplate('Payments', 'Review incoming payments');
-  if(id==='maintenance') return pageTemplate('Maintenance Requests', 'Manage work orders');
-  if(id==='expenses') return pageTemplate('Expenses', 'Track property costs');
-  if(id==='receipts') return pageTemplate('Receipts', 'Issued payment receipts');
-  if(id==='reports') return pageTemplate('Financial Reports', 'Overview of earnings');
-  if(id==='guide') return pageTemplate('Landlord Guide', 'Help & instructions');
-  if(id==='profile') return pageTemplate('Landlord Profile', 'Account settings');
-  return '<div>Page not found</div>';
-}
-
-function landlordDashboard(){
-  let paid=cache.rent_records.reduce((a,x)=>a+Number(x.amount_paid||0),0);
-  let due=cache.rent_records.reduce((a,x)=>a+Number(x.amount_due||0),0);
-  let outstanding=Math.max(0, due-paid);
-  let overdue=cache.rent_records.filter(x=>x.status==='overdue').reduce((a,x)=>a+rentBalance(x),0);
-
-  return `
-    <section>
-      <div class="title">
-        <h1>Landlord Dashboard</h1>
-        <p>Manage your rental business.</p>
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <span>Collected</span>
+        <h2 id="total-collected">UGX 0</h2>
       </div>
-
-      <div class="stats">
-        <div class="card"><small>Properties</small><div class="big">${cache.properties.length}</div></div>
-        <div class="card"><small>Units</small><div class="big">${cache.units.length}</div></div>
-        <div class="card"><small>Rent Collected</small><div class="big green">${money(paid)}</div></div>
-        <div class="card"><small>Outstanding Rent</small><div class="big red">${money(outstanding)}</div></div>
+      <div class="metric-card">
+        <span>Occupied</span>
+        <h2 id="occupied-count">0 Units</h2>
       </div>
-
-      <div class="grid">
-        <div class="card">
-          <h3>💰 Rent Overview</h3>
-          <p>Total rent due: <b>${money(due)}</b></p>
-          <p>Collected: <b class="green">${money(paid)}</b></p>
-          <p>Outstanding: <b class="red">${money(outstanding)}</b></p>
-          <p>Overdue: <b class="red">${money(overdue)}</b></p>
-          <button class="primary" onclick="show('rent')">Open Rent System</button>
-        </div>
-
-        <div class="card">
-          <h3>Quick Actions</h3>
-          <div class="actions">
-            <button class="btn" onclick="show('rent')">💰 Rent</button>
-            <button class="btn" onclick="show('properties')">＋ Property</button>
-            <button class="btn" onclick="show('units')">＋ Unit</button>
-            <button class="btn" onclick="show('tenants')">＋ Tenant</button>
-            <button class="btn" onclick="show('payments')">💳 Payments</button>
-            <button class="btn" onclick="show('maintenance')">🔧 Maintenance</button>
-          </div>
-        </div>
+      <div class="metric-card">
+        <span>Pending</span>
+        <h2 id="pending-count">0 Payments</h2>
       </div>
     </section>
-  `;
-}
 
-/* =====================================================
-   TENANT VIEWS
-===================================================== */
-function tenant(id){
-  if(id==='home') return pageTemplate('Tenant Home', 'Welcome to your portal');
-  if(id==='myRent') return pageTemplate('My Rent', 'Rent status and dues');
-  if(id==='myPayments') return pageTemplate('My Payments', 'Payment history');
-  if(id==='myMaintenance') return pageTemplate('Maintenance', 'Submit maintenance requests');
-  if(id==='myReceipts') return pageTemplate('My Receipts', 'View receipts');
-  if(id==='guide') return pageTemplate('Tenant Guide', 'How to use MavRent');
-  if(id==='profile') return pageTemplate('My Profile', 'Account details');
-  return '<div>Page not found</div>';
-}
-
-function pageTemplate(title, subtitle){
-  return `
-    <section>
-      <div class="title">
-        <h1>${esc(title)}</h1>
-        <p>${esc(subtitle)}</p>
+    <section class="section-card">
+      <div class="section-header">
+        <h3>Recent Transactions</h3>
       </div>
-      <div class="card">
-        <p>This module is initialized and ready.</p>
-      </div>
+      <ul class="activity-list" id="activity-list">
+        <li class="activity-item">
+          <span>Loading activity...</span>
+        </li>
+      </ul>
     </section>
-  `;
-}
+  </main>
 
-/* =====================================================
-   NOTIFICATIONS SYSTEM (FIXED & FULLY IMPLEMENTED)
-===================================================== */
-function toggleNotifications(){
-  const panel = $('notificationPanel');
-  if(panel){
-    panel.classList.toggle('hidden');
-  }
-}
+  <script>
+    // ------------------------------------------------------------------
+    // 1. SUPABASE & CONFIGURATION SETUP
+    // ------------------------------------------------------------------
+    const SUPABASE_URL = "https://wborvbuqdiscoasnsrwa.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indib3J2YnVxZGlzY29hc25zcndhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NjMxMzcsImV4cCI6MjEwMjEzOTEzN30.T-N8JoZn433WNrV1fBY3wQ_C_7QrCYzzCei_5Q4s3bo";
+    const VAPID_PUBLIC_KEY = "BPta9_z15Ou9pn1uxOt-uvH5i8hRPO0ARNUx-tZtWTHe5HWoBYgRbkXGl6CudK-VRz7mNHc7WY5BZPfUWOhko2A";
 
-async function loadNotifications(){
-  if(!user||!sb) return;
-  try {
-    let r = await sb
-      .from('notifications')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', {ascending: false});
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    if(r.error){
-      console.warn('Notifications fetch error:', r.error);
-      return;
+    // ------------------------------------------------------------------
+    // 2. MOBILE MENU DRAWER TOGGLE
+    // ------------------------------------------------------------------
+    function toggleMobileMenu() {
+      const drawer = document.getElementById('mobile-drawer');
+      const overlay = document.getElementById('drawer-overlay');
+      drawer.classList.toggle('open');
+      overlay.classList.toggle('open');
     }
 
-    notifications = r.data || [];
-    renderNotifications();
-  } catch(e) {
-    console.warn('loadNotifications exception:', e);
-  }
-}
+    // ------------------------------------------------------------------
+    // 3. SERVICE WORKER & PUSH NOTIFICATIONS
+    // ------------------------------------------------------------------
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
 
-function renderNotifications(){
-  const countEl = $('notifyCount');
-  const listEl = $('notificationList');
+    async function initServiceWorker() {
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
+        try {
+          const reg = await navigator.serviceWorker.register('/sw.js');
+          console.log('Service Worker registered:', reg);
+          
+          // Check permission state to show banner if needed
+          if (Notification.permission === 'default') {
+            document.getElementById('notif-banner').style.display = 'flex';
+          }
+        } catch (err) {
+          console.error('Service Worker registration failed:', err);
+        }
+      }
+    }
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
-  if(countEl){
-    countEl.textContent = unreadCount;
-    countEl.classList.toggle('hidden', unreadCount === 0);
-  }
+    async function enablePushNotifications() {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          document.getElementById('notif-banner').style.display = 'none';
+          
+          const reg = await navigator.serviceWorker.ready;
+          let sub = await reg.pushManager.getSubscription();
 
-  if(!listEl) return;
+          if (!sub) {
+            sub = await reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+            });
+          }
 
-  if(!notifications.length){
-    listEl.innerHTML = '<div class="empty">No notifications yet.</div>';
-    return;
-  }
+          // Save subscription to Supabase
+          const { data: userData } = await sb.auth.getUser();
+          if (userData && userData.user) {
+            await sb.from('push_subscriptions').upsert({
+              user_id: userData.user.id,
+              subscription: sub
+            }, { onConflict: 'user_id' });
+          }
+          alert('Push Notifications enabled successfully!');
+        }
+      } catch (err) {
+        console.error('Error enabling push notifications:', err);
+      }
+    }
 
-  listEl.innerHTML = notifications.map(n => `
-    <div class="notificationItem ${n.is_read ? '' : 'unread'}" onclick="markNotificationRead('${n.id}')">
-      <div class="notificationTitle">${esc(n.title || 'Notification')}</div>
-      <div class="notificationMessage">${esc(n.message || '')}</div>
-      <div class="notificationDate">${new Date(n.created_at).toLocaleString()}</div>
-    </div>
-  `).join('');
-}
-
-async function markNotificationRead(id){
-  const item = notifications.find(n => n.id === id);
-  if(item && !item.is_read){
-    item.is_read = true;
-    renderNotifications();
-    await sb.from('notifications').update({is_read: true}).eq('id', id);
-  }
-}
-
-async function markAllNotificationsRead(){
-  notifications.forEach(n => n.is_read = true);
-  renderNotifications();
-  await sb.from('notifications').update({is_read: true}).eq('user_id', user.id);
-}
-
-function startRealtime(){
-  if(!user||!sb) return;
-  channel = sb.channel('public:notifications:' + user.id)
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'notifications',
-      filter: `user_id=eq.${user.id}`
-    }, payload => {
-      notifications.unshift(payload.new);
-      renderNotifications();
-    })
-    .subscribe();
-}
-
-</script>
+    // ------------------------------------------------------------------
+    // 4. INITIALIZATION ON LOAD
+    // ------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      initServiceWorker();
+    });
+  </script>
 </body>
 </html>
