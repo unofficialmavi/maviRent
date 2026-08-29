@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>MavRent - Property Management</title>
   
+  <!-- PWA Manifest & iOS Support -->
   <link rel="manifest" href="/manifest.json" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <link rel="apple-touch-icon" href="/icon-180.png" />
 
+  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -70,7 +72,7 @@
       color: var(--primary);
     }
 
-    /* Off-Canvas Slide-Out Mobile Menu (GPU Accelerated) */
+    /* Off-Canvas Slide-Out Mobile Menu */
     .mobile-drawer {
       position: fixed;
       top: 0;
@@ -125,6 +127,7 @@
       font-weight: 500;
       border-left: 4px solid transparent;
       transition: background 0.15s ease;
+      cursor: pointer;
     }
 
     .drawer-links a:active, .drawer-links a.active {
@@ -149,11 +152,20 @@
       pointer-events: auto;
     }
 
-    /* Lightweight Dashboard Container */
+    /* Dashboard Container */
     .dashboard-container {
       padding: 16px;
       max-width: 1000px;
       margin: 0 auto;
+    }
+
+    /* Views Switching */
+    .app-view {
+      display: none;
+    }
+
+    .app-view.active-view {
+      display: block;
     }
 
     /* Notification Banner Prompt */
@@ -184,7 +196,7 @@
       cursor: pointer;
     }
 
-    /* Top Summary Metrics Cards */
+    /* Metrics Cards */
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -213,12 +225,13 @@
       color: var(--text-main);
     }
 
-    /* Recent Activity List */
+    /* Section Cards */
     .section-card {
       background-color: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 10px;
       padding: 16px;
+      margin-bottom: 16px;
     }
 
     .section-header {
@@ -272,6 +285,7 @@
 </head>
 <body>
 
+  <!-- Mobile Header Bar -->
   <header class="mobile-header">
     <button class="icon-btn" onclick="toggleMobileMenu()" aria-label="Open Menu">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -280,72 +294,124 @@
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
-    <span class="app-title">MavRent</span>
+    <span class="app-title" id="page-title">MavRent</span>
     <div style="width: 24px;"></div>
   </header>
 
+  <!-- Navigation Drawer (Slide-out Menu on Mobile) -->
   <aside id="mobile-drawer" class="mobile-drawer">
     <div class="drawer-header">
       <h3>MavRent</h3>
       <button class="close-btn" onclick="toggleMobileMenu()">&times;</button>
     </div>
     <nav class="drawer-links">
-      <a href="#dashboard" class="active" onclick="toggleMobileMenu()">Dashboard</a>
-      <a href="#properties" onclick="toggleMobileMenu()">Properties</a>
-      <a href="#tenants" onclick="toggleMobileMenu()">Tenants</a>
-      <a href="#payments" onclick="toggleMobileMenu()">Payments</a>
-      <a href="#settings" onclick="toggleMobileMenu()">Settings</a>
+      <a onclick="navigateTo('dashboard')" id="nav-dashboard" class="active">Dashboard</a>
+      <a onclick="navigateTo('properties')" id="nav-properties">Properties</a>
+      <a onclick="navigateTo('tenants')" id="nav-tenants">Tenants</a>
+      <a onclick="navigateTo('payments')" id="nav-payments">Payments</a>
+      <a onclick="navigateTo('settings')" id="nav-settings">Settings</a>
     </nav>
   </aside>
   <div id="drawer-overlay" class="drawer-overlay" onclick="toggleMobileMenu()"></div>
 
+  <!-- Main Area -->
   <main class="dashboard-container">
     
+    <!-- Push Notification Banner Prompt -->
     <div id="notif-banner" class="notification-banner" style="display: none;">
-      <p>Enable push notifications for payment updates even when the app is closed.</p>
+      <p>Enable push notifications for payment updates even when closed.</p>
       <button class="btn-small" onclick="enablePushNotifications()">Enable</button>
     </div>
 
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <span>Collected</span>
-        <h2 id="total-collected">UGX 0</h2>
+    <!-- 1. DASHBOARD VIEW -->
+    <section id="view-dashboard" class="app-view active-view">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span>Collected</span>
+          <h2 id="total-collected">UGX 0</h2>
+        </div>
+        <div class="metric-card">
+          <span>Occupied</span>
+          <h2 id="occupied-count">0 Units</h2>
+        </div>
+        <div class="metric-card">
+          <span>Pending</span>
+          <h2 id="pending-count">0 Payments</h2>
+        </div>
       </div>
-      <div class="metric-card">
-        <span>Occupied</span>
-        <h2 id="occupied-count">0 Units</h2>
-      </div>
-      <div class="metric-card">
-        <span>Pending</span>
-        <h2 id="pending-count">0 Payments</h2>
+
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Recent Transactions</h3>
+          <button class="btn-small" onclick="loadDashboardData()">Refresh</button>
+        </div>
+        <ul class="activity-list" id="activity-list">
+          <li class="activity-item">
+            <span>Loading activity...</span>
+          </li>
+        </ul>
       </div>
     </section>
 
-    <section class="section-card">
-      <div class="section-header">
-        <h3>Recent Transactions</h3>
+    <!-- 2. PROPERTIES VIEW -->
+    <section id="view-properties" class="app-view">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Properties Management</h3>
+        </div>
+        <ul class="activity-list" id="properties-list">
+          <li class="activity-item"><span>Loading properties...</span></li>
+        </ul>
       </div>
-      <ul class="activity-list" id="activity-list">
-        <li class="activity-item">
-          <span>Loading activity...</span>
-        </li>
-      </ul>
     </section>
+
+    <!-- 3. TENANTS VIEW -->
+    <section id="view-tenants" class="app-view">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Tenants Directory</h3>
+        </div>
+        <ul class="activity-list" id="tenants-list">
+          <li class="activity-item"><span>Loading tenants...</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. PAYMENTS VIEW -->
+    <section id="view-payments" class="app-view">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>Payment History</h3>
+        </div>
+        <ul class="activity-list" id="payments-list">
+          <li class="activity-item"><span>Loading payments...</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. SETTINGS VIEW -->
+    <section id="view-settings" class="app-view">
+      <div class="section-card">
+        <div class="section-header">
+          <h3>App Settings</h3>
+        </div>
+        <div style="padding: 10px 0;">
+          <button class="btn-small" onclick="enablePushNotifications()">Re-check Push Notifications</button>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <script>
-    // ------------------------------------------------------------------
     // 1. SUPABASE & CONFIGURATION SETUP
-    // ------------------------------------------------------------------
     const SUPABASE_URL = "https://wborvbuqdiscoasnsrwa.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indib3J2YnVxZGlzY29hc25zcndhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1NjMxMzcsImV4cCI6MjEwMjEzOTEzN30.T-N8JoZn433WNrV1fBY3wQ_C_7QrCYzzCei_5Q4s3bo";
     const VAPID_PUBLIC_KEY = "BPta9_z15Ou9pn1uxOt-uvH5i8hRPO0ARNUx-tZtWTHe5HWoBYgRbkXGl6CudK-VRz7mNHc7WY5BZPfUWOhko2A";
 
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ------------------------------------------------------------------
-    // 2. MOBILE MENU DRAWER TOGGLE
-    // ------------------------------------------------------------------
+    // 2. NAVIGATION & VIEW SWITCHER
     function toggleMobileMenu() {
       const drawer = document.getElementById('mobile-drawer');
       const overlay = document.getElementById('drawer-overlay');
@@ -353,9 +419,39 @@
       overlay.classList.toggle('open');
     }
 
-    // ------------------------------------------------------------------
+    function navigateTo(viewName) {
+      // Hide all views
+      const views = document.querySelectorAll('.app-view');
+      views.forEach(v => v.classList.remove('active-view'));
+
+      // Deactivate all menu links
+      const links = document.querySelectorAll('.drawer-links a');
+      links.forEach(l => l.classList.remove('active'));
+
+      // Show requested view & set link active
+      const targetView = document.getElementById(`view-${viewName}`);
+      const targetLink = document.getElementById(`nav-${viewName}`);
+
+      if (targetView) targetView.classList.add('active-view');
+      if (targetLink) targetLink.classList.add('active');
+
+      // Update header title
+      document.getElementById('page-title').innerText = viewName.charAt(0).toUpperCase() + viewName.slice(1);
+
+      // Close menu on selection (mobile)
+      const drawer = document.getElementById('mobile-drawer');
+      if (drawer.classList.contains('open')) {
+        toggleMobileMenu();
+      }
+
+      // Fetch dynamic data based on tab
+      if (viewName === 'dashboard') loadDashboardData();
+      if (viewName === 'properties') loadProperties();
+      if (viewName === 'tenants') loadTenants();
+      if (viewName === 'payments') loadPayments();
+    }
+
     // 3. SERVICE WORKER & PUSH NOTIFICATIONS
-    // ------------------------------------------------------------------
     function urlBase64ToUint8Array(base64String) {
       const padding = '='.repeat((4 - base64String.length % 4) % 4);
       const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -371,9 +467,6 @@
       if ('serviceWorker' in navigator && 'PushManager' in window) {
         try {
           const reg = await navigator.serviceWorker.register('/sw.js');
-          console.log('Service Worker registered:', reg);
-          
-          // Check permission state to show banner if needed
           if (Notification.permission === 'default') {
             document.getElementById('notif-banner').style.display = 'flex';
           }
@@ -399,7 +492,6 @@
             });
           }
 
-          // Save subscription to Supabase
           const { data: userData } = await sb.auth.getUser();
           if (userData && userData.user) {
             await sb.from('push_subscriptions').upsert({
@@ -414,11 +506,60 @@
       }
     }
 
-    // ------------------------------------------------------------------
-    // 4. INITIALIZATION ON LOAD
-    // ------------------------------------------------------------------
+    // 4. SUPABASE DATA LOADERS
+    async function loadDashboardData() {
+      const listEl = document.getElementById('activity-list');
+      listEl.innerHTML = '<li class="activity-item"><span>Loading activity...</span></li>';
+
+      const { data: payments, error } = await sb.from('payments').select('*').limit(5);
+
+      if (error || !payments || payments.length === 0) {
+        listEl.innerHTML = '<li class="activity-item"><span>No recent transactions found.</span></li>';
+        return;
+      }
+
+      listEl.innerHTML = payments.map(p => `
+        <li class="activity-item">
+          <span>${p.tenant_name || 'Payment Received'}</span>
+          <strong>UGX ${(p.amount || 0).toLocaleString()}</strong>
+        </li>
+      `).join('');
+    }
+
+    async function loadProperties() {
+      const el = document.getElementById('properties-list');
+      const { data, error } = await sb.from('properties').select('*');
+      if (error || !data || data.length === 0) {
+        el.innerHTML = '<li class="activity-item"><span>No properties listed.</span></li>';
+        return;
+      }
+      el.innerHTML = data.map(item => `<li class="activity-item"><span>${item.name || 'Property'}</span></li>`).join('');
+    }
+
+    async function loadTenants() {
+      const el = document.getElementById('tenants-list');
+      const { data, error } = await sb.from('tenants').select('*');
+      if (error || !data || data.length === 0) {
+        el.innerHTML = '<li class="activity-item"><span>No tenants found.</span></li>';
+        return;
+      }
+      el.innerHTML = data.map(item => `<li class="activity-item"><span>${item.name || 'Tenant'}</span></li>`).join('');
+    }
+
+    async function loadPayments() {
+      const el = document.getElementById('payments-list');
+      const { data, error } = await sb.from('payments').select('*');
+      if (error || !data || data.length === 0) {
+        el.innerHTML = '<li class="activity-item"><span>No payment records found.</span></li>';
+        return;
+      }
+      el.innerHTML = data.map(item => `<li class="activity-item"><span>${item.tenant_name || 'Payment'}</span><strong>UGX ${(item.amount || 0).toLocaleString()}</strong></li>`).join('');
+    }
+
+    // INITIALIZATION
     window.addEventListener('DOMContentLoaded', () => {
       initServiceWorker();
+      loadDashboardData();
     });
   </script>
 </body>
