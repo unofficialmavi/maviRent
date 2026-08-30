@@ -6,13 +6,14 @@
 
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon-180.png">
+
 <meta name="theme-color" content="#111827">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MavRent">
 
-<title>MavRent V14.2</title>
+<title>MavRent V15</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -316,11 +317,19 @@ place-items:center;
 border:2px solid #111827
 }
 
+/* NAVIGATION */
+
+.navWrap{
+max-width:1100px;
+margin:auto;
+position:relative
+}
+
 nav{
 display:flex;
 gap:6px;
-overflow:auto;
-margin-top:12px
+margin-top:12px;
+align-items:center
 }
 
 nav button{
@@ -335,6 +344,50 @@ white-space:nowrap
 nav button.active{
 background:#fff;
 color:#111827
+}
+
+.navMore{
+position:relative
+}
+
+.navMore>button{
+background:#087cff;
+color:#fff;
+font-weight:800
+}
+
+.moreMenu{
+position:absolute;
+right:0;
+top:45px;
+width:230px;
+background:#fff;
+border:1px solid #e2e5e9;
+border-radius:14px;
+box-shadow:0 20px 50px #0003;
+padding:8px;
+z-index:200
+}
+
+.moreMenu button{
+display:block;
+width:100%;
+text-align:left;
+border:0;
+background:#fff;
+color:#17202a;
+padding:12px;
+border-radius:9px;
+font-weight:700
+}
+
+.moreMenu button:hover{
+background:#f1f5f9
+}
+
+.moreMenu button.active{
+background:#e8f2ff;
+color:#087cff
 }
 
 main{
@@ -481,14 +534,18 @@ color:#956300
 
 .badge.confirmed,
 .badge.completed,
-.badge.paid{
+.badge.paid,
+.badge.active,
+.badge.vacant{
 background:#dcfce7;
 color:#166534
 }
 
 .badge.rejected,
 .badge.cancelled,
-.badge.overdue{
+.badge.overdue,
+.badge.inactive,
+.badge.moved_out{
 background:#fee2e2;
 color:#991b1b
 }
@@ -498,7 +555,8 @@ background:#fef3c7;
 color:#92400e
 }
 
-.badge.in_progress{
+.badge.in_progress,
+.badge.occupied{
 background:#dbeafe;
 color:#1d4ed8
 }
@@ -804,6 +862,76 @@ grid-template-columns:1fr 1fr;
 gap:8px
 }
 
+/* UNIT MANAGEMENT */
+
+.autoUnitBox{
+background:#f8fafc;
+border:1px solid #e5e7eb;
+border-radius:12px;
+padding:13px;
+margin-top:10px
+}
+
+.unitCountPreview{
+font-size:12px;
+color:#667085;
+margin-top:7px
+}
+
+.propertySummary{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap
+}
+
+.statPill{
+padding:7px 10px;
+border-radius:999px;
+background:#eef2ff;
+font-size:11px;
+font-weight:800
+}
+
+/* MODAL */
+
+.modal{
+position:fixed;
+inset:0;
+background:#0008;
+z-index:500;
+display:grid;
+place-items:center;
+padding:18px
+}
+
+.modalBox{
+width:min(500px,100%);
+max-height:90vh;
+overflow:auto;
+background:#fff;
+border-radius:18px;
+padding:20px;
+box-shadow:0 30px 90px #0005
+}
+
+.modalHead{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px
+}
+
+.closeBtn{
+border:0;
+background:#f1f5f9;
+border-radius:50%;
+width:38px;
+height:38px;
+font-size:18px
+}
+
 /* MOBILE */
 
 @media(max-width:700px){
@@ -855,8 +983,8 @@ background:#111827;
 border-top:1px solid #ffffff18;
 display:flex;
 justify-content:space-around;
-gap:2px;
-overflow:hidden
+gap:3px;
+overflow:visible
 }
 
 nav button{
@@ -877,6 +1005,33 @@ white-space:normal
 nav button.active{
 background:#fff;
 color:#111827
+}
+
+.navMore{
+flex:1;
+display:flex;
+position:static
+}
+
+.navMore>button{
+width:100%;
+background:#273244;
+color:#dbe1e8
+}
+
+.navMore>button.active{
+background:#fff;
+color:#111827
+}
+
+.moreMenu{
+position:fixed;
+right:8px;
+bottom:70px;
+top:auto;
+width:230px;
+max-height:65vh;
+overflow:auto
 }
 
 main{
@@ -971,16 +1126,33 @@ align-items:flex-start
 ===================================================== -->
 
 <div id="mavLoading" class="mav-loading">
-  <div class="mav-loading-logo">M</div>
-  <div class="mav-loading-name">Mav<span>Rent</span></div>
-  <div class="mav-loading-text">Rental management platform</div>
-  <div class="mav-spinner"></div>
-  <div id="loadingStatus" class="mav-loading-status">Starting MavRent...</div>
+
+<div class="mav-loading-logo">M</div>
+
+<div class="mav-loading-name">
+Mav<span>Rent</span>
+</div>
+
+<div class="mav-loading-text">
+Rental management platform
+</div>
+
+<div class="mav-spinner"></div>
+
+<div id="loadingStatus" class="mav-loading-status">
+Starting MavRent...
+</div>
+
 </div>
 
 <div id="connectionStatus" class="connection-status">
-  <span class="connection-dot"></span>
-  <span id="connectionText">Online</span>
+
+<span class="connection-dot"></span>
+
+<span id="connectionText">
+Online
+</span>
+
 </div>
 
 <!-- =====================================================
@@ -1080,8 +1252,15 @@ class="notifyBtn"
 type="button"
 onclick="toggleNotifications()"
 title="Notifications">
+
 🔔
-<span id="notifyCount" class="notifyCount hidden">0</span>
+
+<span
+id="notifyCount"
+class="notifyCount hidden">
+0
+</span>
+
 </button>
 
 <button
@@ -1095,7 +1274,16 @@ Log out
 
 </div>
 
+<div class="navWrap">
+
 <nav id="nav"></nav>
+
+<div
+id="moreMenu"
+class="moreMenu hidden">
+</div>
+
+</div>
 
 </header>
 
@@ -1130,7 +1318,38 @@ Mark all read
 
 </div>
 
+<!-- =====================================================
+     MODAL
+===================================================== -->
+
+<div
+id="modal"
+class="modal hidden">
+
+<div class="modalBox">
+
+<div class="modalHead">
+
+<h2 id="modalTitle" style="margin:0">
+MavRent
+</h2>
+
+<button
+class="closeBtn"
+onclick="closeModal()">
+×
+</button>
+
+</div>
+
+<div id="modalBody"></div>
+
+</div>
+
+</div>
+
 <script>
+
 /* =====================================================
    CONFIGURATION
 ===================================================== */
@@ -1162,6 +1381,7 @@ let notifications=[];
 let channel=null;
 let busy=false;
 let currentPage='dashboard';
+let moreOpen=false;
 
 let cache={
 properties:[],
@@ -1201,12 +1421,14 @@ m=>({
 );
 
 function shortId(id){
+
 return id
 ?'MVR-'+String(id)
 .replace(/-/g,'')
 .slice(0,8)
 .toUpperCase()
 :'—';
+
 }
 
 function monthLabel(date){
@@ -1248,7 +1470,10 @@ const d=new Date(
 );
 
 d.setDate(1);
-d.setMonth(d.getMonth()+Number(n));
+
+d.setMonth(
+d.getMonth()+Number(n)
+);
 
 return d.toISOString().slice(0,10);
 
@@ -1275,16 +1500,15 @@ return 'paid';
 if(paid>0&&paid<due)
 return 'partial';
 
-const dueDate=r.due_date;
-
 if(
-dueDate &&
-dueDate<today() &&
+r.due_date &&
+r.due_date<today() &&
 paid<due
 )
 return 'overdue';
 
 return 'pending';
+
 }
 
 function rentStatusClass(status){
@@ -1304,7 +1528,9 @@ const box=$('authMsg');
 if(!box)return;
 
 box.textContent=text;
-box.className='message '+type;
+
+box.className=
+'message '+type;
 
 }
 
@@ -1320,8 +1546,7 @@ function hideLoader(){
 
 const loader=$('mavLoading');
 
-if(!loader)return;
-
+if(loader)
 loader.classList.add('hide');
 
 }
@@ -1332,6 +1557,31 @@ const loader=$('mavLoading');
 
 if(loader)
 loader.classList.remove('hide');
+
+}
+
+function closeMore(){
+
+moreOpen=false;
+
+const menu=$('moreMenu');
+
+if(menu)
+menu.classList.add('hidden');
+
+}
+
+function openModal(title,html){
+
+$('modalTitle').textContent=title;
+$('modalBody').innerHTML=html;
+$('modal').classList.remove('hidden');
+
+}
+
+function closeModal(){
+
+$('modal').classList.add('hidden');
 
 }
 
@@ -1470,6 +1720,7 @@ return msg(r.error.message);
 if(r.data.session){
 
 user=r.data.user;
+
 await loadApp();
 
 }else{
@@ -1596,6 +1847,7 @@ return r.data;
 }catch(e){
 
 console.warn(e);
+
 return null;
 
 }
@@ -1612,7 +1864,10 @@ async function loadApp(){
 if(!user)return;
 
 showLoader();
-setLoadingStatus('Loading your MavRent account...');
+
+setLoadingStatus(
+'Loading your MavRent account...'
+);
 
 try{
 
@@ -1633,7 +1888,9 @@ $('app').classList.remove('hidden');
 
 buildNav();
 
-setLoadingStatus('Preparing dashboard...');
+setLoadingStatus(
+'Preparing dashboard...'
+);
 
 await refresh();
 
@@ -1667,7 +1924,7 @@ $('main').innerHTML=`
 <h2>MavRent could not load some data</h2>
 
 <p>
-The application itself is working, but one of the
+The application is working, but one of the
 database requests failed.
 </p>
 
@@ -1766,26 +2023,37 @@ await sb
 );
 
 if(r.error)
-return dbErr('Tenant profiles',r.error);
+return dbErr(
+'Tenant profiles',
+r.error
+);
 
-fresh.registeredTenants=r.data||[];
-
+fresh.registeredTenants=
+r.data||[];
 
 r=
 await sb
 .from('properties')
 .select('*')
 .eq('landlord_id',user.id)
-.order('created_at',{ascending:false});
+.order(
+'created_at',
+{ascending:false}
+);
 
 if(r.error)
-return dbErr('Properties',r.error);
+return dbErr(
+'Properties',
+r.error
+);
 
-fresh.properties=r.data||[];
-
+fresh.properties=
+r.data||[];
 
 const propertyIds=
-fresh.properties.map(x=>x.id);
+fresh.properties.map(
+x=>x.id
+);
 
 if(propertyIds.length){
 
@@ -1793,15 +2061,21 @@ r=
 await sb
 .from('units')
 .select('*')
-.in('property_id',propertyIds);
+.in(
+'property_id',
+propertyIds
+);
 
 if(r.error)
-return dbErr('Units',r.error);
+return dbErr(
+'Units',
+r.error
+);
 
-fresh.units=r.data||[];
+fresh.units=
+r.data||[];
 
 }
-
 
 for(const tableName of [
 'tenants',
@@ -1815,45 +2089,43 @@ r=
 await sb
 .from(tableName)
 .select('*')
-.eq('landlord_id',user.id);
-
-if(r.error){
-
-if(tableName==='receipts'){
-
-r=
-await sb
-.from(tableName)
-.select('*')
-.eq('landlord_id',user.id);
-
-}
+.eq(
+'landlord_id',
+user.id
+);
 
 if(r.error)
-return dbErr(tableName,r.error);
+return dbErr(
+tableName,
+r.error
+);
+
+fresh[tableName]=
+r.data||[];
 
 }
-
-fresh[tableName]=r.data||[];
-
-}
-
 
 r=
 await sb
 .from('rent_records')
 .select('*')
-.eq('landlord_id',user.id)
+.eq(
+'landlord_id',
+user.id
+)
 .order(
 'period_month',
 {ascending:false}
 );
 
 if(r.error)
-return dbErr('Rent records',r.error);
+return dbErr(
+'Rent records',
+r.error
+);
 
-fresh.rent_records=r.data||[];
-
+fresh.rent_records=
+r.data||[];
 
 }else{
 
@@ -1861,17 +2133,28 @@ let r=
 await sb
 .from('tenants')
 .select('*')
-.eq('profile_id',user.id)
-.eq('status','active');
+.eq(
+'profile_id',
+user.id
+)
+.eq(
+'status',
+'active'
+);
 
 if(r.error)
-return dbErr('Tenant account',r.error);
+return dbErr(
+'Tenant account',
+r.error
+);
 
-fresh.tenants=r.data||[];
-
+fresh.tenants=
+r.data||[];
 
 const tenantIds=
-fresh.tenants.map(x=>x.id);
+fresh.tenants.map(
+x=>x.id
+);
 
 const unitIds=
 fresh.tenants
@@ -1887,9 +2170,13 @@ await sb
 .in('id',unitIds);
 
 if(r.error)
-return dbErr('Units',r.error);
+return dbErr(
+'Units',
+r.error
+);
 
-fresh.units=r.data||[];
+fresh.units=
+r.data||[];
 
 const propertyIds=
 fresh.units
@@ -1902,17 +2189,23 @@ r=
 await sb
 .from('properties')
 .select('*')
-.in('id',propertyIds);
+.in(
+'id',
+propertyIds
+);
 
 if(r.error)
-return dbErr('Properties',r.error);
+return dbErr(
+'Properties',
+r.error
+);
 
-fresh.properties=r.data||[];
+fresh.properties=
+r.data||[];
 
 }
 
 }
-
 
 if(tenantIds.length){
 
@@ -1926,42 +2219,49 @@ r=
 await sb
 .from(tableName)
 .select('*')
-.in('tenant_id',tenantIds);
+.in(
+'tenant_id',
+tenantIds
+);
 
 if(r.error)
-return dbErr(tableName,r.error);
+return dbErr(
+tableName,
+r.error
+);
 
-fresh[tableName]=r.data||[];
+fresh[tableName]=
+r.data||[];
 
 }
-
 
 r=
 await sb
 .from('rent_records')
 .select('*')
-.in('tenant_id',tenantIds)
+.in(
+'tenant_id',
+tenantIds
+)
 .order(
 'period_month',
 {ascending:false}
 );
 
 if(r.error)
-return dbErr('Rent records',r.error);
+return dbErr(
+'Rent records',
+r.error
+);
 
-fresh.rent_records=r.data||[];
+fresh.rent_records=
+r.data||[];
 
 }
 
 }
 
 cache=fresh;
-
-
-/*
-   Automatically make sure the current month exists
-   for active tenants.
-*/
 
 await ensureCurrentRentRecords();
 
@@ -1974,7 +2274,10 @@ await ensureCurrentRentRecords();
 
 async function ensureCurrentRentRecords(){
 
-if(!user||!cache.tenants.length)
+if(
+!user||
+!cache.tenants.length
+)
 return;
 
 const existing=
@@ -1997,11 +2300,6 @@ unit?.monthly_rent||
 if(!rentAmount)
 continue;
 
-
-/*
-   Start from the tenant's move-in month where possible.
-*/
-
 const startMonth=
 monthStart(
 tenant.move_in_date||
@@ -2009,8 +2307,7 @@ tenant.created_at||
 today()
 );
 
-let month=
-startMonth;
+let month=startMonth;
 
 const currentMonth=
 monthStart(today());
@@ -2042,16 +2339,14 @@ rentAmount
 
 }
 
-month=addMonths(month,1);
+month=addMonths(
+month,
+1
+);
 
 }
 
 }
-
-
-/*
-   Reload only rent records after generation.
-*/
 
 if(role==='landlord'){
 
@@ -2059,14 +2354,18 @@ const r=
 await sb
 .from('rent_records')
 .select('*')
-.eq('landlord_id',user.id)
+.eq(
+'landlord_id',
+user.id
+)
 .order(
 'period_month',
 {ascending:false}
 );
 
 if(!r.error)
-cache.rent_records=r.data||[];
+cache.rent_records=
+r.data||[];
 
 }else{
 
@@ -2079,14 +2378,18 @@ const r=
 await sb
 .from('rent_records')
 .select('*')
-.in('tenant_id',ids)
+.in(
+'tenant_id',
+ids
+)
 .order(
 'period_month',
 {ascending:false}
 );
 
 if(!r.error)
-cache.rent_records=r.data||[];
+cache.rent_records=
+r.data||[];
 
 }
 
@@ -2137,7 +2440,8 @@ tenant_id:
 tenant.id,
 
 unit_id:
-tenant.unit_id||null,
+tenant.unit_id||
+null,
 
 period_month:
 periodMonth,
@@ -2161,11 +2465,6 @@ await sb
 .insert(payload);
 
 if(r.error){
-
-/*
-   If the record already exists because another
-   session created it, do not freeze the application.
-*/
 
 if(
 !String(r.error.message||'')
@@ -2226,31 +2525,112 @@ role==='landlord'
 ['profile','👤 My Profile']
 ];
 
+const visibleCount=
+window.innerWidth<=700
+?4
+:7;
+
+const visible=
+items.slice(
+0,
+visibleCount
+);
+
+const hidden=
+items.slice(
+visibleCount
+);
+
 $('nav').innerHTML=
-items.map(
+visible.map(
 ([id,label])=>
-`<button type="button" data-p="${id}">
+`
+<button
+type="button"
+data-p="${id}">
 ${label}
-</button>`
+</button>
+`
+).join('');
+
+if(hidden.length){
+
+$('nav').innerHTML+=`
+
+<div class="navMore">
+
+<button
+type="button"
+id="moreNavBtn"
+onclick="toggleMoreMenu(event)">
+☰ More
+</button>
+
+</div>
+
+`;
+
+}
+
+$('moreMenu').innerHTML=
+hidden.map(
+([id,label])=>
+`
+<button
+type="button"
+data-p="${id}">
+${label}
+</button>
+`
 ).join('');
 
 document
-.querySelectorAll('#nav button')
+.querySelectorAll(
+'#nav button[data-p], #moreMenu button[data-p]'
+)
 .forEach(btn=>{
 
 btn.addEventListener(
 'click',
-()=>navigate(btn.dataset.p)
+()=>{
+
+closeMore();
+
+navigate(
+btn.dataset.p
+);
+
+}
 );
 
 });
 
 }
 
+function toggleMoreMenu(e){
+
+if(e)
+e.stopPropagation();
+
+const menu=$('moreMenu');
+
+if(!menu)
+return;
+
+moreOpen=!moreOpen;
+
+menu.classList.toggle(
+'hidden',
+!moreOpen
+);
+
+}
 
 function navigate(id){
 
 currentPage=id;
+
+closeMore();
 
 renderPage(id);
 
@@ -2264,7 +2644,9 @@ renderPage(id);
 function renderPage(id){
 
 document
-.querySelectorAll('#nav button')
+.querySelectorAll(
+'#nav button[data-p], #moreMenu button[data-p]'
+)
 .forEach(
 b=>
 b.classList.toggle(
@@ -2272,6 +2654,21 @@ b.classList.toggle(
 b.dataset.p===id
 )
 );
+
+const moreBtn=
+$('moreNavBtn');
+
+if(moreBtn){
+
+const hiddenActive=
+morePageIsActive(id);
+
+moreBtn.classList.toggle(
+'active',
+hiddenActive
+);
+
+}
 
 $('main').innerHTML=
 '<div class="loading">Loading...</div>';
@@ -2309,9 +2706,37 @@ ${esc(error.message||error)}
 
 }
 
+function morePageIsActive(id){
+
+const landlordHidden=[
+'payments',
+'maintenance',
+'expenses',
+'receipts',
+'reports',
+'guide',
+'profile'
+];
+
+const tenantHidden=[
+'myPayments',
+'myMaintenance',
+'myReceipts',
+'guide',
+'profile'
+];
+
+return(
+role==='landlord'
+?landlordHidden
+:tenantHidden
+).includes(id);
+
+}
+
 
 /* =====================================================
-   REFRESH BUTTON
+   REFRESH
 ===================================================== */
 
 async function safeRefresh(){
@@ -2352,10 +2777,14 @@ Try again
 
 
 /* =====================================================
-   TABLE HELPER
+   TABLE
 ===================================================== */
 
-function table(headers,rows,renderer){
+function table(
+headers,
+rows,
+renderer
+){
 
 return`
 
@@ -2401,7 +2830,7 @@ No records yet.
 
 
 /* =====================================================
-   LANDLORD PAGES
+   LANDLORD ROUTING
 ===================================================== */
 
 function landlordPage(id){
@@ -2437,7 +2866,7 @@ if(id==='reports')
 return reportsPage();
 
 if(id==='guide')
-return guidePage();
+return landlordGuide();
 
 if(id==='profile')
 return profilePage();
@@ -2454,21 +2883,22 @@ return landlordDashboard();
 function landlordDashboard(){
 
 const due=
-cache.rent_records
-.reduce(
+cache.rent_records.reduce(
 (a,x)=>a+Number(x.amount_due||0),
 0
 );
 
 const paid=
-cache.rent_records
-.reduce(
+cache.rent_records.reduce(
 (a,x)=>a+Number(x.amount_paid||0),
 0
 );
 
 const outstanding=
-Math.max(0,due-paid);
+Math.max(
+0,
+due-paid
+);
 
 const overdue=
 cache.rent_records
@@ -2480,8 +2910,15 @@ x=>getRentStatus(x)==='overdue'
 0
 );
 
-const previousUnpaid=
-getPreviousUnpaidRecords();
+const occupied=
+cache.units.filter(
+x=>x.status==='occupied'
+).length;
+
+const vacant=
+cache.units.filter(
+x=>x.status==='vacant'
+).length;
 
 return`
 
@@ -2492,66 +2929,66 @@ return`
 <h1>Landlord Dashboard</h1>
 
 <p>
-Manage properties, tenants, rent and payments.
+Your private property management centre.
 </p>
 
 </div>
-
-${
-previousUnpaid.length
-?`
-<div class="card dangerCard">
-
-<h3>⚠️ Rent needs attention</h3>
-
-<p>
-${previousUnpaid.length}
-rent record(s) have an unpaid previous month.
-Review them before accepting the next month's rent.
-</p>
-
-<button
-class="btn danger"
-onclick="navigate('rent')">
-Review unpaid rent
-</button>
-
-</div>
-`
-:''
-}
 
 <div class="stats">
 
 <div class="card">
-<small>Properties</small>
+<small>Your Properties</small>
 <div class="big">
 ${cache.properties.length}
 </div>
 </div>
 
 <div class="card">
-<small>Units</small>
+<small>Your Units</small>
 <div class="big">
 ${cache.units.length}
 </div>
 </div>
 
 <div class="card">
-<small>Rent Collected</small>
-<div class="big green">
-${money(paid)}
+<small>Occupied</small>
+<div class="big blue">
+${occupied}
 </div>
 </div>
 
 <div class="card">
-<small>Outstanding</small>
-<div class="big red">
-${money(outstanding)}
+<small>Vacant</small>
+<div class="big orange">
+${vacant}
 </div>
 </div>
 
 </div>
+
+${
+overdue>0
+?`
+<div class="card dangerCard">
+
+<h3>⚠️ Rent requires attention</h3>
+
+<p>
+Your properties currently have
+<b>${money(overdue)}</b>
+in overdue rent balances.
+</p>
+
+<button
+class="btn danger"
+onclick="navigate('rent')">
+Review overdue rent
+</button>
+
+</div>
+`
+:''
+}
 
 <div class="grid">
 
@@ -2565,7 +3002,7 @@ Total due:
 </p>
 
 <p>
-Paid:
+Collected:
 <b class="green">${money(paid)}</b>
 </p>
 
@@ -2574,51 +3011,54 @@ Outstanding:
 <b class="red">${money(outstanding)}</b>
 </p>
 
-<p>
-Overdue:
-<b class="red">${money(overdue)}</b>
-</p>
-
 <button
 class="primary"
 onclick="navigate('rent')">
-Open Rent System
+Open Rent Management
 </button>
 
 </div>
 
 <div class="card">
 
-<h3>Quick actions</h3>
+<h3>⚡ Quick Actions</h3>
 
 <div class="actions">
 
-<button class="btn" onclick="navigate('rent')">
-💰 Rent
+<button
+class="btn"
+onclick="navigate('properties')">
+🏘️ Manage Properties
 </button>
 
-<button class="btn" onclick="navigate('properties')">
-＋ Property
+<button
+class="btn"
+onclick="navigate('units')">
+🚪 Manage Units
 </button>
 
-<button class="btn" onclick="navigate('units')">
-＋ Unit
+<button
+class="btn"
+onclick="navigate('tenants')">
+👥 Manage Tenants
 </button>
 
-<button class="btn" onclick="navigate('tenants')">
-＋ Tenant
-</button>
-
-<button class="btn" onclick="navigate('payments')">
+<button
+class="btn"
+onclick="navigate('payments')">
 💳 Payments
 </button>
 
-<button class="btn" onclick="navigate('maintenance')">
+<button
+class="btn"
+onclick="navigate('maintenance')">
 🔧 Maintenance
 </button>
 
-<button class="btn" onclick="navigate('guide')">
-📖 Learn MavRent
+<button
+class="btn"
+onclick="navigate('reports')">
+📊 Reports
 </button>
 
 </div>
@@ -2629,113 +3069,60 @@ Open Rent System
 
 <div class="card">
 
-<h3>📅 Today's rent attention</h3>
+<h3>🏠 Property Occupancy</h3>
 
-${rentReminderSummary()}
+${cache.properties.length
+?cache.properties.map(p=>{
+
+const units=
+cache.units.filter(
+u=>u.property_id===p.id
+);
+
+const occupied=
+units.filter(
+u=>u.status==='occupied'
+).length;
+
+return`
+
+<div class="propertySummary">
+
+<div>
+
+<b>${esc(p.name)}</b>
+
+<div style="font-size:12px;color:#667085">
+${esc(p.location||'No location')}
+</div>
+
+</div>
+
+<div>
+
+<span class="statPill">
+${units.length} Units
+</span>
+
+<span class="statPill">
+${occupied} Occupied
+</span>
+
+</div>
+
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0">
+
+`;
+
+}).join('')
+:'<div class="empty">No properties yet.</div>'
+}
 
 </div>
 
 </section>
-
-`;
-
-}
-
-
-/* =====================================================
-   RENT REMINDERS
-===================================================== */
-
-function getPreviousUnpaidRecords(){
-
-const result=[];
-
-for(const tenant of cache.tenants){
-
-const records=
-cache.rent_records
-.filter(
-r=>r.tenant_id===tenant.id
-)
-.sort(
-(a,b)=>
-String(a.period_month)
-.localeCompare(String(b.period_month))
-);
-
-for(let i=0;i<records.length;i++){
-
-const r=records[i];
-
-if(getRentStatus(r)==='paid')
-continue;
-
-const next=records[i+1];
-
-if(next){
-
-result.push({
-tenant,
-record:r,
-next
-});
-
-}
-
-}
-
-}
-
-return result;
-
-}
-
-
-function rentReminderSummary(){
-
-const overdue=
-cache.rent_records.filter(
-r=>getRentStatus(r)==='overdue'
-);
-
-const partial=
-cache.rent_records.filter(
-r=>getRentStatus(r)==='partial'
-);
-
-const upcoming=
-cache.rent_records.filter(
-r=>{
-if(!r.due_date)return false;
-
-const diff=
-Math.ceil(
-(
-new Date(r.due_date)-
-new Date(today())
-)/86400000
-);
-
-return diff>=0&&diff<=5;
-}
-);
-
-return`
-
-<p>
-🔴 Overdue:
-<b>${overdue.length}</b>
-</p>
-
-<p>
-🟡 Partial:
-<b>${partial.length}</b>
-</p>
-
-<p>
-🔔 Due within 5 days:
-<b>${upcoming.length}</b>
-</p>
 
 `;
 
@@ -2749,21 +3136,22 @@ return`
 function landlordRent(){
 
 const due=
-cache.rent_records
-.reduce(
+cache.rent_records.reduce(
 (a,x)=>a+Number(x.amount_due||0),
 0
 );
 
 const paid=
-cache.rent_records
-.reduce(
+cache.rent_records.reduce(
 (a,x)=>a+Number(x.amount_paid||0),
 0
 );
 
 const balance=
-Math.max(0,due-paid);
+Math.max(
+0,
+due-paid
+);
 
 const overdue=
 cache.rent_records
@@ -2827,15 +3215,13 @@ ${money(overdue)}
 <h3>🔄 Automatic rent system</h3>
 
 <p>
-MavRent creates a monthly rent record for every active
-tenant. Each record receives a due date based on that
-tenant's selected rent day.
+MavRent creates an individual rent record for every active
+tenant and every rental period.
 </p>
 
 <p>
-If a tenant has not fully paid the previous month,
-MavRent keeps that month visible instead of allowing
-the unpaid amount to disappear.
+Each record contains its own <b>month, due date, amount due,
+amount paid, balance and status</b>.
 </p>
 
 </div>
@@ -2870,7 +3256,8 @@ cache.registeredTenants.find(
 p=>p.id===tenant?.profile_id
 );
 
-const status=getRentStatus(r);
+const status=
+getRentStatus(r);
 
 return`
 
@@ -2885,7 +3272,9 @@ p?.email||
 </td>
 
 <td>
-${esc(monthLabel(r.period_month))}
+${esc(
+monthLabel(r.period_month)
+)}
 </td>
 
 <td>
@@ -2901,15 +3290,21 @@ ${money(r.amount_paid)}
 </td>
 
 <td class="${
-rentBalance(r)>0?'red':'green'
+rentBalance(r)>0
+?'red'
+:'green'
 }">
 ${money(rentBalance(r))}
 </td>
 
 <td>
-<span class="badge ${rentStatusClass(status)}">
+
+<span class="badge ${
+rentStatusClass(status)
+}">
 ${esc(status)}
 </span>
+
 </td>
 
 <td>
@@ -2938,6 +3333,63 @@ Record payment
 }
 
 
+/* =====================================================
+   RENT WARNINGS
+===================================================== */
+
+function getPreviousUnpaidRecords(){
+
+const result=[];
+
+for(const tenant of cache.tenants){
+
+const records=
+cache.rent_records
+.filter(
+r=>r.tenant_id===tenant.id
+)
+.sort(
+(a,b)=>
+String(a.period_month)
+.localeCompare(
+String(b.period_month)
+)
+);
+
+for(
+let i=0;
+i<records.length;
+i++
+){
+
+const r=records[i];
+
+if(
+getRentStatus(r)==='paid'
+)
+continue;
+
+const next=
+records[i+1];
+
+if(next){
+
+result.push({
+tenant,
+record:r,
+next
+});
+
+}
+
+}
+
+}
+
+return result;
+
+}
+
 function renderLandlordRentWarnings(){
 
 const warnings=[];
@@ -2946,18 +3398,25 @@ for(const tenant of cache.tenants){
 
 const records=
 cache.rent_records
-.filter(r=>r.tenant_id===tenant.id)
+.filter(
+r=>r.tenant_id===tenant.id
+)
 .sort(
 (a,b)=>
 String(b.period_month)
-.localeCompare(String(a.period_month))
+.localeCompare(
+String(a.period_month)
+)
 );
 
-if(!records.length)continue;
+if(!records.length)
+continue;
 
 const latest=records[0];
 
-if(getRentStatus(latest)!=='paid'){
+if(
+getRentStatus(latest)!=='paid'
+){
 
 const p=
 cache.registeredTenants.find(
@@ -2973,18 +3432,21 @@ getRentStatus(latest)==='overdue'
 }">
 
 <h3>
-⚠️ ${esc(p?.full_name||'Tenant')}
+⚠️ ${esc(
+p?.full_name||
+p?.email||
+'Tenant'
+)}
 </h3>
 
 <p>
-${monthLabel(latest.period_month)}
+${esc(
+monthLabel(latest.period_month)
+)}
 has a balance of
-<b>${money(rentBalance(latest))}</b>.
-</p>
-
-<p>
-Do not treat the next month as paid until the previous
-balance has been cleared or separately recorded.
+<b>${money(
+rentBalance(latest)
+)}</b>.
 </p>
 
 </div>
@@ -3014,13 +3476,19 @@ return`
 
 <h1>🏘️ Properties</h1>
 
-<p>Manage your rental properties.</p>
+<p>
+Create properties and optionally generate their units automatically.
+</p>
 
 </div>
 
 <div class="card">
 
-<form id="propertyForm" class="formgrid">
+<h3>＋ Add Property</h3>
+
+<form
+id="propertyForm"
+class="formgrid">
 
 <input
 id="pname"
@@ -3036,8 +3504,34 @@ id="pdesc"
 class="full"
 placeholder="Description"></textarea>
 
-<button class="primary full">
-Save property
+<div class="full autoUnitBox">
+
+<b>🚪 Automatic unit creation</b>
+
+<p style="font-size:12px;color:#667085">
+You can create the property first with zero units,
+or automatically create multiple units immediately.
+</p>
+
+<input
+id="punitcount"
+type="number"
+min="0"
+max="500"
+value="0"
+placeholder="Number of units to automatically create">
+
+<div
+id="unitCountPreview"
+class="unitCountPreview">
+0 units will be created automatically.
+</div>
+
+</div>
+
+<button
+class="primary full">
+Save Property
 </button>
 
 </form>
@@ -3046,42 +3540,87 @@ Save property
 
 <div class="card">
 
-<h3>Properties</h3>
+<h3>Your Properties</h3>
 
-${table(
-[
-'Name',
-'Location',
-'Description',
-''
-],
-cache.properties,
-x=>`
+${
+cache.properties.length
+?cache.properties.map(p=>{
 
-<tr>
+const units=
+cache.units.filter(
+u=>u.property_id===p.id
+);
 
-<td>${esc(x.name)}</td>
+const occupied=
+units.filter(
+u=>u.status==='occupied'
+).length;
 
-<td>${esc(x.location)}</td>
+return`
 
-<td class="wrap">
-${esc(x.description)}
-</td>
+<div
+class="propertySummary"
+style="padding:10px 0">
 
-<td>
+<div>
+
+<h3 style="margin:0">
+${esc(p.name)}
+</h3>
+
+<div style="color:#667085;font-size:12px">
+📍 ${esc(p.location||'Location not provided')}
+</div>
+
+${
+p.description
+?`
+<p style="font-size:12px;color:#667085">
+${esc(p.description)}
+</p>
+`
+:''
+}
+
+</div>
+
+<div>
+
+<span class="statPill">
+${units.length} Units
+</span>
+
+<span class="statPill">
+${occupied} Occupied
+</span>
+
+</div>
+
+</div>
+
+<div class="actions">
+
+<button
+class="btn"
+onclick="navigate('units')">
+🚪 Manage Units
+</button>
 
 <button
 class="btn danger"
-onclick="delProperty('${x.id}')">
-Delete
+onclick="delProperty('${p.id}')">
+Delete Property
 </button>
 
-</td>
+</div>
 
-</tr>
+<hr style="border:0;border-top:1px solid #eee;margin:15px 0">
 
-`
-)}
+`;
+
+}).join('')
+:'<div class="empty">No properties yet.</div>'
+}
 
 </div>
 
@@ -3098,25 +3637,78 @@ Delete
 
 function unitsPage(){
 
+const vacant=
+cache.units.filter(
+u=>u.status==='vacant'
+).length;
+
+const occupied=
+cache.units.filter(
+u=>u.status==='occupied'
+).length;
+
 return`
 
 <section>
 
 <div class="title">
 
-<h1>🚪 Units</h1>
+<h1>🚪 Unit Management</h1>
 
-<p>Manage rental units and prices.</p>
+<p>
+Add units manually, create groups of units automatically,
+or remove vacant units when your property changes.
+</p>
+
+</div>
+
+<div class="stats">
+
+<div class="card">
+<small>Total Units</small>
+<div class="big">
+${cache.units.length}
+</div>
+</div>
+
+<div class="card">
+<small>Occupied</small>
+<div class="big blue">
+${occupied}
+</div>
+</div>
+
+<div class="card">
+<small>Vacant</small>
+<div class="big green">
+${vacant}
+</div>
+</div>
+
+<div class="card">
+<small>Properties</small>
+<div class="big">
+${cache.properties.length}
+</div>
+</div>
 
 </div>
 
 <div class="card">
 
-<form id="unitForm" class="formgrid">
+<h3>＋ Add Unit Manually</h3>
 
-<select id="uproperty" required>
+<form
+id="unitForm"
+class="formgrid">
 
-<option value="">Select property</option>
+<select
+id="uproperty"
+required>
+
+<option value="">
+Select property
+</option>
 
 ${cache.properties.map(
 x=>
@@ -3129,7 +3721,7 @@ ${esc(x.name)}
 
 <input
 id="unum"
-placeholder="Unit number"
+placeholder="Unit number / name"
 required>
 
 <input
@@ -3157,8 +3749,9 @@ Maintenance
 
 </select>
 
-<button class="primary full">
-Save unit
+<button
+class="primary full">
+Add Unit
 </button>
 
 </form>
@@ -3167,7 +3760,74 @@ Save unit
 
 <div class="card">
 
-<h3>Units</h3>
+<h3>⚡ Automatically Add Multiple Units</h3>
+
+<p style="font-size:13px;color:#667085">
+Use this when you have several units with the same basic
+configuration. MavRent will create Unit 1, Unit 2, Unit 3,
+and so on.
+</p>
+
+<form
+id="bulkUnitForm"
+class="formgrid">
+
+<select
+id="bulkProperty"
+required>
+
+<option value="">
+Select property
+</option>
+
+${cache.properties.map(
+x=>
+`<option value="${x.id}">
+${esc(x.name)}
+</option>`
+).join('')}
+
+</select>
+
+<input
+id="bulkCount"
+type="number"
+min="1"
+max="500"
+value="5"
+placeholder="Number of units"
+required>
+
+<input
+id="bulkPrefix"
+value="Unit"
+placeholder="Unit name prefix">
+
+<input
+id="bulkRent"
+type="number"
+min="0"
+placeholder="Monthly rent"
+required>
+
+<input
+id="bulkDeposit"
+type="number"
+min="0"
+placeholder="Deposit">
+
+<button
+class="primary full">
+Create Units Automatically
+</button>
+
+</form>
+
+</div>
+
+<div class="card">
+
+<h3>Your Units</h3>
 
 ${table(
 [
@@ -3175,32 +3835,94 @@ ${table(
 'Property',
 'Rent',
 'Deposit',
-'Status'
+'Status',
+'Tenant',
+'Action'
 ],
 cache.units,
-x=>`
+x=>{
+
+const property=
+cache.properties.find(
+p=>p.id===x.property_id
+);
+
+const tenant=
+cache.tenants.find(
+t=>t.unit_id===x.id &&
+t.status==='active'
+);
+
+const tenantProfile=
+cache.registeredTenants.find(
+p=>p.id===tenant?.profile_id
+);
+
+return`
 
 <tr>
 
-<td>${esc(x.unit_number)}</td>
+<td>
+<b>${esc(x.unit_number)}</b>
+</td>
+
+<td>
+${esc(property?.name||'—')}
+</td>
+
+<td>
+${money(x.monthly_rent)}
+</td>
+
+<td>
+${money(x.deposit_amount)}
+</td>
+
+<td>
+
+<span class="badge ${
+rentStatusClass(x.status||'vacant')
+}">
+${esc(x.status||'vacant')}
+</span>
+
+</td>
 
 <td>
 ${esc(
-cache.properties.find(
-p=>p.id===x.property_id
-)?.name||'—'
+tenantProfile?.full_name||
+tenantProfile?.email||
+'Vacant'
 )}
 </td>
 
-<td>${money(x.monthly_rent)}</td>
+<td>
 
-<td>${money(x.deposit_amount)}</td>
+${
+tenant
+?`
+<button
+class="btn warningBtn"
+onclick="navigate('tenants')">
+Occupied
+</button>
+`
+:`
+<button
+class="btn danger"
+onclick="deleteUnit('${x.id}')">
+Remove
+</button>
+`
+}
 
-<td>${esc(x.status)}</td>
+</td>
 
 </tr>
 
-`
+`;
+
+}
 )}
 
 </div>
@@ -3227,69 +3949,80 @@ return`
 <h1>👥 Tenant Management</h1>
 
 <p>
-Assign tenants and set their automatic rent schedule.
+Assign tenants to vacant units, manage rent schedules,
+and move tenants out when they leave.
 </p>
 
 </div>
 
 <div class="card infoCard">
 
-<h3>💡 Important rent setting</h3>
+<h3>👤 Tenant lifecycle</h3>
 
 <p>
-Choose the tenant's preferred rent due day below.
-For example, if the tenant normally pays on the
-<b>5th</b>, enter <b>5</b>.
+When a new tenant arrives, assign them to a vacant unit.
+When they leave, use <b>Move Out</b>.
 </p>
 
 <p>
-MavRent will automatically calculate future due dates
-and show reminders before that day.
+MavRent will keep their old rent, payment and maintenance
+history instead of destroying it, and the unit will become
+available again.
 </p>
 
 </div>
 
 <div class="card">
 
-<form id="tenantForm" class="formgrid">
+<h3>＋ Assign New Tenant</h3>
 
-<select id="tprofile" required>
+<form
+id="tenantForm"
+class="formgrid">
+
+<select
+id="tprofile"
+required>
 
 <option value="">
 Select registered tenant
 </option>
 
 ${cache.registeredTenants.map(
-p=>`
-
+p=>
+`
 <option value="${p.id}">
 ${esc(p.full_name||p.email)}
 —
 ${esc(p.email||'')}
 </option>
-
 `
 ).join('')}
 
 </select>
 
-<select id="tunit" required>
+<select
+id="tunit"
+required>
 
 <option value="">
 Select vacant unit
 </option>
 
 ${cache.units
-.filter(x=>x.status!=='occupied')
+.filter(
+x=>
+x.status!=='occupied' &&
+x.status!=='maintenance'
+)
 .map(
-x=>`
-
+x=>
+`
 <option value="${x.id}">
 ${esc(x.unit_number)}
 —
 ${money(x.monthly_rent)}
 </option>
-
 `
 ).join('')}
 
@@ -3324,21 +4057,22 @@ value="${today()}">
 <select id="tadvance">
 
 <option value="1">
-Normal — 1 month at a time
+Normal — 1 month
 </option>
 
 <option value="3">
-New tenant — 3 months advance
+3 months advance
 </option>
 
 <option value="4">
-New tenant — 4 months advance
+4 months advance
 </option>
 
 </select>
 
-<button class="primary full">
-Assign tenant
+<button
+class="primary full">
+Assign Tenant
 </button>
 
 </form>
@@ -3349,17 +4083,9 @@ Assign tenant
 
 <h3>Current Tenants</h3>
 
-${table(
-[
-'Tenant',
-'Email',
-'Unit',
-'Rent',
-'Due Day',
-'Move-in',
-'Status'
-],
-cache.tenants,
+${
+cache.tenants.length
+?cache.tenants.map(
 x=>{
 
 const p=
@@ -3374,42 +4100,74 @@ u=>u.id===x.unit_id
 
 return`
 
-<tr>
+<div class="card">
 
-<td>
-${esc(p?.full_name||'Tenant')}
-</td>
+<div class="propertySummary">
 
-<td>
-${esc(p?.email||'')}
-</td>
+<div>
 
-<td>
-${esc(u?.unit_number||'—')}
-</td>
+<h3 style="margin:0">
+${esc(
+p?.full_name||
+p?.email||
+'Tenant'
+)}
+</h3>
 
-<td>
+<p style="margin:5px 0;color:#667085;font-size:12px">
+📧 ${esc(p?.email||'')}
+</p>
+
+<p style="margin:5px 0;font-size:13px">
+🏠 Unit:
+<b>${esc(u?.unit_number||'—')}</b>
+</p>
+
+</div>
+
+<span class="badge active">
+Active Tenant
+</span>
+
+</div>
+
+<div class="grid">
+
+<div>
+<small>Monthly Rent</small>
+<div class="big">
 ${money(x.rent_amount)}
-</td>
+</div>
+</div>
 
-<td>
+<div>
+<small>Rent Due Day</small>
+<div class="big">
 ${esc(x.rent_due_day||5)}
-</td>
+</div>
+</div>
 
-<td>
+</div>
+
+<p style="font-size:12px;color:#667085">
+Move-in:
 ${esc(x.move_in_date||'—')}
-</td>
+</p>
 
-<td>
-${esc(x.status||'active')}
-</td>
+<button
+class="btn danger"
+onclick="moveOutTenant('${x.id}')">
+🚪 Move Tenant Out
+</button>
 
-</tr>
+</div>
 
 `;
 
 }
-)}
+).join('')
+:'<div class="empty">No active tenants yet.</div>'
+}
 
 </div>
 
@@ -3435,16 +4193,20 @@ return`
 <h1>💳 Payments</h1>
 
 <p>
-Record payments and link them to the correct rent month.
+Record and verify payments against the correct rental month.
 </p>
 
 </div>
 
 <div class="card">
 
-<form id="paymentForm" class="formgrid">
+<form
+id="paymentForm"
+class="formgrid">
 
-<select id="ptenant" required>
+<select
+id="ptenant"
+required>
 
 <option value="">
 Select tenant
@@ -3461,7 +4223,11 @@ x=>x.id===t.profile_id
 return`
 
 <option value="${t.id}">
-${esc(p?.full_name||p?.email||'Tenant')}
+${esc(
+p?.full_name||
+p?.email||
+'Tenant'
+)}
 </option>
 
 `;
@@ -3476,19 +4242,6 @@ ${esc(p?.full_name||p?.email||'Tenant')}
 <option value="">
 Select rent month
 </option>
-
-${cache.rent_records.map(
-r=>`
-
-<option value="${r.id}">
-${esc(monthLabel(r.period_month))}
-—
-Balance:
-${money(rentBalance(r))}
-</option>
-
-`
-).join('')}
 
 </select>
 
@@ -3534,8 +4287,9 @@ id="pnotes"
 class="full"
 placeholder="Notes"></textarea>
 
-<button class="primary full">
-Save payment
+<button
+class="primary full">
+Save Payment
 </button>
 
 </form>
@@ -3590,16 +4344,30 @@ p?.email||
 
 <td>${money(x.amount)}</td>
 
-<td>${esc(x.payment_method||'—')}</td>
-
 <td>
-<span class="badge ${rentStatusClass(x.status||'confirmed')}">
-${esc(x.status||'confirmed')}
-</span>
+${esc(
+x.payment_method||'—'
+)}
 </td>
 
 <td>
-${esc(x.transaction_reference||'—')}
+
+<span class="badge ${
+rentStatusClass(
+x.status||'confirmed'
+)
+}">
+${esc(
+x.status||'confirmed'
+)}
+</span>
+
+</td>
+
+<td>
+${esc(
+x.transaction_reference||'—'
+)}
 </td>
 
 <td>
@@ -3640,20 +4408,27 @@ return`
 
 <h1>🧾 Expenses</h1>
 
-<p>Record rental business expenses.</p>
+<p>
+Record expenses connected to your rental business.
+</p>
 
 </div>
 
 <div class="card">
 
-<form id="expenseForm" class="formgrid">
+<form
+id="expenseForm"
+class="formgrid">
 
 <select id="eprop">
 
-<option value="">No property</option>
+<option value="">
+No property
+</option>
 
 ${cache.properties.map(
-x=>`
+x=>
+`
 <option value="${x.id}">
 ${esc(x.name)}
 </option>
@@ -3684,8 +4459,9 @@ id="edesc"
 class="full"
 placeholder="Description"></textarea>
 
-<button class="primary full">
-Save expense
+<button
+class="primary full">
+Save Expense
 </button>
 
 </form>
@@ -3704,22 +4480,27 @@ ${table(
 'Description'
 ],
 cache.expenses,
-x=>`
-
+x=>
+`
 <tr>
 
-<td>${esc(x.expense_date)}</td>
+<td>
+${esc(x.expense_date)}
+</td>
 
-<td>${esc(x.category)}</td>
+<td>
+${esc(x.category)}
+</td>
 
-<td>${money(x.amount)}</td>
+<td>
+${money(x.amount)}
+</td>
 
 <td class="wrap">
 ${esc(x.description)}
 </td>
 
 </tr>
-
 `
 )}
 
@@ -3746,15 +4527,21 @@ return`
 
 <h1>🧾 Receipts</h1>
 
-<p>Issue receipts for confirmed payments.</p>
+<p>
+Issue receipts for confirmed payments.
+</p>
 
 </div>
 
 <div class="card">
 
-<form id="receiptForm" class="formgrid">
+<form
+id="receiptForm"
+class="formgrid">
 
-<select id="rpayment" required>
+<select
+id="rpayment"
+required>
 
 <option value="">
 Select payment
@@ -3765,14 +4552,13 @@ ${cache.payments
 p=>p.status==='confirmed'
 )
 .map(
-p=>`
-
+p=>
+`
 <option value="${p.id}">
 ${esc(p.payment_date)}
 —
 ${money(p.amount)}
 </option>
-
 `
 ).join('')}
 
@@ -3783,8 +4569,9 @@ id="rnumber"
 placeholder="Receipt number"
 required>
 
-<button class="primary full">
-Issue receipt
+<button
+class="primary full">
+Issue Receipt
 </button>
 
 </form>
@@ -3802,8 +4589,8 @@ ${table(
 'Issued'
 ],
 cache.receipts,
-x=>`
-
+x=>
+`
 <tr>
 
 <td>
@@ -3816,12 +4603,13 @@ ${esc(x.payment_id)}
 
 <td>
 ${x.issued_at
-?new Date(x.issued_at).toLocaleString()
+?new Date(
+x.issued_at
+).toLocaleString()
 :'—'}
 </td>
 
 </tr>
-
 `
 )}
 
@@ -3842,36 +4630,37 @@ function reportsPage(){
 
 const revenue=
 cache.payments
-.filter(x=>x.status==='confirmed')
+.filter(
+x=>x.status==='confirmed'
+)
 .reduce(
 (a,x)=>a+Number(x.amount||0),
 0
 );
 
 const expenses=
-cache.expenses
-.reduce(
+cache.expenses.reduce(
 (a,x)=>a+Number(x.amount||0),
 0
 );
 
 const due=
-cache.rent_records
-.reduce(
+cache.rent_records.reduce(
 (a,x)=>a+Number(x.amount_due||0),
 0
 );
 
 const paid=
-cache.rent_records
-.reduce(
+cache.rent_records.reduce(
 (a,x)=>a+Number(x.amount_paid||0),
 0
 );
 
 const collection=
 due
-?Math.round((paid/due)*100)
+?Math.round(
+(paid/due)*100
+)
 :0;
 
 return`
@@ -3882,7 +4671,9 @@ return`
 
 <h1>📊 Reports</h1>
 
-<p>Financial and rent overview.</p>
+<p>
+Financial and occupancy information for your rental business.
+</p>
 
 </div>
 
@@ -3905,7 +4696,9 @@ ${money(expenses)}
 <div class="card">
 <small>Net Income</small>
 <div class="big ${
-revenue-expenses>=0?'green':'red'
+revenue-expenses>=0
+?'green'
+:'red'
 }">
 ${money(revenue-expenses)}
 </div>
@@ -3922,7 +4715,36 @@ ${collection}%
 
 <div class="card">
 
-<h3>Rent status</h3>
+<h3>🏠 Occupancy</h3>
+
+<p>
+Total units:
+<b>${cache.units.length}</b>
+</p>
+
+<p>
+Occupied:
+<b class="blue">
+${cache.units.filter(
+x=>x.status==='occupied'
+).length}
+</b>
+</p>
+
+<p>
+Vacant:
+<b class="green">
+${cache.units.filter(
+x=>x.status==='vacant'
+).length}
+</b>
+</p>
+
+</div>
+
+<div class="card">
+
+<h3>💰 Rent Status</h3>
 
 <p>
 Paid:
@@ -3970,10 +4792,10 @@ r=>getRentStatus(r)==='overdue'
 
 
 /* =====================================================
-   GUIDE
+   LANDLORD GUIDE
 ===================================================== */
 
-function guidePage(){
+function landlordGuide(){
 
 return`
 
@@ -3981,27 +4803,27 @@ return`
 
 <div class="title">
 
-<h1>📖 MavRent Guide</h1>
+<h1>📖 Landlord Guide</h1>
 
 <p>
-Learn how to use MavRent without losing track of rent.
+A guide specifically for property owners and managers.
 </p>
 
 </div>
 
 <div class="card infoCard">
 
-<h2>👋 Welcome to MavRent</h2>
+<h2>🏢 Your MavRent landlord account</h2>
 
 <p>
-MavRent is designed to keep every property, unit,
-tenant, rent payment and maintenance request organised.
+This account is designed for managing <b>your properties,
+your units, your tenants, your rent, your expenses and
+your rental records.</b>
 </p>
 
 <p>
-The most important rule is:
-<b>never skip an unpaid rent month.</b>
-MavRent keeps each month as its own record.
+Tenant accounts do not receive these landlord management
+controls.
 </p>
 
 </div>
@@ -4012,10 +4834,10 @@ MavRent keeps each month as its own record.
 
 <div class="guideIcon">🏘️</div>
 
-<h3>1. Add your property</h3>
+<h3>1. Create a property</h3>
 
 <p>
-Open Properties and add the property name,
+Open <b>Properties</b> and enter the property name,
 location and description.
 </p>
 
@@ -4025,11 +4847,26 @@ location and description.
 
 <div class="guideIcon">🚪</div>
 
-<h3>2. Add units</h3>
+<h3>2. Create your units</h3>
 
 <p>
-Create each unit and enter its monthly rent,
-deposit and current status.
+You can manually create one unit at a time or automatically
+create many units. For example, entering 20 creates
+Unit 1 through Unit 20.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🔄</div>
+
+<h3>3. Manage changing units</h3>
+
+<p>
+If a vacant unit no longer exists, use the
+<b>Remove</b> button. Occupied units are protected from
+accidental deletion.
 </p>
 
 </div>
@@ -4038,11 +4875,25 @@ deposit and current status.
 
 <div class="guideIcon">👥</div>
 
-<h3>3. Add the tenant</h3>
+<h3>4. Assign a tenant</h3>
 
 <p>
-Assign a registered tenant to a unit.
-Choose the tenant's rent due day.
+Select a registered tenant and connect them to a vacant
+unit. Set their rent, deposit, move-in date and rent due day.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🚪</div>
+
+<h3>5. When a tenant leaves</h3>
+
+<p>
+Do not delete their history. Use <b>Move Tenant Out</b>.
+MavRent changes their tenancy to inactive and makes the
+unit available again.
 </p>
 
 </div>
@@ -4051,26 +4902,12 @@ Choose the tenant's rent due day.
 
 <div class="guideIcon">📆</div>
 
-<h3>4. Choose the due day</h3>
+<h3>6. Rent schedules</h3>
 
 <p>
-If the tenant normally pays on the 5th,
-set the rent due day to 5.
-MavRent uses this to calculate future dates.
-</p>
-
-</div>
-
-<div class="guideItem">
-
-<div class="guideIcon">💰</div>
-
-<h3>5. Rent is generated</h3>
-
-<p>
-MavRent creates monthly rent records.
-Each month has its own amount due,
-amount paid, balance and status.
+Each active tenant receives monthly rent records.
+The tenant's selected due day is used to calculate
+their due dates.
 </p>
 
 </div>
@@ -4079,13 +4916,11 @@ amount paid, balance and status.
 
 <div class="guideIcon">💳</div>
 
-<h3>6. Record payments</h3>
+<h3>7. Record payments correctly</h3>
 
 <p>
-Always select the correct rent month before
-recording the payment.
-This prevents payments being assigned to
-the wrong month.
+Always select the correct tenant and rental month before
+recording a payment.
 </p>
 
 </div>
@@ -4094,39 +4929,11 @@ the wrong month.
 
 <div class="guideIcon">⚠️</div>
 
-<h3>7. Watch unpaid months</h3>
+<h3>8. Watch unpaid rent</h3>
 
 <p>
-If the previous month is unpaid or partially paid,
-MavRent keeps showing the outstanding balance.
-The landlord can identify it before the next month
-is treated as settled.
-</p>
-
-</div>
-
-<div class="guideItem">
-
-<div class="guideIcon">🔔</div>
-
-<h3>8. Check reminders</h3>
-
-<p>
-MavRent calculates upcoming due dates and
-highlights rent that is approaching, partial or overdue.
-</p>
-
-</div>
-
-<div class="guideItem">
-
-<div class="guideIcon">🧾</div>
-
-<h3>9. Issue receipts</h3>
-
-<p>
-After confirming a payment, use Receipts to
-create the corresponding receipt record.
+A previous unpaid month remains visible. Its balance does
+not disappear just because a new month has started.
 </p>
 
 </div>
@@ -4135,11 +4942,50 @@ create the corresponding receipt record.
 
 <div class="guideIcon">🔧</div>
 
-<h3>10. Maintenance</h3>
+<h3>9. Manage maintenance</h3>
 
 <p>
-Tenants can submit maintenance requests and
-attach photos or videos.
+Review tenant maintenance requests, including attached
+photos or videos when available.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🧾</div>
+
+<h3>10. Manage receipts</h3>
+
+<p>
+Create receipts for confirmed payments and keep payment
+records connected to the correct rental period.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">💼</div>
+
+<h3>11. Track expenses</h3>
+
+<p>
+Record property expenses so you can compare rental revenue
+against operating costs.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">📊</div>
+
+<h3>12. Review reports</h3>
+
+<p>
+Use Reports to view revenue, expenses, net income,
+rent collection and occupancy.
 </p>
 
 </div>
@@ -4148,18 +4994,16 @@ attach photos or videos.
 
 <div class="card">
 
-<h2>🆕 New tenant advance payments</h2>
+<h2>🚪 What happens when a tenant leaves?</h2>
 
 <div class="step">
 
 <div class="stepNum">1</div>
 
 <div>
-<b>Choose the advance period</b>
+<b>Open Tenants</b>
 <p>
-When assigning a new tenant, choose
-3 or 4 months if they have paid several
-months in advance.
+Find the active tenant who is leaving.
 </p>
 </div>
 
@@ -4170,11 +5014,9 @@ months in advance.
 <div class="stepNum">2</div>
 
 <div>
-<b>Keep every month visible</b>
+<b>Choose Move Tenant Out</b>
 <p>
-Do not combine several months into one
-unexplained payment. Each rental period
-should remain identifiable.
+Confirm that the tenant has left the property.
 </p>
 </div>
 
@@ -4185,75 +5027,44 @@ should remain identifiable.
 <div class="stepNum">3</div>
 
 <div>
-<b>Use the next due date</b>
+<b>The tenancy becomes inactive</b>
 <p>
-After the advance period, MavRent continues
-the monthly schedule using the tenant's selected
-due day.
+The old tenancy remains in the database for historical
+records instead of being destroyed.
 </p>
 </div>
 
 </div>
 
+<div class="step">
+
+<div class="stepNum">4</div>
+
+<div>
+<b>The unit becomes vacant</b>
+<p>
+The unit can now be assigned to another tenant.
+</p>
 </div>
 
-<div class="card alertCard">
-
-<h2>⚠️ The most important protection</h2>
-
-<p>
-Suppose a tenant owes January and then February becomes due.
-Do not simply record the February payment as if January never existed.
-</p>
-
-<p>
-First check the January rent record. If it is unpaid or partial,
-the outstanding amount remains visible.
-</p>
-
-<p>
-This makes it much harder to accidentally forget an old debt
-and lose rental income.
-</p>
-
 </div>
-
-<div class="card">
-
-<h2>🔔 Reminder system</h2>
-
-<p>
-MavRent uses the tenant's selected due day to calculate
-the next due date.
-</p>
-
-<p>
-For example, if the tenant pays on the <b>5th</b>:
-</p>
-
-<ul>
-<li>Next due date → 5th of the next period</li>
-<li>Upcoming → highlighted before the due date</li>
-<li>Due today → highlighted</li>
-<li>Past due with balance → Overdue</li>
-<li>Partial payment → Partial</li>
-<li>Fully paid → Paid</li>
-</ul>
-
-<p>
-The notification bell can also be used for application
-notifications when push notifications are configured.
-</p>
 
 </div>
 
 <div class="card success">
 
-<h2>✅ Simple workflow</h2>
+<h2>✅ Recommended landlord workflow</h2>
 
 <p>
-<b>Property → Unit → Tenant → Due Day → Rent Record →
-Payment → Correct Month → Receipt → Next Due Date</b>
+<b>
+Property → Units → Tenant → Rent Schedule →
+Rent Records → Payment → Receipt → Reports
+</b>
+</p>
+
+<p>
+When someone leaves:
+<b>Tenant → Move Out → Unit becomes Vacant → New Tenant</b>
 </p>
 
 </div>
@@ -4284,7 +5095,9 @@ return`
 
 <h1>👤 Profile</h1>
 
-<p>Account details and MavRent identity.</p>
+<p>
+Your MavRent account information.
+</p>
 
 </div>
 
@@ -4293,9 +5106,13 @@ return`
 <div class="profileHero">
 
 <div class="avatar">
+
 ${esc(
-String(name).charAt(0).toUpperCase()
+String(name)
+.charAt(0)
+.toUpperCase()
 )}
+
 </div>
 
 <div>
@@ -4348,7 +5165,7 @@ ${esc(profile.tenant_code)}
 
 
 /* =====================================================
-   TENANT PAGES
+   TENANT ROUTING
 ===================================================== */
 
 function tenantPage(id){
@@ -4369,7 +5186,7 @@ if(id==='myReceipts')
 return tenantReceipts();
 
 if(id==='guide')
-return guidePage();
+return tenantGuide();
 
 if(id==='profile')
 return profilePage();
@@ -4385,7 +5202,8 @@ return tenantHome();
 
 function tenantHome(){
 
-const tenant=cache.tenants[0];
+const tenant=
+cache.tenants[0];
 
 const unit=
 cache.units.find(
@@ -4405,7 +5223,9 @@ r=>r.tenant_id===tenant?.id
 .sort(
 (a,b)=>
 String(b.period_month)
-.localeCompare(String(a.period_month))
+.localeCompare(
+String(a.period_month)
+)
 )[0];
 
 return`
@@ -4416,29 +5236,69 @@ return`
 
 <h1>🏠 My Home</h1>
 
-<p>Welcome to MavRent.</p>
+<p>
+Your private rental information.
+</p>
 
 </div>
 
 <div class="card">
 
 <h2>
-${esc(property?.name||'My Rental')}
+${esc(
+property?.name||
+'My Rental'
+)}
 </h2>
 
 <p>
-Unit:
-<b>${esc(unit?.unit_number||'—')}</b>
+📍 Property:
+<b>
+${esc(
+property?.location||
+'—'
+)}
+</b>
 </p>
 
 <p>
-Monthly rent:
-<b>${money(tenant?.rent_amount||unit?.monthly_rent)}</b>
+🚪 My Unit:
+<b>
+${esc(
+unit?.unit_number||
+'—'
+)}
+</b>
 </p>
 
 <p>
-Rent due day:
-<b>${esc(tenant?.rent_due_day||5)}</b>
+💰 Monthly Rent:
+<b>
+${money(
+tenant?.rent_amount||
+unit?.monthly_rent
+)}
+</b>
+</p>
+
+<p>
+📆 Rent Due Day:
+<b>
+${esc(
+tenant?.rent_due_day||
+5
+)}
+</b>
+</p>
+
+<p>
+📅 Move-in Date:
+<b>
+${esc(
+tenant?.move_in_date||
+'—'
+)}
+</b>
 </p>
 
 </div>
@@ -4455,24 +5315,43 @@ getRentStatus(latest)==='overdue'
 <h3>💰 Current Rent</h3>
 
 <p>
-${esc(monthLabel(latest.period_month))}
+${esc(
+monthLabel(latest.period_month)
+)}
+</p>
+
+<p>
+Due:
+<b>
+${esc(
+latest.due_date||
+'—'
+)}
+</b>
 </p>
 
 <p>
 Balance:
 <b class="${
-rentBalance(latest)>0?'red':'green'
+rentBalance(latest)>0
+?'red'
+:'green'
 }">
-${money(rentBalance(latest))}
+${money(
+rentBalance(latest)
+)}
 </b>
 </p>
 
 <p>
 Status:
 <span class="badge ${
-rentStatusClass(getRentStatus(latest))
-}">
-${esc(getRentStatus(latest))}
+rentStatusClass(
+getRentStatus(latest)
+)}">
+${esc(
+getRentStatus(latest)
+)}
 </span>
 </p>
 
@@ -4484,12 +5363,11 @@ View My Rent
 
 </div>
 `
-:''
-}
+:''}
 
 <div class="card">
 
-<h3>Quick actions</h3>
+<h3>Quick Actions</h3>
 
 <div class="actions">
 
@@ -4513,8 +5391,8 @@ onclick="navigate('myMaintenance')">
 
 <button
 class="btn"
-onclick="navigate('guide')">
-📖 Open Guide
+onclick="navigate('myReceipts')">
+🧾 My Receipts
 </button>
 
 </div>
@@ -4544,7 +5422,9 @@ t=>t.id===r.tenant_id
 .sort(
 (a,b)=>
 String(b.period_month)
-.localeCompare(String(a.period_month))
+.localeCompare(
+String(a.period_month)
+)
 );
 
 const totalDue=
@@ -4560,7 +5440,10 @@ records.reduce(
 );
 
 const balance=
-Math.max(0,totalDue-totalPaid);
+Math.max(
+0,
+totalDue-totalPaid
+);
 
 const latest=records[0];
 
@@ -4573,7 +5456,7 @@ return`
 <h1>💰 My Rent</h1>
 
 <p>
-Your monthly rent schedule and payment history.
+Your personal rent schedule and payment history.
 </p>
 
 </div>
@@ -4591,23 +5474,36 @@ ${money(balance)}
 <div class="rentMiniGrid">
 
 <div class="rentMini">
+
 <small>Total due</small>
-<strong>${money(totalDue)}</strong>
+
+<strong>
+${money(totalDue)}
+</strong>
+
 </div>
 
 <div class="rentMini">
+
 <small>Total paid</small>
-<strong>${money(totalPaid)}</strong>
+
+<strong>
+${money(totalPaid)}
+</strong>
+
 </div>
 
 <div class="rentMini">
+
 <small>Next due</small>
+
 <strong>
 ${esc(
 latest?.due_date||
 '—'
 )}
 </strong>
+
 </div>
 
 </div>
@@ -4618,14 +5514,15 @@ ${renderTenantRentWarnings(records)}
 
 <div class="card">
 
-<h3>Rent History</h3>
+<h3>My Rent History</h3>
 
 ${
 records.length
 ?records.map(
 r=>{
 
-const status=getRentStatus(r);
+const status=
+getRentStatus(r);
 
 return`
 
@@ -4636,11 +5533,15 @@ return`
 <div>
 
 <div class="monthName">
-${esc(monthLabel(r.period_month))}
+${esc(
+monthLabel(r.period_month)
+)}
 </div>
 
 <small>
-Due ${esc(r.due_date||'—')}
+Due ${esc(
+r.due_date||'—'
+)}
 </small>
 
 </div>
@@ -4656,24 +5557,45 @@ ${esc(status)}
 <div class="amountGrid">
 
 <div class="amountBox">
-<small>Amount due</small>
-<strong>${money(r.amount_due)}</strong>
+
+<small>
+Amount due
+</small>
+
+<strong>
+${money(r.amount_due)}
+</strong>
+
 </div>
 
 <div class="amountBox">
-<small>Amount paid</small>
+
+<small>
+Amount paid
+</small>
+
 <strong class="green">
 ${money(r.amount_paid)}
 </strong>
+
 </div>
 
 <div class="amountBox">
-<small>Remaining</small>
+
+<small>
+Remaining
+</small>
+
 <strong class="${
-rentBalance(r)>0?'red':'green'
+rentBalance(r)>0
+?'red'
+:'green'
 }">
-${money(rentBalance(r))}
+${money(
+rentBalance(r)
+)}
 </strong>
+
 </div>
 
 </div>
@@ -4682,7 +5604,7 @@ ${money(rentBalance(r))}
 
 <button
 onclick="tenantPayRent('${r.id}')">
-💳 Record payment
+💳 Submit Payment
 </button>
 
 </div>
@@ -4705,11 +5627,19 @@ onclick="tenantPayRent('${r.id}')">
 }
 
 
+/* =====================================================
+   TENANT RENT WARNINGS
+===================================================== */
+
 function renderTenantRentWarnings(records){
 
 const warnings=[];
 
-for(let i=0;i<records.length-1;i++){
+for(
+let i=0;
+i<records.length-1;
+i++
+){
 
 const current=records[i];
 const previous=records[i+1];
@@ -4723,17 +5653,22 @@ warnings.push(`
 
 <div class="card dangerCard">
 
-<h3>⚠️ Previous rent still unpaid</h3>
+<h3>
+⚠️ Previous rent still unpaid
+</h3>
 
 <p>
-${esc(monthLabel(previous.period_month))}
+${esc(
+monthLabel(
+previous.period_month
+)
+)}
 has a remaining balance of
-<b>${money(rentBalance(previous))}</b>.
-</p>
-
-<p>
-Please clear the previous balance before considering
-the next rental period fully settled.
+<b>
+${money(
+rentBalance(previous)
+)}
+</b>.
 </p>
 
 </div>
@@ -4751,14 +5686,16 @@ if(records[0]){
 const diff=
 Math.ceil(
 (
-new Date(records[0].due_date)-
+new Date(
+records[0].due_date
+)-
 new Date(today())
 )/86400000
 );
 
 if(
-diff>=0&&
-diff<=5&&
+diff>=0 &&
+diff<=5 &&
 rentBalance(records[0])>0
 ){
 
@@ -4766,16 +5703,26 @@ warnings.push(`
 
 <div class="card alertCard">
 
-<h3>🔔 Rent reminder</h3>
+<h3>
+🔔 Rent Reminder
+</h3>
 
 <p>
-Your next/current rent is due
-<b>${esc(records[0].due_date)}</b>.
+Your rent is due
+<b>
+${esc(
+records[0].due_date
+)}
+</b>.
 </p>
 
 <p>
 Remaining:
-<b>${money(rentBalance(records[0]))}</b>
+<b>
+${money(
+rentBalance(records[0])
+)}
+</b>
 </p>
 
 </div>
@@ -4805,7 +5752,10 @@ return`
 
 <h1>💳 My Payments</h1>
 
-<p>Payments made against your rent.</p>
+<p>
+Only payments connected to your own tenant account
+are displayed here.
+</p>
 
 </div>
 
@@ -4832,28 +5782,51 @@ return`
 
 <tr>
 
-<td>${esc(x.payment_date)}</td>
+<td>
+${esc(x.payment_date)}
+</td>
 
-<td>${money(x.amount)}</td>
+<td>
+${money(x.amount)}
+</td>
 
-<td>${esc(x.payment_method||'—')}</td>
+<td>
+${esc(
+x.payment_method||'—'
+)}
+</td>
 
-<td>${esc(x.transaction_reference||'—')}</td>
+<td>
+${esc(
+x.transaction_reference||
+'—'
+)}
+</td>
 
 <td>
 ${esc(
 rr
-?monthLabel(rr.period_month)
+?monthLabel(
+rr.period_month
+)
 :'—'
 )}
 </td>
 
 <td>
+
 <span class="badge ${
-rentStatusClass(x.status||'confirmed')
+rentStatusClass(
+x.status||
+'pending'
+)
 }">
-${esc(x.status||'confirmed')}
+${esc(
+x.status||
+'pending'
+)}
 </span>
+
 </td>
 
 </tr>
@@ -4886,7 +5859,9 @@ return`
 
 <h1>🧾 My Receipts</h1>
 
-<p>Your issued payment receipts.</p>
+<p>
+Receipts connected to your own payments.
+</p>
 
 </div>
 
@@ -4904,16 +5879,22 @@ x=>`
 <tr>
 
 <td>
-${esc(x.receipt_number)}
+${esc(
+x.receipt_number
+)}
 </td>
 
 <td>
-${esc(x.payment_id)}
+${esc(
+x.payment_id
+)}
 </td>
 
 <td>
 ${x.issued_at
-?new Date(x.issued_at).toLocaleString()
+?new Date(
+x.issued_at
+).toLocaleString()
 :'—'}
 </td>
 
@@ -4932,7 +5913,292 @@ ${x.issued_at
 
 
 /* =====================================================
-   MAINTENANCE - TENANT
+   TENANT GUIDE
+===================================================== */
+
+function tenantGuide(){
+
+return`
+
+<section>
+
+<div class="title">
+
+<h1>📖 Tenant Guide</h1>
+
+<p>
+A guide specifically for people renting a MavRent property.
+</p>
+
+</div>
+
+<div class="card infoCard">
+
+<h2>👋 Welcome to your MavRent account</h2>
+
+<p>
+Your tenant account is designed to give you access to
+<b>your own rental information</b>.
+</p>
+
+<p>
+You can see your home, rent schedule, payments, receipts
+and maintenance requests.
+</p>
+
+<p>
+You do not see other tenants' private information or the
+landlord's business management tools.
+</p>
+
+</div>
+
+<div class="guideGrid">
+
+<div class="guideItem">
+
+<div class="guideIcon">🏠</div>
+
+<h3>1. My Home</h3>
+
+<p>
+My Home shows the property you are renting, your unit,
+monthly rent, location and rent due day.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">💰</div>
+
+<h3>2. My Rent</h3>
+
+<p>
+My Rent shows your individual rental months, amount due,
+amount paid, balance and status.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">📆</div>
+
+<h3>3. Rent due date</h3>
+
+<p>
+Your landlord sets your rent due day. MavRent uses it to
+calculate your rental schedule.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">💳</div>
+
+<h3>4. Submit a payment</h3>
+
+<p>
+Select the rental month you are paying and enter the
+amount. The landlord can then review the payment.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🧾</div>
+
+<h3>5. My Payments</h3>
+
+<p>
+Review payments associated with your own tenant account,
+including the payment method and rental month.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🧾</div>
+
+<h3>6. My Receipts</h3>
+
+<p>
+After the landlord issues a receipt, it becomes available
+in your personal receipt area.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🔧</div>
+
+<h3>7. Report maintenance</h3>
+
+<p>
+Use Maintenance to report a problem in your unit.
+You can attach a photo or video to explain the issue.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">📷</div>
+
+<h3>8. Attach evidence</h3>
+
+<p>
+A photo or video can help your landlord understand exactly
+what needs repair.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">🔔</div>
+
+<h3>9. Rent reminders</h3>
+
+<p>
+MavRent can highlight rent that is approaching its due date,
+partially paid or overdue.
+</p>
+
+</div>
+
+<div class="guideItem">
+
+<div class="guideIcon">⚠️</div>
+
+<h3>10. Previous unpaid rent</h3>
+
+<p>
+If an older rental month still has a balance, MavRent keeps
+that balance visible instead of making it disappear.
+</p>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>💰 How your rent is tracked</h2>
+
+<div class="step">
+
+<div class="stepNum">1</div>
+
+<div>
+<b>Rental month is created</b>
+<p>
+MavRent creates a separate record for the rental period.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="stepNum">2</div>
+
+<div>
+<b>Due date is calculated</b>
+<p>
+The due date is based on the rent day selected for your tenancy.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="stepNum">3</div>
+
+<div>
+<b>Payment is recorded</b>
+<p>
+Your payment is connected to the specific rental month.
+</p>
+</div>
+
+</div>
+
+<div class="step">
+
+<div class="stepNum">4</div>
+
+<div>
+<b>Balance is calculated</b>
+<p>
+MavRent shows what remains unpaid for that month.
+</p>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>🔧 Reporting maintenance</h2>
+
+<p>
+When something needs repair:
+</p>
+
+<ol>
+
+<li>Open <b>Maintenance</b>.</li>
+
+<li>Enter a short subject.</li>
+
+<li>Select the priority.</li>
+
+<li>Describe the problem clearly.</li>
+
+<li>Attach a photo or video if useful.</li>
+
+<li>Submit the request.</li>
+
+</ol>
+
+</div>
+
+<div class="card success">
+
+<h2>✅ Simple tenant workflow</h2>
+
+<p>
+<b>
+My Home → My Rent → Payment → Receipt
+</b>
+</p>
+
+<p>
+For repairs:
+<b>
+Maintenance → Describe Problem → Attach Photo/Video → Submit
+</b>
+</p>
+
+</div>
+
+</section>
+
+`;
+
+}
+
+
+/* =====================================================
+   TENANT MAINTENANCE
 ===================================================== */
 
 function tenantMaintenance(){
@@ -4946,14 +6212,16 @@ return`
 <h1>🔧 Maintenance Requests</h1>
 
 <p>
-Submit and track maintenance problems.
+Report and track maintenance problems in your unit.
 </p>
 
 </div>
 
 <div class="card">
 
-<form id="tenantMaintForm" class="formgrid">
+<form
+id="tenantMaintForm"
+class="formgrid">
 
 <input
 id="tsubject"
@@ -4966,7 +6234,9 @@ required>
 Low Priority
 </option>
 
-<option value="medium" selected>
+<option
+value="medium"
+selected>
 Medium Priority
 </option>
 
@@ -5009,7 +6279,7 @@ Maximum 25 MB.
 <button
 id="submitTenantMaintenanceBtn"
 class="primary full">
-Submit request
+Submit Request
 </button>
 
 </form>
@@ -5042,29 +6312,54 @@ x.created_at
 </td>
 
 <td>
-${esc(x.title||x.subject)}
+${esc(
+x.title||
+x.subject
+)}
 </td>
 
 <td>
+
 <span class="badge">
-${esc(x.priority||'medium')}
+${esc(
+x.priority||
+'medium'
+)}
 </span>
+
 </td>
 
 <td>
+
 <span class="badge ${
-rentStatusClass(x.status||'pending')
+rentStatusClass(
+x.status||
+'pending'
+)
 }">
-${esc(x.status||'pending')}
+${esc(
+x.status||
+'pending'
+)}
 </span>
+
 </td>
 
 <td>
+
 ${
 x.media_url
-?`<a href="${esc(x.media_url)}" target="_blank" rel="noopener">View</a>`
+?`
+<a
+href="${esc(x.media_url)}"
+target="_blank"
+rel="noopener">
+View
+</a>
+`
 :'—'
 }
+
 </td>
 
 </tr>
@@ -5082,7 +6377,7 @@ x.media_url
 
 
 /* =====================================================
-   MAINTENANCE - LANDLORD
+   LANDLORD MAINTENANCE
 ===================================================== */
 
 function maintenanceLandlord(){
@@ -5095,7 +6390,9 @@ return`
 
 <h1>🔧 Maintenance</h1>
 
-<p>Review tenant maintenance requests.</p>
+<p>
+Review maintenance requests submitted by your tenants.
+</p>
 
 </div>
 
@@ -5144,29 +6441,54 @@ p?.email||
 </td>
 
 <td class="wrap">
-${esc(x.title||x.subject)}
+${esc(
+x.title||
+x.subject
+)}
 </td>
 
 <td>
+
 <span class="badge">
-${esc(x.priority||'medium')}
+${esc(
+x.priority||
+'medium'
+)}
 </span>
+
 </td>
 
 <td>
+
 <span class="badge ${
-rentStatusClass(x.status||'pending')
+rentStatusClass(
+x.status||
+'pending'
+)
 }">
-${esc(x.status||'pending')}
+${esc(
+x.status||
+'pending'
+)}
 </span>
+
 </td>
 
 <td>
+
 ${
 x.media_url
-?`<a href="${esc(x.media_url)}" target="_blank" rel="noopener">View</a>`
+?`
+<a
+href="${esc(x.media_url)}"
+target="_blank"
+rel="noopener">
+View
+</a>
+`
 :'—'
 }
+
 </td>
 
 </tr>
@@ -5194,8 +6516,12 @@ function attachPageEvents(id){
 if(id==='properties')
 attachPropertyForm();
 
-if(id==='units')
+if(id==='units'){
+
 attachUnitForm();
+attachBulkUnitForm();
+
+}
 
 if(id==='tenants')
 attachTenantForm();
@@ -5228,6 +6554,33 @@ const form=$('propertyForm');
 
 if(!form)return;
 
+const countInput=
+$('punitcount');
+
+if(countInput){
+
+countInput.addEventListener(
+'input',
+()=>{
+
+const count=
+Math.max(
+0,
+Number(countInput.value||0)
+);
+
+$('unitCountPreview').textContent=
+count===0
+?'0 units will be created automatically.'
+:`${count} unit${
+count===1?'':'s'
+} will be created automatically.`;
+
+}
+);
+
+}
+
 form.addEventListener(
 'submit',
 async e=>{
@@ -5238,11 +6591,12 @@ const button=
 form.querySelector('button');
 
 button.disabled=true;
-button.textContent='Saving...';
+button.textContent=
+'Saving property...';
 
 try{
 
-const r=
+const property=
 await sb
 .from('properties')
 .insert({
@@ -5254,18 +6608,80 @@ description:$('pdesc').value.trim()
 .select()
 .single();
 
-if(r.error)throw r.error;
+if(property.error)
+throw property.error;
+
+const unitCount=
+Math.max(
+0,
+Math.min(
+500,
+Number(
+$('punitcount').value||0
+)
+)
+);
+
+if(unitCount>0){
+
+const units=[];
+
+for(
+let i=1;
+i<=unitCount;
+i++
+){
+
+units.push({
+landlord_id:user.id,
+property_id:property.data.id,
+unit_number:'Unit '+i,
+monthly_rent:0,
+deposit_amount:0,
+status:'vacant'
+});
+
+}
+
+const unitResult=
+await sb
+.from('units')
+.insert(units);
+
+if(unitResult.error){
+
+console.warn(
+'Automatic units:',
+unitResult.error
+);
+
+alert(
+'Property created, but automatic units could not be created: '+
+unitResult.error.message
+);
+
+}
+
+}
 
 await refresh();
-renderPage('properties');
+
+renderPage(
+'properties'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not create property.'
+);
 
 }finally{
 
 button.disabled=false;
+button.textContent=
+'Save Property';
 
 }
 
@@ -5291,44 +6707,313 @@ async e=>{
 
 e.preventDefault();
 
-const button=form.querySelector('button');
+const button=
+form.querySelector('button');
 
 button.disabled=true;
-button.textContent='Saving...';
+button.textContent=
+'Adding unit...';
 
 try{
+
+const propertyId=
+$('uproperty').value;
+
+const unitNumber=
+$('unum').value.trim();
+
+const duplicate=
+cache.units.find(
+u=>
+u.property_id===propertyId &&
+String(u.unit_number)
+.toLowerCase()===
+unitNumber.toLowerCase()
+);
+
+if(duplicate){
+
+throw new Error(
+'That unit number already exists in this property.'
+);
+
+}
 
 const r=
 await sb
 .from('units')
 .insert({
 landlord_id:user.id,
-property_id:$('uproperty').value,
-unit_number:$('unum').value.trim(),
-monthly_rent:Number($('urent').value||0),
-deposit_amount:Number($('udep').value||0),
+property_id:propertyId,
+unit_number:unitNumber,
+monthly_rent:
+Number(
+$('urent').value||0
+),
+deposit_amount:
+Number(
+$('udep').value||0
+),
 status:$('ustatus').value
 })
 .select()
 .single();
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 await refresh();
-renderPage('units');
+
+renderPage(
+'units'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not add unit.'
+);
 
 }finally{
 
 button.disabled=false;
+button.textContent=
+'Add Unit';
 
 }
 
 }
 );
+
+}
+
+
+/* =====================================================
+   BULK UNIT FORM
+===================================================== */
+
+function attachBulkUnitForm(){
+
+const form=$('bulkUnitForm');
+
+if(!form)return;
+
+form.addEventListener(
+'submit',
+async e=>{
+
+e.preventDefault();
+
+const button=
+form.querySelector('button');
+
+button.disabled=true;
+button.textContent=
+'Creating units...';
+
+try{
+
+const propertyId=
+$('bulkProperty').value;
+
+const count=
+Math.max(
+1,
+Math.min(
+500,
+Number(
+$('bulkCount').value||0
+)
+)
+);
+
+const prefix=
+$('bulkPrefix').value.trim()||
+'Unit';
+
+const rent=
+Number(
+$('bulkRent').value||0
+);
+
+const deposit=
+Number(
+$('bulkDeposit').value||0
+);
+
+const existing=
+cache.units.filter(
+u=>u.property_id===propertyId
+);
+
+const units=[];
+
+let created=0;
+
+let number=1;
+
+while(
+created<count &&
+number<10000
+){
+
+const name=
+prefix+' '+number;
+
+const exists=
+existing.some(
+u=>
+String(
+u.unit_number
+).toLowerCase()===
+name.toLowerCase()
+);
+
+if(!exists){
+
+units.push({
+landlord_id:user.id,
+property_id:propertyId,
+unit_number:name,
+monthly_rent:rent,
+deposit_amount:deposit,
+status:'vacant'
+});
+
+created++;
+
+}
+
+number++;
+
+}
+
+if(!units.length){
+
+throw new Error(
+'No new unit names were available.'
+);
+
+}
+
+const r=
+await sb
+.from('units')
+.insert(units);
+
+if(r.error)
+throw r.error;
+
+await refresh();
+
+alert(
+`${units.length} unit(s) created successfully.`
+);
+
+renderPage(
+'units'
+);
+
+}catch(error){
+
+alert(
+error.message||
+'Could not create units.'
+);
+
+}finally{
+
+button.disabled=false;
+button.textContent=
+'Create Units Automatically';
+
+}
+
+}
+);
+
+}
+
+
+/* =====================================================
+   DELETE UNIT
+===================================================== */
+
+async function deleteUnit(id){
+
+const unit=
+cache.units.find(
+u=>u.id===id
+);
+
+if(!unit)
+return;
+
+if(unit.status==='occupied'){
+
+alert(
+'This unit is occupied. Move the tenant out before removing the unit.'
+);
+
+return;
+
+}
+
+const tenant=
+cache.tenants.find(
+t=>
+t.unit_id===id &&
+t.status==='active'
+);
+
+if(tenant){
+
+alert(
+'This unit is still assigned to an active tenant.'
+);
+
+return;
+
+}
+
+if(!confirm(
+`Remove ${unit.unit_number}? This should only be used for a unit that no longer exists.`
+))
+return;
+
+try{
+
+const r=
+await sb
+.from('units')
+.delete()
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error)
+throw r.error;
+
+await refresh();
+
+renderPage(
+'units'
+);
+
+}catch(error){
+
+alert(
+error.message||
+'Could not remove unit.'
+);
+
+}
 
 }
 
@@ -5343,16 +7028,51 @@ const form=$('tenantForm');
 
 if(!form)return;
 
+const unitSelect=
+$('tunit');
+
+if(unitSelect){
+
+unitSelect.addEventListener(
+'change',
+()=>{
+
+const unit=
+cache.units.find(
+x=>x.id===unitSelect.value
+);
+
+if(unit){
+
+$('trent').value=
+unit.monthly_rent||'';
+
+if(
+$('tdeposit') &&
+unit.deposit_amount
+)
+$('tdeposit').value=
+unit.deposit_amount;
+
+}
+
+}
+);
+
+}
+
 form.addEventListener(
 'submit',
 async e=>{
 
 e.preventDefault();
 
-const button=form.querySelector('button');
+const button=
+form.querySelector('button');
 
 button.disabled=true;
-button.textContent='Assigning...';
+button.textContent=
+'Assigning...';
 
 try{
 
@@ -5367,10 +7087,32 @@ cache.units.find(
 x=>x.id===unitId
 );
 
+if(!unit)
+throw new Error(
+'Select a valid unit.'
+);
+
+if(unit.status==='occupied')
+throw new Error(
+'That unit is already occupied.'
+);
+
+const alreadyAssigned=
+cache.tenants.find(
+t=>
+t.unit_id===unitId &&
+t.status==='active'
+);
+
+if(alreadyAssigned)
+throw new Error(
+'That unit already has an active tenant.'
+);
+
 const rent=
 Number(
 $('trent').value||
-unit?.monthly_rent||
+unit.monthly_rent||
 0
 );
 
@@ -5383,19 +7125,28 @@ Math.min(
 28,
 Math.max(
 1,
-Number($('tdue').value||5)
+Number(
+$('tdue').value||
+5
+)
 )
 );
 
 const advanceMonths=
-Number($('tadvance').value||1);
+Number(
+$('tadvance').value||
+1
+);
 
 const payload={
 landlord_id:user.id,
 profile_id:tenantProfileId,
 unit_id:unitId,
 rent_amount:rent,
-deposit_amount:Number($('tdeposit').value||0),
+deposit_amount:
+Number(
+$('tdeposit').value||0
+),
 rent_due_day:dueDay,
 move_in_date:moveDate,
 status:'active'
@@ -5408,14 +7159,10 @@ await sb
 .select()
 .single();
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 const tenant=r.data;
-
-
-/*
-   Create the initial advance-period records.
-*/
 
 for(
 let i=0;
@@ -5435,28 +7182,29 @@ rent
 
 }
 
-
-/*
-   Mark the unit occupied.
-*/
-
-if(unitId){
-
 const unitUpdate=
 await sb
 .from('units')
 .update({
 status:'occupied'
 })
-.eq('id',unitId);
+.eq(
+'id',
+unitId
+)
+.eq(
+'landlord_id',
+user.id
+);
 
 if(unitUpdate.error)
-console.warn(unitUpdate.error);
-
-}
+throw unitUpdate.error;
 
 await refresh();
-renderPage('tenants');
+
+renderPage(
+'tenants'
+);
 
 }catch(error){
 
@@ -5470,11 +7218,127 @@ alert(
 }finally{
 
 button.disabled=false;
+button.textContent=
+'Assign Tenant';
 
 }
 
 }
 );
+
+}
+
+
+/* =====================================================
+   MOVE TENANT OUT
+===================================================== */
+
+async function moveOutTenant(id){
+
+const tenant=
+cache.tenants.find(
+t=>t.id===id
+);
+
+if(!tenant)
+return;
+
+const p=
+cache.registeredTenants.find(
+x=>x.id===tenant.profile_id
+);
+
+const unit=
+cache.units.find(
+x=>x.id===tenant.unit_id
+);
+
+const tenantName=
+p?.full_name||
+p?.email||
+'Tenant';
+
+if(!confirm(
+`Move ${tenantName} out of ${
+unit?.unit_number||'the unit'
+}? Their historical rent and payment records will be preserved.`
+))
+return;
+
+try{
+
+/*
+   Important:
+   We DO NOT delete the tenant record.
+   This preserves historical records.
+*/
+
+const r=
+await sb
+.from('tenants')
+.update({
+status:'inactive'
+})
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(r.error)
+throw r.error;
+
+
+/*
+   Make the unit available again.
+*/
+
+if(tenant.unit_id){
+
+const u=
+await sb
+.from('units')
+.update({
+status:'vacant'
+})
+.eq(
+'id',
+tenant.unit_id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(u.error)
+throw u.error;
+
+}
+
+await refresh();
+
+renderPage(
+'tenants'
+);
+
+addLocalNotification(
+'Tenant moved out',
+`${tenantName} has been moved out of ${unit?.unit_number||'the unit'}. The unit is now available.`
+);
+
+}catch(error){
+
+console.error(error);
+
+alert(
+'Could not move tenant out: '+
+(error.message||error)
+);
+
+}
 
 }
 
@@ -5505,24 +7369,32 @@ r=>r.tenant_id===tenantId
 );
 
 select.innerHTML=
-`<option value="">
+`
+<option value="">
 Select rent month
-</option>`+
-records.map(
-r=>`
-
-<option value="${r.id}">
-${esc(monthLabel(r.period_month))}
-—
-Balance ${money(rentBalance(r))}
 </option>
-
+`
++
+records.map(
+r=>
+`
+<option value="${r.id}">
+${esc(
+monthLabel(
+r.period_month
+)
+)}
+—
+Balance:
+${money(
+rentBalance(r)
+)}
+</option>
 `
 ).join('');
 
 }
 );
-
 
 form.addEventListener(
 'submit',
@@ -5530,19 +7402,30 @@ async e=>{
 
 e.preventDefault();
 
-const button=form.querySelector('button');
+const button=
+form.querySelector('button');
 
 button.disabled=true;
-button.textContent='Saving payment...';
+button.textContent=
+'Saving payment...';
 
 try{
 
-const tenantId=$('ptenant').value;
-const rentId=$('prentrecord').value;
-const amount=Number($('pamount').value||0);
+const tenantId=
+$('ptenant').value;
+
+const rentId=
+$('prentrecord').value;
+
+const amount=
+Number(
+$('pamount').value||0
+);
 
 if(!tenantId)
-throw new Error('Select a tenant.');
+throw new Error(
+'Select a tenant.'
+);
 
 if(!rentId)
 throw new Error(
@@ -5550,7 +7433,9 @@ throw new Error(
 );
 
 if(amount<=0)
-throw new Error('Enter a valid amount.');
+throw new Error(
+'Enter a valid amount.'
+);
 
 const rent=
 cache.rent_records.find(
@@ -5558,28 +7443,37 @@ r=>r.id===rentId
 );
 
 if(!rent)
-throw new Error('Rent record not found.');
-
+throw new Error(
+'Rent record not found.'
+);
 
 const newPaid=
-Number(rent.amount_paid||0)+amount;
+Number(
+rent.amount_paid||0
+)+amount;
 
 const status=
-newPaid>=Number(rent.amount_due||0)
+newPaid>=
+Number(
+rent.amount_due||0
+)
 ?'paid'
 :'partial';
-
 
 const paymentPayload={
 landlord_id:user.id,
 tenant_id:tenantId,
 rent_record_id:rentId,
 amount:amount,
-payment_date:$('pdate').value||today(),
-payment_method:$('pmethod').value,
+payment_date:
+$('pdate').value||
+today(),
+payment_method:
+$('pmethod').value,
 transaction_reference:
 $('pref').value.trim(),
-notes:$('pnotes').value.trim(),
+notes:
+$('pnotes').value.trim(),
 status:'confirmed'
 };
 
@@ -5593,7 +7487,6 @@ await sb
 if(payment.error)
 throw payment.error;
 
-
 const update=
 await sb
 .from('rent_records')
@@ -5601,22 +7494,32 @@ await sb
 amount_paid:newPaid,
 status:status
 })
-.eq('id',rentId);
+.eq(
+'id',
+rentId
+);
 
 if(update.error)
 throw update.error;
 
-
 await refresh();
-renderPage('payments');
+
+renderPage(
+'payments'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not save payment.'
+);
 
 }finally{
 
 button.disabled=false;
+button.textContent=
+'Save Payment';
 
 }
 
@@ -5637,37 +7540,51 @@ navigate('payments');
 setTimeout(
 ()=>{
 
-const select=$('prentrecord');
-
-if(select)
-select.value=id;
-
 const rent=
 cache.rent_records.find(
 r=>r.id===id
 );
 
-if(rent){
+if(!rent)
+return;
 
 const tenant=
 cache.tenants.find(
 t=>t.id===rent.tenant_id
 );
 
-if(tenant){
+if(!tenant)
+return;
 
 const tenantSelect=
 $('ptenant');
 
-if(tenantSelect)
-tenantSelect.value=tenant.id;
+if(tenantSelect){
 
-}
+tenantSelect.value=
+tenant.id;
+
+tenantSelect.dispatchEvent(
+new Event('change')
+);
+
+setTimeout(
+()=>{
+
+const select=
+$('prentrecord');
+
+if(select)
+select.value=id;
+
+},
+20
+);
 
 }
 
 },
-50
+80
 );
 
 }
@@ -5690,17 +7607,25 @@ if(!rent)return;
 
 const amount=
 prompt(
-`Enter the payment amount for ${monthLabel(rent.period_month)}:`
+`Enter payment amount for ${monthLabel(
+rent.period_month
+)}:`
 );
 
-if(amount===null)return;
+if(amount===null)
+return;
 
 const numeric=
 Number(amount);
 
-if(!numeric||numeric<=0){
+if(
+!numeric||
+numeric<=0
+){
 
-alert('Enter a valid amount.');
+alert(
+'Enter a valid amount.'
+);
 
 return;
 
@@ -5726,21 +7651,36 @@ t=>t.id===rent.tenant_id
 );
 
 if(!tenant)
-throw new Error('Tenant record not found.');
+throw new Error(
+'Tenant record not found.'
+);
 
 const payment={
 landlord_id:
 tenant.landlord_id,
+
 tenant_id:
 tenant.id,
+
 rent_record_id:
 rent.id,
+
 amount:amount,
-payment_date:today(),
-payment_method:'pending_confirmation',
-transaction_reference:'',
-notes:'Payment submitted by tenant.',
-status:'pending'
+
+payment_date:
+today(),
+
+payment_method:
+'pending_confirmation',
+
+transaction_reference:
+'',
+
+notes:
+'Payment submitted by tenant.',
+
+status:
+'pending'
 };
 
 const r=
@@ -5748,18 +7688,25 @@ await sb
 .from('payments')
 .insert(payment);
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 alert(
-'Payment submitted. The landlord can now review and confirm it.'
+'Payment submitted. Your landlord can now review and confirm it.'
 );
 
 await refresh();
-renderPage('myRent');
+
+renderPage(
+'myRent'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not submit payment.'
+);
 
 }
 
@@ -5782,7 +7729,8 @@ async e=>{
 
 e.preventDefault();
 
-const button=form.querySelector('button');
+const button=
+form.querySelector('button');
 
 button.disabled=true;
 
@@ -5793,21 +7741,37 @@ await sb
 .from('expenses')
 .insert({
 landlord_id:user.id,
-property_id:$('eprop').value||null,
-amount:Number($('eamount').value||0),
-category:$('ecat').value.trim(),
-expense_date:$('edate').value||today(),
-description:$('edesc').value.trim()
+property_id:
+$('eprop').value||
+null,
+amount:
+Number(
+$('eamount').value||0
+),
+category:
+$('ecat').value.trim(),
+expense_date:
+$('edate').value||
+today(),
+description:
+$('edesc').value.trim()
 });
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 await refresh();
-renderPage('expenses');
+
+renderPage(
+'expenses'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not save expense.'
+);
 
 }finally{
 
@@ -5837,7 +7801,8 @@ async e=>{
 
 e.preventDefault();
 
-const button=form.querySelector('button');
+const button=
+form.querySelector('button');
 
 button.disabled=true;
 
@@ -5848,19 +7813,29 @@ await sb
 .from('receipts')
 .insert({
 landlord_id:user.id,
-payment_id:$('rpayment').value,
-receipt_number:$('rnumber').value.trim(),
-issued_at:new Date().toISOString()
+payment_id:
+$('rpayment').value,
+receipt_number:
+$('rnumber').value.trim(),
+issued_at:
+new Date().toISOString()
 });
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 await refresh();
-renderPage('receipts');
+
+renderPage(
+'receipts'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not issue receipt.'
+);
 
 }finally{
 
@@ -5905,7 +7880,8 @@ const button=
 $('submitTenantMaintenanceBtn');
 
 button.disabled=true;
-button.textContent='Submitting...';
+button.textContent=
+'Submitting...';
 
 try{
 
@@ -5914,7 +7890,7 @@ cache.tenants[0];
 
 if(!tenant)
 throw new Error(
-'Your tenant account is not assigned to a unit yet.'
+'Your tenant account is not assigned to a unit.'
 );
 
 let mediaUrl=null;
@@ -5924,13 +7900,21 @@ input?.files?.[0];
 
 if(file){
 
-if(file.size>25*1024*1024)
+if(
+file.size>
+25*1024*1024
+){
+
 throw new Error(
 'Maximum attachment size is 25 MB.'
 );
 
+}
+
 const extension=
-file.name.split('.').pop();
+file.name
+.split('.')
+.pop();
 
 const path=
 `${user.id}/${Date.now()}.${extension}`;
@@ -5953,7 +7937,9 @@ throw upload.error;
 const publicUrl=
 sb.storage
 .from(MEDIA_BUCKET)
-.getPublicUrl(path);
+.getPublicUrl(
+path
+);
 
 mediaUrl=
 publicUrl.data.publicUrl;
@@ -5964,33 +7950,61 @@ const r=
 await sb
 .from('maintenance_requests')
 .insert({
-landlord_id:tenant.landlord_id,
-tenant_id:tenant.id,
-unit_id:tenant.unit_id,
-title:$('tsubject').value.trim(),
-description:$('tdesc').value.trim(),
-priority:$('tpriority').value,
-status:'pending',
-media_url:mediaUrl
+landlord_id:
+tenant.landlord_id,
+
+tenant_id:
+tenant.id,
+
+unit_id:
+tenant.unit_id,
+
+title:
+$('tsubject')
+.value
+.trim(),
+
+description:
+$('tdesc')
+.value
+.trim(),
+
+priority:
+$('tpriority').value,
+
+status:
+'pending',
+
+media_url:
+mediaUrl
 });
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 alert(
 'Maintenance request submitted.'
 );
 
 await refresh();
-renderPage('myMaintenance');
+
+renderPage(
+'myMaintenance'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not submit request.'
+);
 
 }finally{
 
 button.disabled=false;
-button.textContent='Submit request';
+
+button.textContent=
+'Submit Request';
 
 }
 
@@ -6008,15 +8022,20 @@ function previewMaintenanceMedia(){
 
 const input=$('tmedia');
 
-if(!input||!input.files.length)
+if(
+!input||
+!input.files.length
+)
 return;
 
-const file=input.files[0];
+const file=
+input.files[0];
 
 let old=
 $('maintenanceMediaPreview');
 
-if(old)old.remove();
+if(old)
+old.remove();
 
 const box=
 document.createElement('div');
@@ -6024,7 +8043,8 @@ document.createElement('div');
 box.id=
 'maintenanceMediaPreview';
 
-box.className='mediaBox';
+box.className=
+'mediaBox';
 
 const title=
 document.createElement('strong');
@@ -6034,13 +8054,18 @@ title.textContent=
 
 box.appendChild(title);
 
-if(file.type.startsWith('video/')){
+if(
+file.type.startsWith('video/')
+){
 
 const video=
 document.createElement('video');
 
-video.className='mediaPreview';
+video.className=
+'mediaPreview';
+
 video.controls=true;
+
 video.src=
 URL.createObjectURL(file);
 
@@ -6051,7 +8076,9 @@ box.appendChild(video);
 const img=
 document.createElement('img');
 
-img.className='mediaPreview';
+img.className=
+'mediaPreview';
+
 img.src=
 URL.createObjectURL(file);
 
@@ -6097,28 +8124,89 @@ button.before(box);
 
 async function delProperty(id){
 
+const property=
+cache.properties.find(
+p=>p.id===id
+);
+
+if(!property)
+return;
+
+const units=
+cache.units.filter(
+u=>u.property_id===id
+);
+
+const occupied=
+units.some(
+u=>u.status==='occupied'
+);
+
+if(occupied){
+
+alert(
+'This property has occupied units. Move those tenants out before deleting the property.'
+);
+
+return;
+
+}
+
 if(!confirm(
-'Delete this property? Units belonging to it may prevent deletion.'
+`Delete ${property.name}? All its units must be removable before the property can be deleted.`
 ))
 return;
 
 try{
 
+if(units.length){
+
+const unitDelete=
+await sb
+.from('units')
+.delete()
+.eq(
+'property_id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
+
+if(unitDelete.error)
+throw unitDelete.error;
+
+}
+
 const r=
 await sb
 .from('properties')
 .delete()
-.eq('id',id)
-.eq('landlord_id',user.id);
+.eq(
+'id',
+id
+)
+.eq(
+'landlord_id',
+user.id
+);
 
-if(r.error)throw r.error;
+if(r.error)
+throw r.error;
 
 await refresh();
-renderPage('properties');
+
+renderPage(
+'properties'
+);
 
 }catch(error){
 
-alert(error.message||error);
+alert(
+error.message||
+'Could not delete property.'
+);
 
 }
 
@@ -6133,10 +8221,13 @@ async function loadNotifications(){
 
 notifications=[];
 
-const count=$('notifyCount');
+const count=
+$('notifyCount');
 
 if(count)
-count.classList.add('hidden');
+count.classList.add(
+'hidden'
+);
 
 renderNotifications();
 
@@ -6167,7 +8258,8 @@ return;
 
 list.innerHTML=
 notifications.map(
-n=>`
+n=>
+`
 
 <div class="notificationItem unread">
 
@@ -6198,17 +8290,22 @@ message
 notifications.unshift({
 title,
 message,
-date:new Date().toLocaleString()
+date:
+new Date()
+.toLocaleString()
 });
 
-const count=$('notifyCount');
+const count=
+$('notifyCount');
 
 if(count){
 
 count.textContent=
 notifications.length;
 
-count.classList.remove('hidden');
+count.classList.remove(
+'hidden'
+);
 
 }
 
@@ -6221,8 +8318,7 @@ function toggleNotifications(){
 const panel=
 $('notificationPanel');
 
-if(!panel)return;
-
+if(panel)
 panel.classList.toggle(
 'hidden'
 );
@@ -6237,7 +8333,9 @@ const count=
 $('notifyCount');
 
 if(count)
-count.classList.add('hidden');
+count.classList.add(
+'hidden'
+);
 
 renderNotifications();
 
@@ -6245,39 +8343,52 @@ renderNotifications();
 
 
 /* =====================================================
-   AUTOMATIC REMINDER CHECK
+   RENT REMINDERS
 ===================================================== */
 
 function checkRentReminders(){
 
-if(!user||!cache.rent_records.length)
+if(
+!user||
+!cache.rent_records.length
+)
 return;
 
 const todayDate=
 new Date(today());
 
-for(const record of cache.rent_records){
+for(
+const record
+of cache.rent_records
+){
 
 const balance=
 rentBalance(record);
 
-if(balance<=0)continue;
+if(balance<=0)
+continue;
 
-if(!record.due_date)continue;
+if(!record.due_date)
+continue;
 
 const due=
-new Date(record.due_date);
+new Date(
+record.due_date
+);
 
 const days=
 Math.ceil(
-(due-todayDate)/86400000
+(due-todayDate)/
+86400000
 );
 
 if(days===0){
 
 addLocalNotification(
 'Rent due today',
-`${monthLabel(record.period_month)} has a balance of ${money(balance)}.`
+`${monthLabel(
+record.period_month
+)} has a balance of ${money(balance)}.`
 );
 
 }
@@ -6286,7 +8397,9 @@ if(days===1){
 
 addLocalNotification(
 'Rent due tomorrow',
-`${monthLabel(record.period_month)} is due tomorrow.`
+`${monthLabel(
+record.period_month
+)} is due tomorrow.`
 );
 
 }
@@ -6295,7 +8408,9 @@ if(days===3){
 
 addLocalNotification(
 'Rent reminder',
-`${monthLabel(record.period_month)} is due in 3 days.`
+`${monthLabel(
+record.period_month
+)} is due in 3 days.`
 );
 
 }
@@ -6304,7 +8419,9 @@ if(days<0){
 
 addLocalNotification(
 'Overdue rent',
-`${monthLabel(record.period_month)} is overdue by ${money(balance)}.`
+`${monthLabel(
+record.period_month
+)} is overdue by ${money(balance)}.`
 );
 
 }
@@ -6325,7 +8442,11 @@ if(!user)return;
 if(channel){
 
 try{
-sb.removeChannel(channel);
+
+sb.removeChannel(
+channel
+);
+
 }catch(e){}
 
 }
@@ -6333,7 +8454,8 @@ sb.removeChannel(channel);
 channel=
 sb
 .channel(
-'mavrent-user-'+user.id
+'mavrent-user-'+
+user.id
 )
 .on(
 'postgres_changes',
@@ -6342,15 +8464,23 @@ event:'*',
 schema:'public'
 },
 async()=>{
+
 try{
 
 await refresh();
 
 if(
 $('app') &&
-!$('app').classList.contains('hidden')
-)
-renderPage(currentPage);
+!$('app')
+.classList
+.contains('hidden')
+){
+
+renderPage(
+currentPage
+);
+
+}
 
 }catch(e){
 
@@ -6360,6 +8490,7 @@ e
 );
 
 }
+
 }
 )
 .subscribe();
@@ -6368,7 +8499,7 @@ e
 
 
 /* =====================================================
-   CLOSE NOTIFICATION PANEL
+   CLOSE PANELS
 ===================================================== */
 
 document.addEventListener(
@@ -6378,19 +8509,54 @@ e=>{
 const panel=
 $('notificationPanel');
 
-const button=
-e.target.closest('.notifyBtn');
+const notifyButton=
+e.target.closest(
+'.notifyBtn'
+);
 
 if(
 panel &&
-!panel.classList.contains('hidden') &&
+!panel
+.classList
+.contains('hidden') &&
 !panel.contains(e.target) &&
-!button
+!notifyButton
 ){
 
-panel.classList.add('hidden');
+panel.classList.add(
+'hidden'
+);
 
 }
+
+const menu=
+$('moreMenu');
+
+const moreButton=
+e.target.closest(
+'#moreNavBtn'
+);
+
+if(
+menu &&
+!menu.classList.contains('hidden') &&
+!menu.contains(e.target) &&
+!moreButton
+){
+
+closeMore();
+
+}
+
+});
+
+
+$('modal').addEventListener(
+'click',
+e=>{
+
+if(e.target===$('modal'))
+closeModal();
 
 });
 
@@ -6400,7 +8566,10 @@ panel.classList.add('hidden');
 ===================================================== */
 
 sb.auth.onAuthStateChange(
-async(event,session)=>{
+async(
+event,
+session
+)=>{
 
 if(
 session?.user &&
@@ -6421,14 +8590,26 @@ await loadApp();
 ===================================================== */
 
 window.addEventListener(
+'resize',
+()=>{
+
+if(
+$('app') &&
+!$('app')
+.classList
+.contains('hidden')
+){
+
+buildNav();
+
+}
+
+}
+);
+
+window.addEventListener(
 'load',
 async()=>{
-
-/*
-   Always remove the loading screen.
-   This prevents MavRent being trapped forever
-   on the M / MavRent / Online screen.
-*/
 
 setTimeout(
 hideLoader,
@@ -6446,7 +8627,8 @@ await sb.auth.getSession();
 
 if(r.data.session){
 
-user=r.data.session.user;
+user=
+r.data.session.user;
 
 await loadApp();
 
