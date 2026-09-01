@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- =====================================================
-     MAVRENT PWA V14.5 — PUSH + NEXT MONTH
+     MAVRENT PWA V14.6 — PUSH NOTIFICATIONS + NEXT MONTH
 ===================================================== -->
 
 <!-- MAVRENT V14.5 STABLE LOADING SCREEN -->
@@ -40,7 +40,7 @@ content="black-translucent">
 name="apple-mobile-web-app-title"
 content="MavRent">
 
-<title>MavRent V14.5</title>
+<title>MavRent V14.6</title>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1156,36 +1156,23 @@ window.addEventListener('load',()=>{
    PWA SERVICE WORKER
 ===================================================== */
 
-if(
-'serviceWorker' in navigator
-){
+let mavrentSWRegistration=null;
 
-window.addEventListener(
-'load',
-()=>{
-
-navigator.serviceWorker
-.register('./sw.js?v=14.5')
-.then(
-registration=>{
-console.log(
-'MavRent service worker registered:',
-registration.scope
-);
+async function registerMavRentServiceWorker(){
+  if(!('serviceWorker' in navigator)) return null;
+  try{
+    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=14.6',{scope:'./'});
+    await navigator.serviceWorker.ready;
+    console.log('MavRent service worker ready:',mavrentSWRegistration.scope);
+    return mavrentSWRegistration;
+  }catch(error){
+    console.error('MavRent service worker registration failed:',error);
+    return null;
+  }
 }
-)
-.catch(
-error=>{
-console.error(
-'MavRent service worker registration failed:',
-error
-);
-}
-);
 
-}
-);
-
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{registerMavRentServiceWorker();},{once:true});
 }
 
 
@@ -3646,7 +3633,7 @@ function guidePage(){
   <div class="guideStep"><b>5. Confirm payments</b>The landlord reviews the payment and confirms it. Confirmed money is allocated from the oldest unpaid rent forward.</div>
   <div class="guideStep"><b>6. Watch the reminders</b>Use 🔔 to see advance reminders, due-today alerts and overdue warnings. The next due date is always shown.</div>
  </div>
- <div class="card"><h3>🔔 Automatic reminder schedule</h3><button class="btn guideBtn" onclick="requestRentNotifications()">🔔 Enable phone notifications</button><div class="reminderList">
+ <div class="card"><h3>🔔 Automatic reminder schedule</h3><button class="btn guideBtn" onclick="requestRentNotifications()">🔔 Enable phone notifications</button><button class="btn guideBtn" style="margin-top:8px" onclick="testMavRentNotification()">🔔 Test notification</button><div class="reminderList">
   <div class="reminderItem"><strong>14 days before</strong>Advance reminder — plan ahead.</div>
   <div class="reminderItem"><strong>7 days before</strong>Upcoming rent reminder.</div>
   <div class="reminderItem"><strong>3 days before</strong>Prepare payment reminder.</div>
@@ -3917,7 +3904,9 @@ async function requestRentNotifications(){
       return;
     }
 
-    const registration = await navigator.serviceWorker.ready;
+    const registration = await registerMavRentServiceWorker() || await navigator.serviceWorker.ready;
+
+    try{ await registration.update(); }catch(e){}
 
     let subscription =
       await registration.pushManager.getSubscription();
@@ -3988,6 +3977,29 @@ async function requestRentNotifications(){
 
   }
 
+}
+
+async function testMavRentNotification(){
+  try{
+    if(!('Notification' in window)) throw new Error('Notifications are not supported on this device/browser.');
+    if(Notification.permission!=='granted'){
+      await requestRentNotifications();
+      if(Notification.permission!=='granted') return;
+    }
+    const registration=await registerMavRentServiceWorker() || await navigator.serviceWorker.ready;
+    await registration.showNotification('MavRent — Test notification',{
+      body:'Push notifications are enabled on this device. Server push can now reach this device when MavRent is closed.',
+      icon:'./icon-192.png',
+      badge:'./icon-192.png',
+      tag:'mavrent-test-notification',
+      renotify:true,
+      data:{url:location.origin+'/'},
+      requireInteraction:false
+    });
+  }catch(error){
+    console.error(error);
+    alert('Notification test failed.\n\n'+(error.message||error));
+  }
 }
 
 async function loadNotifications(){
