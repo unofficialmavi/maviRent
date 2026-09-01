@@ -1,18 +1,17 @@
-```javascript
 /* =========================================================
    MAVRENT SERVICE WORKER
-   V14.2 STABLE
+   V14.5 - PUSH NOTIFICATIONS + OFFLINE SUPPORT
    ========================================================= */
 
-const CACHE_NAME = "mavrent-v14-2";
+const CACHE_NAME = "mavrent-v14-5";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./manifest.json",
-  "./icon-180.png",
   "./icon-192.png",
-  "./icon-512.png"
+  "./icon-512.png",
+  "./icon-180.png"
 ];
 
 
@@ -20,31 +19,18 @@ const APP_FILES = [
    INSTALL
    ========================================================= */
 
-self.addEventListener("install", event => {
-
+self.addEventListener("install", function (event) {
   event.waitUntil(
-
     caches.open(CACHE_NAME)
-
-      .then(cache => {
-
+      .then(function (cache) {
         return cache.addAll(APP_FILES);
-
       })
-
-      .catch(error => {
-
-        console.error(
-          "MavRent cache installation error:",
-          error
-        );
-
+      .catch(function (error) {
+        console.error("MavRent cache install error:", error);
       })
-
   );
 
   self.skipWaiting();
-
 });
 
 
@@ -52,45 +38,22 @@ self.addEventListener("install", event => {
    ACTIVATE
    ========================================================= */
 
-self.addEventListener("activate", event => {
-
+self.addEventListener("activate", function (event) {
   event.waitUntil(
-
     caches.keys()
-
-      .then(cacheNames => {
-
+      .then(function (cacheNames) {
         return Promise.all(
-
-          cacheNames
-
-            .filter(name => {
-
-              return (
-                name.startsWith("mavrent-") &&
-                name !== CACHE_NAME
-              );
-
-            })
-
-            .map(name => {
-
-              return caches.delete(name);
-
-            })
-
+          cacheNames.map(function (cacheName) {
+            if (cacheName !== CACHE_NAME) {
+              return caches.delete(cacheName);
+            }
+          })
         );
-
       })
-
-      .then(() => {
-
+      .then(function () {
         return self.clients.claim();
-
       })
-
   );
-
 });
 
 
@@ -98,160 +61,66 @@ self.addEventListener("activate", event => {
    FETCH
    ========================================================= */
 
-self.addEventListener("fetch", event => {
+self.addEventListener("fetch", function (event) {
 
-  const request = event.request;
-
-  /* Only handle GET requests */
-
-  if (request.method !== "GET") {
+  if (event.request.method !== "GET") {
     return;
   }
-
-  /*
-     IMPORTANT:
-     Supabase, APIs and external services should go
-     directly to the internet.
-
-     The service worker mainly protects the MavRent
-     application shell.
-  */
-
-  const url = new URL(request.url);
-
-  if (
-    url.hostname.includes("supabase.co") ||
-    url.hostname.includes("jsdelivr.net") ||
-    url.hostname !== self.location.hostname
-  ) {
-
-    return;
-
-  }
-
 
   event.respondWith(
-
-    fetch(request)
-
-      .then(response => {
-
-        /*
-           Save successful application responses
-           in the cache.
-        */
+    fetch(event.request)
+      .then(function (response) {
 
         if (
           response &&
           response.status === 200 &&
           response.type === "basic"
         ) {
+          const responseClone = response.clone();
 
-          const copy = response.clone();
-
-          caches.open(CACHE_NAME)
-            .then(cache => {
-
-              cache.put(request, copy);
-
-            });
-
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(event.request, responseClone);
+          });
         }
 
         return response;
-
       })
-
-      .catch(() => {
-
-        /*
-           If internet is unavailable,
-           use the cached version.
-        */
-
-        return caches.match(request)
-
-          .then(cachedResponse => {
+      .catch(function () {
+        return caches.match(event.request)
+          .then(function (cachedResponse) {
 
             if (cachedResponse) {
-
               return cachedResponse;
-
             }
 
-            /*
-               For navigation requests, return
-               the cached index.html.
-            */
-
-            if (request.mode === "navigate") {
-
-              return caches.match("./index.html");
-
-            }
-
-            return new Response(
-              "MavRent is currently offline.",
-              {
-                status: 503,
-                headers: {
-                  "Content-Type":
-                    "text/plain; charset=utf-8"
-                }
-              }
-            );
-
+            return caches.match("./index.html");
           });
-
       })
-
   );
-
 });
 
 
 /* =========================================================
-   MESSAGE
+   PUSH NOTIFICATION
+   Works when MavRent is closed/backgrounded.
    ========================================================= */
 
-self.addEventListener("message", event => {
-
-  if (!event.data) {
-    return;
-  }
-
-  if (event.data.type === "SKIP_WAITING") {
-
-    self.skipWaiting();
-
-  }
-
-});
-
-
-/* =========================================================
-   PUSH NOTIFICATIONS
-   ========================================================= */
-
-self.addEventListener("push", event => {
+self.addEventListener("push", function (event) {
 
   let data = {};
 
   try {
-
-    data = event.data
-      ? event.data.json()
-      : {};
-
+    if (event.data) {
+      data = event.data.json();
+    }
   } catch (error) {
-
-    data = {
-      title: "MavRent",
-      body: event.data
-        ? event.data.text()
-        : "You have a new notification."
-    };
-
+    try {
+      data = {
+        body: event.data ? event.data.text() : ""
+      };
+    } catch (e) {
+      data = {};
+    }
   }
 
 
@@ -259,19 +128,31 @@ self.addEventListener("push", event => {
     data.title ||
     "MavRent";
 
-  const options = {
+  const body =
+    data.body ||
+    data.message ||
+    "You have a new MavRent notification.";
 
-    body:
-      data.body ||
-      "You have a new MavRent notification.",
+  const icon =
+    data.icon ||
+    "./icon-192.png";
 
-    icon:
-      data.icon ||
-      "./icon-192.png",
+  const badge =
+    data.badge ||
+    "./icon-192.png";
 
-    badge:
-      data.badge ||
-      "./icon-192.png",
+  const url =
+    data.url ||
+    data.click_action ||
+    "./";
+
+
+  const notificationOptions = {
+    body: body,
+
+    icon: icon,
+
+    badge: badge,
 
     tag:
       data.tag ||
@@ -280,26 +161,19 @@ self.addEventListener("push", event => {
     renotify: true,
 
     requireInteraction:
-      Boolean(data.requireInteraction),
+      data.requireInteraction === true,
 
     data: {
-
-      url:
-        data.url ||
-        "./"
-
+      url: url
     }
-
   };
 
 
   event.waitUntil(
-
     self.registration.showNotification(
       title,
-      options
+      notificationOptions
     )
-
   );
 
 });
@@ -311,60 +185,53 @@ self.addEventListener("push", event => {
 
 self.addEventListener(
   "notificationclick",
-  event => {
+  function (event) {
 
     event.notification.close();
 
+    const notificationData =
+      event.notification.data || {};
+
     const targetUrl =
-      event.notification.data &&
-      event.notification.data.url
-        ? event.notification.data.url
-        : "./";
+      notificationData.url ||
+      "./";
 
 
     event.waitUntil(
 
-      clients.matchAll({
+      self.clients.matchAll({
         type: "window",
         includeUncontrolled: true
       })
 
-      .then(clientList => {
-
-        /*
-           If MavRent is already open,
-           focus it instead of opening another copy.
-        */
+      .then(function (clientList) {
 
         for (const client of clientList) {
 
           if (
             "focus" in client &&
-            client.url.includes(
-              self.location.origin
-            )
+            client.url.indexOf(self.location.origin) === 0
           ) {
 
-            return client.focus();
+            return client.focus()
+              .then(function (focusedClient) {
+
+                if (
+                  "navigate" in focusedClient &&
+                  targetUrl
+                ) {
+                  return focusedClient.navigate(targetUrl);
+                }
+
+                return focusedClient;
+              });
 
           }
-
         }
 
 
-        /*
-           Otherwise open MavRent.
-        */
-
-        if (clients.openWindow) {
-
-          return clients.openWindow(
-            new URL(
-              targetUrl,
-              self.location.origin
-            ).href
-          );
-
+        if (self.clients.openWindow) {
+          return self.clients.openWindow(targetUrl);
         }
 
       })
@@ -373,4 +240,42 @@ self.addEventListener(
 
   }
 );
-```
+
+
+/* =========================================================
+   NOTIFICATION CLOSE
+   ========================================================= */
+
+self.addEventListener(
+  "notificationclose",
+  function (event) {
+
+    console.log(
+      "MavRent notification closed."
+    );
+
+  }
+);
+
+
+/* =========================================================
+   MESSAGE
+   ========================================================= */
+
+self.addEventListener(
+  "message",
+  function (event) {
+
+    if (!event.data) {
+      return;
+    }
+
+
+    if (event.data.type === "SKIP_WAITING") {
+
+      self.skipWaiting();
+
+    }
+
+  }
+);
