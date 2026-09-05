@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- =====================================================
-     MAVRENT PWA V14.6 — PUSH NOTIFICATIONS + NEXT MONTH
+     MAVRENT PWA V14.6 — PUSH NOTIFICATIONS + FULL VIEWS
 ===================================================== -->
 
-<!-- MAVRENT V14.5 STABLE LOADING SCREEN -->
 <div id="mavLoading" class="mav-loading">
   <div class="mav-loading-logo">M</div>
   <div class="mav-loading-name">Mav<span>Rent</span></div>
@@ -16,7 +15,6 @@
   <div class="mav-spinner"></div>
 </div>
 
-<!-- ONLINE STATUS -->
 <div id="connectionStatus" class="connection-status online">
   <span class="connection-dot"></span>
   <span id="connectionText">Online</span>
@@ -235,9 +233,6 @@ background:#fff;
 color:#111827
 }
 
-/* =====================================================
-   MORE NAVIGATION DRAWER
-===================================================== */
 .nav-backdrop{
 position:fixed;
 inset:0;
@@ -369,57 +364,6 @@ gap:12px
 
 .full{grid-column:1/-1}
 
-.actions{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:9px
-}
-
-.btn{
-border:1px solid #d9dde3;
-background:#fff;
-color:#17202a;
-border-radius:10px;
-padding:11px;
-text-align:left;
-font-weight:700
-}
-
-.danger{
-background:#fff0f0;
-color:#a72828
-}
-
-.successBtn{
-background:#ecfdf3;
-color:#08743f
-}
-
-.warningBtn{
-background:#fff8e6;
-color:#966100
-}
-
-#app input,
-#app select,
-#app textarea{
-width:100%;
-padding:13px 14px;
-border:1px solid #d9dde3;
-border-radius:12px;
-background:#fff;
-color:#17202a!important;
-caret-color:#17202a;
-outline:0
-}
-
-#app input:focus,
-#app select:focus,
-#app textarea:focus{
-border-color:#087cff;
-box-shadow:0 0 0 3px #087cff1f
-}
-
 .tablewrap{overflow:auto}
 
 .table{
@@ -434,11 +378,6 @@ border-bottom:1px solid #eceef1;
 text-align:left;
 vertical-align:top;
 white-space:nowrap
-}
-
-.wrap{
-white-space:normal!important;
-min-width:200px
 }
 
 .badge{
@@ -456,7 +395,8 @@ color:#956300
 
 .badge.confirmed,
 .badge.completed,
-.badge.paid{
+.badge.paid,
+.badge.occupied{
 background:#dcfce7;
 color:#166534
 }
@@ -468,26 +408,10 @@ background:#fee2e2;
 color:#991b1b
 }
 
-.badge.partial{
-background:#fef3c7;
-color:#92400e
-}
-
-.badge.in_progress{
-background:#dbeafe;
-color:#1d4ed8
-}
-
-.empty,.loading{
+.empty{
 text-align:center;
 padding:30px;
 color:#737b87
-}
-
-.code{
-font-family:monospace;
-font-weight:800;
-letter-spacing:.5px
 }
 
 .profileHero{
@@ -516,10 +440,6 @@ padding:10px;
 font-family:monospace;
 font-weight:800
 }
-
-/* =====================================================
-   NOTIFICATIONS
-===================================================== */
 
 .notificationPanel{
 position:fixed;
@@ -573,219 +493,6 @@ font-size:10px;
 color:#9299a3;
 margin-top:7px
 }
-
-.notificationType{
-font-size:10px;
-margin-top:6px;
-color:#1769d1;
-font-weight:700
-}
-
-.mediaPreview{
-max-width:280px;
-max-height:220px;
-border-radius:10px;
-margin-top:8px
-}
-
-.mediaBox{
-padding:10px;
-border:1px solid #e5e7eb;
-border-radius:10px;
-background:#f8fafc;
-margin-top:8px
-}
-
-.maintCard{
-border:1px solid #e5e7eb;
-border-radius:14px;
-padding:14px;
-margin-bottom:12px
-}
-
-.maintTop{
-display:flex;
-justify-content:space-between;
-gap:10px
-}
-
-.maintMeta{
-font-size:12px;
-color:#667085;
-line-height:1.6
-}
-
-.maintActions{
-margin-top:12px;
-padding-top:12px;
-border-top:1px solid #eef0f3
-}
-
-.maintActionsGrid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:8px
-}
-
-.progressLine{
-display:flex;
-gap:6px;
-flex-wrap:wrap;
-margin:10px 0
-}
-
-.progressStep{
-padding:5px 9px;
-border-radius:999px;
-background:#eef1f5;
-font-size:11px
-}
-
-.progressStep.done{
-background:#dcfce7;
-color:#166534
-}
-
-.progressStep.current{
-background:#dbeafe;
-color:#1d4ed8
-}
-
-.rentHero{
-background:
-linear-gradient(135deg,#071b41,#0869d7 55%,#00b8ff);
-color:#fff;
-border:0
-}
-
-.rentHero .muted{
-color:#ffffffc9
-}
-
-.rentBalance{
-font-size:32px;
-font-weight:900;
-margin-top:7px
-}
-
-.rentMiniGrid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-margin-top:15px
-}
-
-.rentMini{
-background:#ffffff18;
-border:1px solid #ffffff30;
-border-radius:12px;
-padding:12px
-}
-
-.rentMini small{
-display:block;
-color:#ffffffb8
-}
-
-.rentMini strong{
-display:block;
-margin-top:4px
-}
-
-.monthCard{
-border:1px solid #e5e7eb;
-border-radius:14px;
-padding:15px;
-margin-bottom:12px;
-background:#fff
-}
-
-.monthTop{
-display:flex;
-justify-content:space-between;
-align-items:flex-start;
-gap:12px
-}
-
-.monthName{
-font-weight:900;
-font-size:17px
-}
-
-.amountGrid{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:10px;
-margin-top:12px
-}
-
-.amountBox{
-padding:11px;
-border-radius:10px;
-background:#f8fafc
-}
-
-.amountBox small{
-display:block;
-color:#667085
-}
-
-.amountBox strong{
-display:block;
-margin-top:4px
-}
-
-.rentActionRow{
-display:flex;
-gap:8px;
-flex-wrap:wrap;
-margin-top:12px
-}
-
-.rentActionRow button{
-border:1px solid #d9dde3;
-background:#fff;
-border-radius:99px;
-padding:9px 12px;
-font-weight:700
-}
-
-.guideBtn{margin-top:0!important;background:#111827!important;color:#fff!important;text-align:center!important}
-.alertStrip{border-radius:14px;padding:13px 14px;margin-bottom:12px;border:1px solid #e5e7eb;background:#fff}
-.alertStrip.danger{background:#fff1f2;color:#991b1b;border-color:#fecdd3}
-.alertStrip.warning{background:#fffbeb;color:#92400e;border-color:#fde68a}
-.alertStrip.info{background:#eff6ff;color:#1d4ed8;border-color:#bfdbfe}
-.alertStrip.success{background:#ecfdf3;color:#166534;border-color:#bbf7d0}
-.alertTitle{font-weight:900;margin-bottom:4px}
-.rentStatus{font-weight:900}
-.rentStatus.paid{color:#166534}.rentStatus.partial{color:#92400e}.rentStatus.overdue{color:#991b1b}.rentStatus.pending{color:#92400e}
-.rentDueDate{font-size:12px;color:#667085;margin-top:5px}
-.guideGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.guideStep{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:15px}
-.guideStep b{display:block;margin-bottom:6px}
-.reminderList{display:grid;gap:8px}
-.reminderItem{padding:11px;border-radius:11px;background:#f8fafc;border:1px solid #e5e7eb;font-size:13px}
-.reminderItem strong{display:block;margin-bottom:3px}
-.payInputHint{font-size:12px;color:#667085;margin-top:5px}
-
-@media(max-width:700px){
-.guideGrid{grid-template-columns:1fr}
-.stats,.grid,.formgrid{grid-template-columns:1fr}
-.stats{grid-template-columns:1fr 1fr}
-.full{grid-column:auto}
-.title h1{font-size:22px}
-.actions{grid-template-columns:1fr}
-.userbox span{display:none}
-.notificationPanel{right:10px}
-.maintTop{display:block}
-.maintActionsGrid{grid-template-columns:1fr}
-.rentMiniGrid{grid-template-columns:1fr}
-.amountGrid{grid-template-columns:1fr}
-}
-
-/* =====================================================
-   MAVRENT V14.1 MOBILE UI
-===================================================== */
 
 .mav-loading{
   position:fixed;
@@ -953,63 +660,16 @@ font-weight:700
     border-radius:16px;
     padding:14px;
   }
-  .title{
-    margin-bottom:12px;
-  }
-  .title h1{
-    font-size:21px;
-  }
-  .stats{
-    gap:8px;
-  }
-  .stats .card{
-    padding:12px;
-    margin-bottom:0;
-  }
-  .stats .big{
-    font-size:17px;
-    overflow-wrap:anywhere;
-  }
-  #app input,
-  #app select,
-  #app textarea{
-    min-height:48px;
-    font-size:16px;
-  }
-  .primary,
-  .secondary,
-  .btn{
-    min-height:46px;
-  }
-  .tablewrap{
-    margin:0 -5px;
-  }
-  .notificationPanel{
-    top:62px;
-    right:8px;
-    width:calc(100vw - 16px);
-    max-height:70vh;
-  }
   .connection-status{
     bottom:76px;
     right:8px;
     opacity:.9;
-  }
-  .rentBalance{
-    font-size:28px;
-  }
-  .rentActionRow button{
-    min-height:44px;
   }
 }
 </style>
 </head>
 
 <body>
-
-<!-- =====================================================
-     LOGIN
-===================================================== -->
 
 <div id="auth" class="auth">
 <div class="login">
@@ -1050,11 +710,6 @@ Rental management platform
 </div>
 </div>
 
-
-<!-- =====================================================
-     APPLICATION
-===================================================== -->
-
 <div id="app" class="hidden">
 
 <header>
@@ -1078,11 +733,6 @@ Rental management platform
 
 </div>
 
-
-<!-- =====================================================
-     MORE NAVIGATION DRAWER
-===================================================== -->
-
 <div id="navBackdrop" class="nav-backdrop" onclick="closeNavDrawer()"></div>
 
 <div id="navDrawer" class="nav-drawer">
@@ -1093,26 +743,16 @@ Rental management platform
   <div id="drawerContent" class="drawer-content"></div>
 </div>
 
-
-<!-- =====================================================
-     NOTIFICATION PANEL
-===================================================== -->
-
 <div id="notificationPanel" class="notificationPanel hidden">
 <div class="notificationHead">
   <h3 style="margin:0">🔔 Notifications</h3>
-  <button class="btn" onclick="markAllNotificationsRead()">Mark all read</button>
+  <button class="btn" onclick="markAllNotificationsRead()" style="padding:6px 10px; font-size:11px;">Mark all read</button>
 </div>
 
 <div id="notificationList"></div>
 </div>
 
-
 <script>
-
-/* =====================================================
-   STARTUP SAFETY
-===================================================== */
 window.addEventListener('load',()=>{
   const loader=document.getElementById('mavLoading');
   if(loader){
@@ -1120,11 +760,7 @@ window.addEventListener('load',()=>{
   }
 });
 
-/* =====================================================
-   WEB PUSH / BACKGROUND NOTIFICATIONS
-===================================================== */
 const MAVRENT_VAPID_PUBLIC_KEY = 'BGcK6LPWHwIUw4Em721oLZF8dubZ_YZ22OL24WRI7S80-C8TU0OjZShZKv_-FJ6OtXwlblBhUkdTUaWj7dUH5XE';
-
 let mavrentSWRegistration = null;
 
 function urlBase64ToUint8Array(base64String) {
@@ -1143,10 +779,9 @@ async function registerMavRentServiceWorker(){
   try{
     mavrentSWRegistration = await navigator.serviceWorker.register('./sw.js?v=14.6',{scope:'./'});
     await navigator.serviceWorker.ready;
-    console.log('MavRent service worker ready:', mavrentSWRegistration.scope);
     return mavrentSWRegistration;
   }catch(error){
-    console.error('MavRent service worker registration failed:', error);
+    console.error('Service worker registration failed:', error);
     return null;
   }
 }
@@ -1194,14 +829,8 @@ async function subscribeToPushNotifications() {
   }
 }
 
-
-/* =====================================================
-   SUPABASE
-===================================================== */
-
 const SUPABASE_URL = 'https://wborvbuqdiscoasnsrwa.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
-const MEDIA_BUCKET = 'maintenance-media';
 
 let sb=null;
 let supabaseReadyPromise=null;
@@ -1221,7 +850,7 @@ function ensureSupabase(){
   supabaseReadyPromise=new Promise((resolve,reject)=>{
     let tries=0;
     const timer=setInterval(()=>{
-      const client=initSupabaseClient();
+      let client=initSupabaseClient();
       if(client){
         clearInterval(timer);
         resolve(client);
@@ -1230,17 +859,12 @@ function ensureSupabase(){
       tries++;
       if(tries>=100){
         clearInterval(timer);
-        reject(new Error('MavRent login service could not load. Please refresh and try again.'));
+        reject(new Error('MavRent service could not load. Please refresh.'));
       }
     },100);
   });
   return supabaseReadyPromise;
 }
-
-
-/* =====================================================
-   GLOBAL STATE
-===================================================== */
 
 let role='landlord';
 let user=null;
@@ -1251,55 +875,16 @@ let loading=false;
 let activeTab='dashboard';
 
 let cache={
-  properties:[],
-  units:[],
-  tenants:[],
-  registeredTenants:[],
-  payments:[],
-  maintenance_requests:[],
-  expenses:[],
-  receipts:[],
-  rent_records:[]
+  properties:[], units:[], tenants:[], registeredTenants:[],
+  payments:[], maintenance_requests:[], expenses:[], receipts:[], rent_records:[]
 };
-
-
-/* =====================================================
-   HELPERS
-===================================================== */
 
 const $=x=>document.getElementById(x);
 const money=n => 'UGX '+Number(n||0).toLocaleString('en-US');
-const today=() => new Date().toISOString().slice(0,10);
-
 const esc=s => String(s??'').replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
 function shortId(id){
   return id ? 'MVR-'+String(id).replace(/-/g,'').slice(0,8).toUpperCase() : '—';
-}
-
-function monthLabel(date){
-  if(!date)return '—';
-  let d=new Date(date+'T00:00:00');
-  return d.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-}
-
-function monthStart(date){
-  let d=new Date(date+'T00:00:00');
-  return new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);
-}
-
-function addMonths(date,n){
-  let d=new Date(date+'T00:00:00');
-  d.setMonth(d.getMonth()+n);
-  return new Date(d.getFullYear(),d.getMonth(),1).toISOString().slice(0,10);
-}
-
-function rentBalance(r){
-  return Math.max(0, Number(r.amount_due||0) - Number(r.amount_paid||0));
-}
-
-function rentStatusClass(status){
-  return String(status||'pending').toLowerCase().replace(/\s+/g,'_');
 }
 
 function msg(t,c='error'){
@@ -1309,11 +894,6 @@ function msg(t,c='error'){
   x.className='message '+c;
   x.classList.remove('hidden');
 }
-
-
-/* =====================================================
-   LOGIN / AUTH
-===================================================== */
 
 function chooseRole(r){
   role=r;
@@ -1374,11 +954,6 @@ $('loginForm').onsubmit=async e=>{
   await loadApp();
 };
 
-
-/* =====================================================
-   PROFILE
-===================================================== */
-
 async function loadProfile(){
   let r=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
   if(r.error){
@@ -1386,26 +961,6 @@ async function loadProfile(){
     return null;
   }
   return r.data;
-}
-
-
-/* =====================================================
-   LOAD APPLICATION
-===================================================== */
-
-let scheduleMaintenanceRunning=false;
-async function ensureRentSchedules(){
-  if(scheduleMaintenanceRunning||!user||role!=='landlord'||!navigator.onLine)return;
-  scheduleMaintenanceRunning=true;
-  try{
-    for(const t of cache.tenants){
-      const rows=cache.rent_records.filter(x=>x.tenant_id===t.id);
-      if(!rows.length) continue;
-      const last=rows.slice().sort((a,b)=>String(b.period_month).localeCompare(String(a.period_month)))[0];
-      const monthsAhead=Math.round((new Date(last.period_month+'T00:00:00')-new Date(monthStart(today())+'T00:00:00'))/(30.44*86400000));
-    }
-  }catch(e){console.warn('Background rent schedule update:',e)}
-  finally{scheduleMaintenanceRunning=false;}
 }
 
 async function loadApp(){
@@ -1428,24 +983,13 @@ async function loadApp(){
   startRealtime();
 
   loading=false;
-  setTimeout(()=>ensureRentSchedules(),250);
 }
-
-
-/* =====================================================
-   LOGOUT
-===================================================== */
 
 async function logout(){
   if(channel) await sb.removeChannel(channel);
   await sb.auth.signOut();
   location.reload();
 }
-
-
-/* =====================================================
-   DATABASE ERROR
-===================================================== */
 
 function dbErr(t,e){
   console.error(t,e);
@@ -1457,11 +1001,6 @@ function dbErr(t,e){
     </div>
   </div>`;
 }
-
-
-/* =====================================================
-   REFRESH DATA
-===================================================== */
 
 async function refresh(){
   cache={
@@ -1533,11 +1072,6 @@ async function refresh(){
   }
 }
 
-
-/* =====================================================
-   REALTIME & NOTIFICATIONS
-===================================================== */
-
 function startRealtime(){
   if(channel) sb.removeChannel(channel);
   channel = sb.channel('public-changes')
@@ -1598,11 +1132,6 @@ async function markAllNotificationsRead(){
   loadNotifications();
 }
 
-
-/* =====================================================
-   NAVIGATION
-===================================================== */
-
 function toggleNavDrawer(){
   const drawer=$('navDrawer');
   const backdrop=$('navBackdrop');
@@ -1645,7 +1174,7 @@ function buildNav(){
   $('drawerContent').innerHTML = drawerHtml;
 }
 
-function show(tabKey, updateHistory=true){
+function show(tabKey){
   activeTab = tabKey;
   document.querySelectorAll('nav button, .drawer-content button').forEach(btn => btn.classList.remove('active'));
   
@@ -1663,66 +1192,184 @@ function renderCurrentView(){
   switch(activeTab){
     case 'dashboard':
     case 'home':
-      main.innerHTML = `
-        <div class="title">
-          <h1>Welcome, ${esc(profile?.full_name || user.email)}</h1>
-          <p>MavRent Overview & Active Management</p>
-        </div>
-        <div class="stats">
-          <div class="card"><small>Properties</small><div class="big blue">${cache.properties.length}</div></div>
-          <div class="card"><small>Units</small><div class="big green">${cache.units.length}</div></div>
-          <div class="card"><small>Active Tenants</small><div class="big orange">${cache.tenants.length}</div></div>
-          <div class="card"><small>Records</small><div class="big red">${cache.rent_records.length}</div></div>
-        </div>`;
+      renderDashboardView(main);
       break;
-
+    case 'properties':
+      renderPropertiesView(main);
+      break;
+    case 'units':
+      renderUnitsView(main);
+      break;
+    case 'tenants':
+      renderTenantsView(main);
+      break;
+    case 'payments':
+    case 'myPayments':
+      renderPaymentsView(main);
+      break;
     case 'profile':
-      main.innerHTML = `
-        <div class="card">
-          <div class="profileHero">
-            <div class="avatar">${(profile?.full_name || user.email)[0].toUpperCase()}</div>
-            <div>
-              <h3>${esc(profile?.full_name || 'User Profile')}</h3>
-              <p class="muted">${esc(user.email)}</p>
-              <div class="profileId">ID: ${shortId(user.id)}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>🔔 Push Notification Settings</h3>
-          <p class="muted">Enable device-level background alerts for payment updates and maintenance logs.</p>
-          <div style="margin-top:10px;">
-            <p><strong>Status:</strong> <span id="pushStatus">Checking...</span></p>
-            <button class="primary" style="width:auto; padding:10px 20px;" onclick="subscribeToPushNotifications()">Enable Background Alerts</button>
-          </div>
-        </div>`;
-
-      if ('PushManager' in window && navigator.serviceWorker) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.pushManager.getSubscription().then(sub => {
-            const statusEl = $('pushStatus');
-            if (statusEl) {
-              statusEl.textContent = sub ? 'Active & Subscribed' : 'Not Active';
-            }
-          });
-        });
-      }
+      renderProfileView(main);
       break;
-
     default:
       main.innerHTML = `
         <div class="card">
           <h2>${esc(activeTab.toUpperCase())}</h2>
-          <p>View content for ${esc(activeTab)} loaded successfully.</p>
+          <p>View content loaded successfully for ${esc(activeTab)}.</p>
         </div>`;
       break;
   }
 }
 
-/* =====================================================
-   ONLINE / OFFLINE DETECTOR
-===================================================== */
+function renderDashboardView(main){
+  main.innerHTML = `
+    <div class="title">
+      <h1>Welcome, ${esc(profile?.full_name || user.email)}</h1>
+      <p>MavRent Overview & Active Management</p>
+    </div>
+    <div class="stats">
+      <div class="card"><small>Properties</small><div class="big blue">${cache.properties.length}</div></div>
+      <div class="card"><small>Units</small><div class="big green">${cache.units.length}</div></div>
+      <div class="card"><small>Active Tenants</small><div class="big orange">${cache.tenants.length}</div></div>
+      <div class="card"><small>Records</small><div class="big red">${cache.rent_records.length}</div></div>
+    </div>`;
+}
+
+function renderUnitsView(main){
+  if(!cache.units.length){
+    main.innerHTML = `
+      <div class="card">
+        <h2>🚪 Units Management</h2>
+        <div class="empty">No units created yet. Add properties and units to get started.</div>
+      </div>`;
+    return;
+  }
+
+  const rows = cache.units.map(u => {
+    const prop = cache.properties.find(p => p.id === u.property_id);
+    return `
+      <tr>
+        <td><strong>${esc(u.unit_number || u.name || 'Unit')}</strong></td>
+        <td>${esc(prop?.name || '—')}</td>
+        <td>${money(u.rent_amount || u.rent)}</td>
+        <td><span class="badge ${u.status === 'occupied' ? 'confirmed' : 'pending'}">${esc(u.status || 'vacant')}</span></td>
+      </tr>`;
+  }).join('');
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="bar" style="margin-bottom:15px;">
+        <h2>🚪 Units Management (${cache.units.length})</h2>
+      </div>
+      <div class="tablewrap">
+        <table class="table">
+          <thead>
+            <tr><th>Unit</th><th>Property</th><th>Rent</th><th>Status</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderPropertiesView(main){
+  if(!cache.properties.length){
+    main.innerHTML = `<div class="card"><h2>🏘️ Properties</h2><div class="empty">No properties added yet.</div></div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="card">
+      <h2>🏘️ Properties (${cache.properties.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Address</th><th>Units</th></tr></thead>
+          <tbody>
+            ${cache.properties.map(p => `
+              <tr>
+                <td><strong>${esc(p.name)}</strong></td>
+                <td>${esc(p.address || '—')}</td>
+                <td>${cache.units.filter(u => u.property_id === p.id).length}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderTenantsView(main){
+  main.innerHTML = `
+    <div class="card">
+      <h2>👥 Active Tenants (${cache.tenants.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Name</th><th>Phone</th><th>Unit</th><th>Code</th></tr></thead>
+          <tbody>
+            ${cache.tenants.map(t => `
+              <tr>
+                <td><strong>${esc(t.full_name || t.name || 'Tenant')}</strong></td>
+                <td>${esc(t.phone || '—')}</td>
+                <td>${esc(t.unit_number || '—')}</td>
+                <td><code>${esc(t.tenant_code || '—')}</code></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderPaymentsView(main){
+  main.innerHTML = `
+    <div class="card">
+      <h2>💳 Payment Records (${cache.payments.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Date</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+          <tbody>
+            ${cache.payments.map(p => `
+              <tr>
+                <td>${esc(p.payment_date || p.created_at?.slice(0,10))}</td>
+                <td><strong>${money(p.amount)}</strong></td>
+                <td>${esc(p.payment_method || 'Direct')}</td>
+                <td><span class="badge ${p.status === 'confirmed' ? 'confirmed' : 'pending'}">${esc(p.status)}</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderProfileView(main){
+  main.innerHTML = `
+    <div class="card">
+      <div class="profileHero">
+        <div class="avatar">${(profile?.full_name || user.email)[0].toUpperCase()}</div>
+        <div>
+          <h3>${esc(profile?.full_name || 'User Profile')}</h3>
+          <p class="muted">${esc(user.email)}</p>
+          <div class="profileId">ID: ${shortId(user.id)}</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🔔 Push Notification Settings</h3>
+      <p class="muted">Enable device-level background alerts for payment updates and maintenance logs.</p>
+      <div style="margin-top:10px;">
+        <p><strong>Status:</strong> <span id="pushStatus">Checking...</span></p>
+        <button class="primary" style="width:auto; padding:10px 20px;" onclick="subscribeToPushNotifications()">Enable Background Alerts</button>
+      </div>
+    </div>`;
+
+  if ('PushManager' in window && navigator.serviceWorker) {
+    navigator.serviceWorker.ready.then(reg => {
+      reg.pushManager.getSubscription().then(sub => {
+        const statusEl = $('pushStatus');
+        if (statusEl) {
+          statusEl.textContent = sub ? 'Active & Subscribed' : 'Not Active';
+        }
+      });
+    });
+  }
+}
+
 window.addEventListener('online', () => {
   const el = $('connectionStatus');
   if (el) {
@@ -1738,7 +1385,6 @@ window.addEventListener('offline', () => {
     $('connectionText').textContent = 'Offline';
   }
 });
-
 </script>
 </body>
 </html>
