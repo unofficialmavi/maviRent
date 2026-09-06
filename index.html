@@ -29,7 +29,7 @@ content="black-translucent">
 name="apple-mobile-web-app-title"
 content="MavRent">
 
-<title>MavRent V14.9</title>
+<title>MavRent V15.0</title>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1007,7 +1007,29 @@ grid-template-columns:1fr
 @media(max-width:700px){.navDrawerPanel{width:94vw;padding:16px}.dashboardClean{grid-template-columns:1fr}.navDrawerGrid{grid-template-columns:1fr 1fr}.navMenuBtn{padding:8px 10px}}
 
 
-/* V14.9 iOS PUSH + APP ICON FIX */
+
+/* V15 UNIVERSAL NOTIFICATION FALLBACK
+   True background Web Push is capability-dependent.
+   Unsupported iOS versions receive reliable in-app alerts instead of
+   being told that MavRent is broken.
+*/
+.universalNotice{
+  position:fixed;left:50%;top:14px;transform:translateX(-50%);
+  z-index:1200;width:min(560px,calc(100vw - 24px));
+  background:#111827;color:#fff;border-radius:16px;padding:13px 15px;
+  box-shadow:0 18px 50px #0005;display:none;align-items:flex-start;gap:10px;
+}
+.universalNotice.show{display:flex;animation:mavNoticeIn .25s ease}
+.universalNotice .unIcon{font-size:22px;line-height:1}
+.universalNotice .unBody{flex:1}
+.universalNotice .unTitle{font-weight:800;margin-bottom:3px}
+.universalNotice .unText{font-size:13px;line-height:1.4;opacity:.92}
+.universalNotice .unClose{border:0;background:#ffffff18;color:#fff;border-radius:9px;padding:6px 9px}
+.pushBadge.fallback{background:#fff7ed;color:#9a3412}
+.pushBadge.fallback .pushDot{background:#f97316}
+@keyframes mavNoticeIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* V15.0 UNIVERSAL NOTIFICATIONS + iOS COMPATIBILITY */
 .pushBadge.install{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
 .pushBadge.install .pushDot{background:#f97316}
 .iosInstallCard{border:1px solid #dbeafe;background:#eff6ff;border-radius:14px;padding:12px;margin-top:10px}
@@ -1016,7 +1038,17 @@ grid-template-columns:1fr
 </style>
 </head>
 
+
 <body>
+<div id="universalNotice" class="universalNotice" role="status" aria-live="polite">
+  <div class="unIcon">🔔</div>
+  <div class="unBody">
+    <div id="universalNoticeTitle" class="unTitle">MavRent notification</div>
+    <div id="universalNoticeText" class="unText"></div>
+  </div>
+  <button class="unClose" type="button" onclick="hideUniversalNotice()">✕</button>
+</div>
+
 
 <!-- MAVRENT V14.5 STABLE LOADING SCREEN -->
 <div id="mavLoading" class="mav-loading">
@@ -1218,7 +1250,7 @@ let mavrentSWRegistration=null;
 async function registerMavRentServiceWorker(){
   if(!('serviceWorker' in navigator)) return null;
   try{
-    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=14.9',{scope:'./'});
+    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=15.0',{scope:'./'});
     await navigator.serviceWorker.ready;
     console.log('MavRent service worker ready:',mavrentSWRegistration.scope);
     return mavrentSWRegistration;
@@ -3608,8 +3640,8 @@ function reminderHtml(items){
 }
 
 function guidePage(){
- if(role==='landlord') return `<section><div class="title"><h1>❓ Landlord Guide</h1><p>Everything you need to manage properties, tenants, rent and maintenance.</p></div><div class="guideGrid"><div class="guideStep"><b>1. Add properties</b>Create each rental property with its name, location and description. You can edit or delete properties later.</div><div class="guideStep"><b>2. Add and edit units</b>Create units under a property, set monthly rent, deposit and status. Occupied units are protected from accidental deletion.</div><div class="guideStep"><b>3. Assign tenants</b>Select a registered tenant account and vacant unit. Set rent, deposit, payment day and move-in date. The tenant then sees only their own rental information.</div><div class="guideStep"><b>4. Track rent</b>MavRent keeps monthly Amount Due, Amount Paid, Balance, Due Date and Status. Older unpaid rent stays visible and is handled first.</div><div class="guideStep"><b>5. Confirm payments</b>Review pending payments and confirm them. Confirmed payments are allocated from the oldest outstanding rent forward.</div><div class="guideStep"><b>6. Handle maintenance</b>Review requests, open attached photos/videos, and mark requests in progress, completed or closed.</div><div class="guideStep"><b>7. Use reminders</b>🔔 shows upcoming and overdue rent reminders. Enable phone push notifications from your profile/guide on a supported HTTPS device.</div><div class="guideStep"><b>8. Receipts & reports</b>Issue receipts for confirmed payments, print/save them as PDF from the browser, and review income, expenses and collection rate.</div></div><div class="card"><h3>🔔 Reminder schedule</h3><div class="reminderList"><div class="reminderItem"><strong>14 days before</strong>Advance reminder.</div><div class="reminderItem"><strong>7 days before</strong>Upcoming rent reminder.</div><div class="reminderItem"><strong>3 days before</strong>Prepare payment reminder.</div><div class="reminderItem"><strong>1 day before</strong>Rent is due tomorrow.</div><div class="reminderItem"><strong>Due date</strong>Rent is due today.</div><div class="reminderItem"><strong>After due date</strong>Outstanding balance is overdue.</div></div><div class="actions"><button class="btn" onclick="requestRentNotifications()">🔔 Enable phone notifications</button><button class="btn" onclick="testMavRentNotification()">🔔 Test notification</button></div></div></section>`;
- return `<section><div class="title"><h1>❓ Tenant Guide</h1><p>Simple steps for your rental, rent, payments and maintenance.</p></div><div class="guideGrid"><div class="guideStep"><b>1. Check My Home</b>See your assigned property, unit, monthly rent, payment day and next due date.</div><div class="guideStep"><b>2. Check My Rent</b>Your balance, oldest unpaid month, due date and rent history are shown here. MavRent keeps older unpaid months visible.</div><div class="guideStep"><b>3. Pay correctly</b>Select the oldest unpaid month, enter the amount actually paid and the real payment date, then submit it for landlord confirmation.</div><div class="guideStep"><b>4. Keep payment references</b>Choose your payment method and enter the transaction reference where available. Your submitted and confirmed payments remain in My Payments.</div><div class="guideStep"><b>5. Report maintenance</b>Describe the problem and choose a priority. You can take a photo, record a video or upload media from your phone.</div><div class="guideStep"><b>6. Track maintenance</b>Open My Maintenance to see the request and its current status.</div><div class="guideStep"><b>7. Receipts</b>Issued receipts appear under My Receipts after your landlord creates them.</div><div class="guideStep"><b>8. Notifications</b>Use 🔔 for rent reminders and enable phone notifications so supported devices can receive alerts outside the app.</div></div><div class="card"><h3>📅 Reminder schedule</h3><p>Reminders can appear 14, 7, 3 and 1 day before rent, on the due date, and after the due date when a balance remains.</p><button class="btn" onclick="requestRentNotifications()">🔔 Enable phone notifications</button></div></section>`;
+ if(role==='landlord') return `<section><div class="title"><h1>❓ Landlord Guide</h1><p>Everything you need to manage properties, tenants, rent and maintenance.</p></div><div class="guideGrid"><div class="guideStep"><b>1. Add properties</b>Create each rental property with its name, location and description. You can edit or delete properties later.</div><div class="guideStep"><b>2. Add and edit units</b>Create units under a property, set monthly rent, deposit and status. Occupied units are protected from accidental deletion.</div><div class="guideStep"><b>3. Assign tenants</b>Select a registered tenant account and vacant unit. Set rent, deposit, payment day and move-in date. The tenant then sees only their own rental information.</div><div class="guideStep"><b>4. Track rent</b>MavRent keeps monthly Amount Due, Amount Paid, Balance, Due Date and Status. Older unpaid rent stays visible and is handled first.</div><div class="guideStep"><b>5. Confirm payments</b>Review pending payments and confirm them. Confirmed payments are allocated from the oldest outstanding rent forward.</div><div class="guideStep"><b>6. Handle maintenance</b>Review requests, open attached photos/videos, and mark requests in progress, completed or closed.</div><div class="guideStep"><b>7. Use reminders</b>🔔 shows upcoming and overdue rent reminders. Enable phone push notifications on supported devices; older iPhones use in-app alerts while MavRent is open.</div><div class="guideStep"><b>8. Receipts & reports</b>Issue receipts for confirmed payments, print/save them as PDF from the browser, and review income, expenses and collection rate.</div></div><div class="card"><h3>🔔 Reminder schedule</h3><div class="reminderList"><div class="reminderItem"><strong>14 days before</strong>Advance reminder.</div><div class="reminderItem"><strong>7 days before</strong>Upcoming rent reminder.</div><div class="reminderItem"><strong>3 days before</strong>Prepare payment reminder.</div><div class="reminderItem"><strong>1 day before</strong>Rent is due tomorrow.</div><div class="reminderItem"><strong>Due date</strong>Rent is due today.</div><div class="reminderItem"><strong>After due date</strong>Outstanding balance is overdue.</div></div><div class="actions"><button class="btn" onclick="requestRentNotifications()">🔔 Enable phone notifications</button><button class="btn" onclick="testMavRentNotification()">🔔 Test notification</button></div></div></section>`;
+ return `<section><div class="title"><h1>❓ Tenant Guide</h1><p>Simple steps for your rental, rent, payments and maintenance.</p></div><div class="guideGrid"><div class="guideStep"><b>1. Check My Home</b>See your assigned property, unit, monthly rent, payment day and next due date.</div><div class="guideStep"><b>2. Check My Rent</b>Your balance, oldest unpaid month, due date and rent history are shown here. MavRent keeps older unpaid months visible.</div><div class="guideStep"><b>3. Pay correctly</b>Select the oldest unpaid month, enter the amount actually paid and the real payment date, then submit it for landlord confirmation.</div><div class="guideStep"><b>4. Keep payment references</b>Choose your payment method and enter the transaction reference where available. Your submitted and confirmed payments remain in My Payments.</div><div class="guideStep"><b>5. Report maintenance</b>Describe the problem and choose a priority. You can take a photo, record a video or upload media from your phone.</div><div class="guideStep"><b>6. Track maintenance</b>Open My Maintenance to see the request and its current status.</div><div class="guideStep"><b>7. Receipts</b>Issued receipts appear under My Receipts after your landlord creates them.</div><div class="guideStep"><b>8. Notifications</b>Use 🔔 for rent reminders and enable phone notifications so supported devices can receive alerts outside the app; older iPhones receive in-app alerts while MavRent is open.</div></div><div class="card"><h3>📅 Reminder schedule</h3><p>Reminders can appear 14, 7, 3 and 1 day before rent, on the due date, and after the due date when a balance remains.</p><button class="btn" onclick="requestRentNotifications()">🔔 Enable phone notifications</button></div></section>`;
 }
 
 function landlordRent(){
@@ -3851,15 +3883,34 @@ function renderCurrent(reload=false){if(currentPage)show(currentPage,reload);}
 
 let lastBrowserReminderKey='';
 function maybeBrowserRentReminder(){
-  if(!('Notification' in window) || Notification.permission!=='granted')return;
   const items=role==='landlord'?reminderItemsForLandlord():reminderItemsForTenant(cache.tenants[0]?.id);
   if(!items.length)return;
   const key=today()+'|'+role+'|'+items.map(x=>x.title).join('|');
   if(key===lastBrowserReminderKey)return;
   lastBrowserReminderKey=key;
   const first=items[0];
-  try{navigator.serviceWorker?.ready.then(reg=>{if(reg?.showNotification){reg.showNotification('MavRent — Rent Reminder',{body:first.title+'\n'+first.text,icon:'./icon-192.png',badge:'./icon-192.png',tag:'mavrent-rent-reminder',renotify:true,data:{url:location.origin+'/'}});}else if('Notification' in window){new Notification('MavRent — Rent Reminder',{body:first.title+'\n'+first.text,icon:'./icon-180.png',tag:'mavrent-rent-reminder'});}});}catch(e){console.warn('Browser notification unavailable',e);}
+
+  if(universalNotificationMode()==='in-app'){
+    showUniversalNotice('MavRent — Rent Reminder',first.title+' • '+first.text,8000);
+    return;
+  }
+
+  try{
+    navigator.serviceWorker?.ready.then(reg=>{
+      if(reg?.showNotification){
+        reg.showNotification('MavRent — Rent Reminder',{
+          body:first.title+'\n'+first.text,
+          icon:'./icon-192.png',
+          badge:'./icon-192.png',
+          tag:'mavrent-rent-reminder',
+          renotify:true,
+          data:{url:location.origin+'/'}
+        });
+      }
+    });
+  }catch(e){console.warn('Browser notification unavailable',e);}
 }
+
 function urlBase64ToUint8Array(base64String){
   const padding='='.repeat((4-base64String.length%4)%4);
   const base64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/');
@@ -3883,13 +3934,36 @@ function iosPushSupported(){
   const v=getIOSVersion();
   return !!v && (v.major>16 || (v.major===16 && v.minor>=4));
 }
+function isLegacyIOS(){
+  return isIOSDevice() && !iosPushSupported();
+}
+function universalNotificationMode(){
+  if(isLegacyIOS()) return 'in-app';
+  if(!('Notification' in window) || !('PushManager' in window)) return 'in-app';
+  return 'push';
+}
+function showUniversalNotice(title,text,duration=6500){
+  const box=$('universalNotice');
+  const t=$('universalNoticeTitle');
+  const b=$('universalNoticeText');
+  if(!box||!t||!b){ alert(title+'\n\n'+text); return; }
+  t.textContent=title;
+  b.textContent=text;
+  box.classList.add('show');
+  clearTimeout(window.__mavNoticeTimer);
+  window.__mavNoticeTimer=setTimeout(hideUniversalNotice,duration);
+}
+function hideUniversalNotice(){
+  const box=$('universalNotice');
+  if(box)box.classList.remove('show');
+}
 function showIOSInstallInstructions(){
   alert('MavRent phone notifications on iPhone work only after MavRent is added to the Home Screen.\n\n1. In Safari, tap Share.\n2. Tap “Add to Home Screen”.\n3. Make sure “Open as Web App” is enabled if shown.\n4. Tap Add.\n5. Open MavRent from the new MavRent Home Screen icon.\n6. Log in, then tap “Enable phone notifications”.\n\nDo not enable notifications from the normal Safari browser tab.');
 }
 
 function pushState(){
-  if(!('Notification' in window) || !('PushManager' in window)) return {state:'unsupported',label:'Not supported'};
-  if(isIOSDevice() && !iosPushSupported()) return {state:'unsupported',label:'Update iPhone'};
+  if(isLegacyIOS()) return {state:'fallback',label:'In-app alerts'};
+  if(!('Notification' in window) || !('PushManager' in window)) return {state:'fallback',label:'In-app alerts'};
   if(isIOSDevice() && !isStandaloneMavRent()) return {state:'install',label:'Add MavRent to Home Screen'};
   if(Notification.permission==='denied') return {state:'blocked',label:'Blocked'};
   if(Notification.permission!=='granted') return {state:'off',label:'Not enabled'};
@@ -3908,17 +3982,22 @@ async function refreshPushState(){
 }
 async function updatePushStatusUI(){
   const st=await refreshPushState();
-  const cls=st.state==='on'?'on':(st.state==='blocked'?'blocked':(st.state==='install'?'install':'off'));
+  const cls=st.state==='on'?'on':(st.state==='blocked'?'blocked':(st.state==='install'?'install':(st.state==='fallback'?'fallback':'off')));
   const html=`<span class="pushBadge ${cls}"><span class="pushDot"></span>${esc(st.label)}</span>`;
   ['pushStatus','drawerPushStatus'].forEach(id=>{const el=$(id);if(el)el.innerHTML=html;});
   const btn=$('enablePushBtn');
   if(btn){
-    btn.textContent=st.state==='on'?'✓ Notifications activated':(st.state==='install'?'📱 Open Home Screen instructions':'🔔 Enable phone notifications');
+    btn.textContent=st.state==='on'?'✓ Notifications activated':(st.state==='install'?'📱 Open Home Screen instructions':(st.state==='fallback'?'🔔 Use in-app alerts':'🔔 Enable phone notifications'));
   }
 }
 async function enablePushFromUI(){
-  if(isIOSDevice() && !iosPushSupported()){
-    alert('Web Push for MavRent requires iOS/iPadOS 16.4 or later. Please update the device and try again.');
+  if(isLegacyIOS()){
+    showUniversalNotice(
+      'MavRent alerts are available on this iPhone',
+      'This iOS version cannot receive Web Push notifications while MavRent is closed. MavRent will use in-app alerts while it is open. Background push becomes available after upgrading to iOS/iPadOS 16.4 or later.',
+      9000
+    );
+    await updatePushStatusUI();
     return;
   }
   if(isIOSDevice() && !isStandaloneMavRent()){
@@ -3942,7 +4021,11 @@ async function requestRentNotifications(){
     }
     if(isIOSDevice()){
       if(!iosPushSupported()){
-        alert('Web Push for iPhone/iPad requires iOS/iPadOS 16.4 or later.');
+        showUniversalNotice(
+          'In-app alerts enabled',
+          'This iOS version does not provide background Web Push. MavRent will still show rent and maintenance alerts while the app is open.',
+          9000
+        );
         return;
       }
       if(!isStandaloneMavRent()){
@@ -4014,14 +4097,21 @@ async function requestRentNotifications(){
 
 async function testMavRentNotification(){
   try{
-    if(!('Notification' in window)) throw new Error('Notifications are not supported on this device/browser.');
+    if(universalNotificationMode()==='in-app'){
+      showUniversalNotice(
+        'MavRent test alert',
+        'This device/browser is using MavRent in-app alerts. Keep MavRent open to receive alerts on this older or unsupported platform.',
+        8000
+      );
+      return;
+    }
     if(Notification.permission!=='granted'){
       await requestRentNotifications();
       if(Notification.permission!=='granted') return;
     }
     const registration=await registerMavRentServiceWorker() || await navigator.serviceWorker.ready;
     await registration.showNotification('MavRent — Test notification',{
-      body:'Push notifications are enabled on this device. Server push can now reach this device when MavRent is closed.',
+      body:'Push notifications are enabled on this device. Server push can reach this device when supported.',
       icon:'./icon-192.png',
       badge:'./icon-192.png',
       tag:'mavrent-test-notification',
@@ -4031,7 +4121,7 @@ async function testMavRentNotification(){
     });
   }catch(error){
     console.error(error);
-    alert('Notification test failed.\n\n'+(error.message||error));
+    showUniversalNotice('MavRent notification test',error.message||'The notification could not be displayed on this device.',8000);
   }
 }
 
