@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- =====================================================
-     MAVRENT PWA V14.7 — PUSH NOTIFICATIONS + NEXT MONTH
+     MAVRENT PWA V14.8 — PUSH NOTIFICATIONS + NEXT MONTH
 ===================================================== -->
 
 <!-- MAVRENT V14.5 STABLE LOADING SCREEN -->
@@ -40,7 +40,7 @@ content="black-translucent">
 name="apple-mobile-web-app-title"
 content="MavRent">
 
-<title>MavRent V14.6</title>
+<title>MavRent V14.8</title>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -990,6 +990,33 @@ grid-template-columns:1fr
 /* V14.7 EDITABLE MANAGEMENT + MEDIA */
 .modal{position:fixed;inset:0;background:#0008;z-index:500;display:none;align-items:center;justify-content:center;padding:18px}
 .modal.open{display:flex}.modalBox{width:min(560px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-shadow:0 25px 80px #0005}.modalHead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.modalHead h3{margin:0}.closeBtn{border:0;background:#eef1f5;border-radius:10px;padding:8px 12px}.btn{border:0;border-radius:10px;padding:9px 12px;background:#eef1f5;color:#17202a;font-weight:700}.btn.danger{background:#fee2e2;color:#991b1b}.btn.success{background:#dcfce7;color:#166534}.btn.warn{background:#fff4d6;color:#956300}.actions{display:flex;flex-wrap:wrap;gap:8px}.actions .btn{width:auto;margin:0}.mediaThumb{max-width:180px;max-height:130px;border-radius:10px;object-fit:cover;border:1px solid #e5e7eb}.mediaBox{margin-top:10px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#f8fafc}.mediaPreview{max-width:100%;max-height:240px;border-radius:10px;margin-top:8px}.table .actions{min-width:150px}.hint{font-size:12px;color:#6b7280}.successText{color:#166534;font-weight:700}
+
+/* V14.8 CLEAN NAVIGATION + PUSH STATUS */
+.navMenuBtn{border:0;background:#273244;color:#fff;border-radius:10px;padding:9px 12px;font-weight:800;display:flex;align-items:center;gap:7px}
+.navMenuBtn:hover{background:#334155}
+.navDrawer{position:fixed;inset:0;z-index:300;display:none;background:#0007}
+.navDrawer.open{display:block}
+.navDrawerPanel{position:absolute;right:0;top:0;bottom:0;width:min(390px,92vw);background:#fff;box-shadow:-20px 0 70px #0004;overflow:auto;padding:20px}
+.navDrawerHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.navDrawerHead h3{margin:0;font-size:20px}
+.navClose{border:0;background:#eef1f5;border-radius:10px;padding:9px 12px;font-weight:800}
+.navGroupTitle{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#667085;font-weight:900;margin:18px 0 8px}
+.navDrawerGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.navDrawerGrid button{border:1px solid #e2e5e9;background:#fff;border-radius:12px;padding:13px 10px;text-align:left;font-weight:800;color:#17202a}
+.navDrawerGrid button.active{background:#111827;color:#fff;border-color:#111827}
+.navDrawerGrid button:hover{border-color:#087cff}
+.pushStatusCard{border:1px solid #e2e5e9;border-radius:14px;padding:14px;background:#fff;margin-bottom:14px}
+.pushStatusRow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pushStatusTitle{font-weight:900}
+.pushBadge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:900}
+.pushBadge.on{background:#dcfce7;color:#166534}.pushBadge.off{background:#fff4d6;color:#956300}.pushBadge.blocked{background:#fee2e2;color:#991b1b}
+.pushDot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.pushActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:11px}.pushActions .btn{width:auto;margin:0}
+.dashboardClean{display:grid;grid-template-columns:1.4fr .8fr;gap:12px;margin-top:14px}
+.dashboardNavCard{background:#fff;border:1px solid #e3e6ea;border-radius:14px;padding:16px}
+.dashboardNavCard h3{margin:0 0 5px}.dashboardNavCard p{margin:0;color:#667085;font-size:13px}
+@media(max-width:700px){.navDrawerPanel{width:94vw;padding:16px}.dashboardClean{grid-template-columns:1fr}.navDrawerGrid{grid-template-columns:1fr 1fr}.navMenuBtn{padding:8px 10px}}
+
 </style>
 </head>
 
@@ -1107,8 +1134,23 @@ Log out
 </div>
 
 <nav id="nav"></nav>
-
+<button id="navMenuBtn" class="navMenuBtn" type="button" onclick="toggleNavDrawer()" title="Open MavRent menu">☰ <span>Menu</span></button>
 </header>
+<div id="navDrawer" class="navDrawer" onclick="if(event.target===this)closeNavDrawer()">
+  <div class="navDrawerPanel">
+    <div class="navDrawerHead"><h3>☰ MavRent Menu</h3><button class="navClose" onclick="closeNavDrawer()">✕</button></div>
+    <div class="navGroupTitle">All features</div>
+    <div id="navDrawerGrid" class="navDrawerGrid"></div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-top:0">🔔 Phone notifications</h3>
+      <div id="drawerPushStatus"></div>
+      <div class="pushActions">
+        <button class="btn successBtn" onclick="enablePushFromUI()">🔔 Enable notifications</button>
+        <button class="btn" onclick="testMavRentNotification()">🧪 Test</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <main id="main"></main>
 
@@ -1165,7 +1207,7 @@ let mavrentSWRegistration=null;
 async function registerMavRentServiceWorker(){
   if(!('serviceWorker' in navigator)) return null;
   try{
-    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=14.6',{scope:'./'});
+    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=14.8',{scope:'./'});
     await navigator.serviceWorker.ready;
     console.log('MavRent service worker ready:',mavrentSWRegistration.scope);
     return mavrentSWRegistration;
@@ -1612,6 +1654,8 @@ $('app')
 
 buildNav();
 
+await updatePushStatusUI();
+
 await refresh();
 
 await loadNotifications();
@@ -2031,87 +2075,42 @@ r.data||[];
    NAVIGATION
 ===================================================== */
 
+function navItems(){
+  if(role==='landlord') return [
+    ['dashboard','🏠 Dashboard'],['rent','💰 Rent'],['properties','🏘️ Properties'],
+    ['units','🚪 Units'],['tenants','👥 Tenants'],['payments','💳 Payments'],
+    ['maintenance','🔧 Maintenance'],['expenses','🧾 Expenses'],['receipts','🧾 Receipts'],
+    ['reports','📊 Reports'],['guide','❓ Guide'],['profile','👤 Profile']
+  ];
+  return [
+    ['home','🏠 My Home'],['myRent','💰 My Rent'],['myPayments','💳 My Payments'],
+    ['myMaintenance','🔧 Maintenance'],['myReceipts','🧾 My Receipts'],
+    ['guide','❓ Guide'],['profile','👤 My Profile']
+  ];
+}
+function navButtonHtml(item,drawer=false){
+  const [id,label]=item;
+  return drawer
+    ? `<button type="button" data-p="${id}" onclick="navigateFromMenu('${id}')">${label}</button>`
+    : `<button type="button" data-p="${id}">${label}</button>`;
+}
 function buildNav(){
-
-$('who').textContent=
-(role==='landlord'
-?'Landlord: '
-:'Tenant: ')
-+
-(profile?.full_name||
-user.email);
-
-if(role==='landlord'){
-
-$('nav').innerHTML=[
-
-'dashboard:🏠 Dashboard',
-'rent:💰 Rent',
-'properties:🏘️ Properties',
-'units:🚪 Units',
-'tenants:👥 Tenants',
-'payments:💳 Payments',
-'maintenance:🔧 Maintenance',
-'expenses:🧾 Expenses',
-'receipts:🧾 Receipts',
-'reports:📊 Reports',
-'guide:❓ Guide',
-'profile:👤 Profile'
-
-]
-.map(x=>{
-
-let[a,b]=x.split(':');
-
-return`
-<button data-p="${a}">
-${b}
-</button>
-`;
-
-})
-.join('');
-
-}else{
-
-$('nav').innerHTML=[
-
-'home:🏠 My Home',
-'myRent:💰 My Rent',
-'myPayments:💳 My Payments',
-'myMaintenance:🔧 Maintenance',
-'myReceipts:🧾 My Receipts',
-'guide:❓ Guide',
-'profile:👤 My Profile'
-
-]
-.map(x=>{
-
-let[a,b]=x.split(':');
-
-return`
-<button data-p="${a}">
-${b}
-</button>
-`;
-
-})
-.join('');
-
+  $('who').textContent=(role==='landlord'?'Landlord: ':'Tenant: ')+(profile?.full_name||user.email);
+  const items=navItems();
+  const primary=role==='landlord'
+    ?items.filter(x=>['dashboard','rent','tenants'].includes(x[0]))
+    :items.filter(x=>['home','myRent','myMaintenance'].includes(x[0]));
+  $('nav').innerHTML=primary.map(x=>navButtonHtml(x)).join('');
+  $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.p));
+  const drawer=$('navDrawerGrid');
+  if(drawer)drawer.innerHTML=items.map(x=>navButtonHtml(x,true)).join('');
+  updatePushStatusUI();
 }
-
-document
-.querySelectorAll('#nav button')
-.forEach(b=>{
-
-b.onclick=()=>
-show(
-b.dataset.p
-);
-
-});
-
+function toggleNavDrawer(){
+  const d=$('navDrawer');if(d)d.classList.toggle('open');updatePushStatusUI();
 }
+function closeNavDrawer(){const d=$('navDrawer');if(d)d.classList.remove('open');}
+async function navigateFromMenu(id){closeNavDrawer();await show(id);}
 
 
 /* =====================================================
@@ -2392,52 +2391,29 @@ Open Rent System
 
 </div>
 
-<div class="card">
-
-<h3>
-Quick actions
-</h3>
-
-<div class="actions">
-
-<button
-class="btn"
-onclick="show('rent')">
-💰 Rent
-</button>
-
-<button
-class="btn"
-onclick="show('properties')">
-＋ Property
-</button>
-
-<button
-class="btn"
-onclick="show('units')">
-＋ Unit
-</button>
-
-<button
-class="btn"
-onclick="show('tenants')">
-＋ Tenant
-</button>
-
-<button
-class="btn"
-onclick="show('payments')">
-💳 Payments
-</button>
-
-<button
-class="btn"
-onclick="show('maintenance')">
-🔧 Maintenance
-</button>
-
+<div class="pushStatusCard">
+  <div class="pushStatusRow">
+    <div><div class="pushStatusTitle">🔔 Phone notifications</div><div class="hint">Get rent reminders on this device.</div></div>
+    <div id="pushStatus"><span class="pushBadge off"><span class="pushDot"></span>Checking…</span></div>
+  </div>
+  <div class="pushActions">
+    <button id="enablePushBtn" class="btn successBtn" onclick="enablePushFromUI()">🔔 Enable phone notifications</button>
+    <button class="btn" onclick="testMavRentNotification()">🧪 Test</button>
+  </div>
 </div>
-
+<div class="dashboardClean">
+ <div class="dashboardNavCard">
+  <h3>☰ Manage MavRent</h3>
+  <p>All features are now inside the Menu button. Your dashboard stays clean and easy to read.</p>
+  <button class="primary" onclick="toggleNavDrawer()">☰ Open full menu</button>
+ </div>
+ <div class="dashboardNavCard">
+  <h3>⚡ Shortcuts</h3>
+  <div class="actions">
+   <button class="btn" onclick="show('rent')">💰 Rent</button>
+   <button class="btn" onclick="show('tenants')">👥 Tenants</button>
+  </div>
+ </div>
 </div>
 
 </div>
@@ -3487,21 +3463,20 @@ return`
 ===================================================== */
 
 function profilePage(){
-
-return`
-<section>
-<div class="title">
-<h1>👤 Profile</h1>
-<p>Account details</p>
-</div>
-<div class="card">
-<p>Email: <b>${esc(user.email)}</b></p>
-<p>Role: <b>${esc(role)}</b></p>
-<p>User ID: <b class="code">${shortId(user.id)}</b></p>
-</div>
-</section>
-`;
-
+ return`<section>
+ <div class="title"><h1>👤 Profile</h1><p>Account details and notification settings.</p></div>
+ <div class="card"><p>Email: <b>${esc(user.email)}</b></p><p>Role: <b>${esc(role)}</b></p><p>User ID: <b class="code">${shortId(user.id)}</b></p></div>
+ <div class="pushStatusCard">
+  <div class="pushStatusRow">
+   <div><div class="pushStatusTitle">🔔 Phone notifications</div><div class="hint">Rent reminders can appear on supported devices.</div></div>
+   <div id="pushStatus"><span class="pushBadge off"><span class="pushDot"></span>Checking…</span></div>
+  </div>
+  <div class="pushActions">
+   <button id="enablePushBtn" class="btn successBtn" onclick="enablePushFromUI()">🔔 Enable phone notifications</button>
+   <button class="btn" onclick="testMavRentNotification()">🧪 Send test</button>
+  </div>
+ </div>
+ </section>`;
 }
 
 /* =====================================================
@@ -3881,6 +3856,29 @@ function urlBase64ToUint8Array(base64String){
   return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
 }
 
+function pushState(){
+  if(!('Notification' in window))return {state:'unsupported',label:'Not supported'};
+  if(Notification.permission==='denied')return {state:'blocked',label:'Blocked'};
+  if(Notification.permission!=='granted')return {state:'off',label:'Not enabled'};
+  return {state:'on',label:'Activated'};
+}
+async function refreshPushState(){
+  const st=pushState();
+  if(st.state==='on'&&'serviceWorker' in navigator){
+    try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return {state:'off',label:'Not enabled'};}catch(e){}
+  }
+  return st;
+}
+async function updatePushStatusUI(){
+  const st=await refreshPushState();
+  const cls=st.state==='on'?'on':st.state==='blocked'?'blocked':'off';
+  const html=`<span class="pushBadge ${cls}"><span class="pushDot"></span>${esc(st.label)}</span>`;
+  ['pushStatus','drawerPushStatus'].forEach(id=>{const el=$(id);if(el)el.innerHTML=html;});
+  const btn=$('enablePushBtn');
+  if(btn)btn.textContent=st.state==='on'?'✓ Notifications activated':'🔔 Enable phone notifications';
+}
+async function enablePushFromUI(){await requestRentNotifications();await updatePushStatusUI();}
+
 async function requestRentNotifications(){
 
   try{
@@ -3918,6 +3916,7 @@ async function requestRentNotifications(){
     const permission = await Notification.requestPermission();
 
     if(permission !== 'granted'){
+      await updatePushStatusUI();
       if(permission === 'denied'){
         alert('Notifications are blocked for MavRent. Open your browser site settings and allow notifications, then try again.');
       }else{
@@ -3977,7 +3976,8 @@ async function requestRentNotifications(){
 
     if(error) throw error;
 
-    alert('✅ MavRent phone notifications are enabled on this device.');
+    alert('✅ MavRent phone notifications are activated on this device.');
+    await updatePushStatusUI();
 
     console.log(
       'MavRent push subscription saved successfully.'
@@ -4304,6 +4304,8 @@ function enhanceMaintenanceUploader(){
 /* =====================================================
    IMPROVED MOBILE NOTIFICATION CLOSE
 ===================================================== */
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNavDrawer();});
 
 document.addEventListener(
   'click',
