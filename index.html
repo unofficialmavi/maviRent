@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- =====================================================
-     MAVRENT PWA V14.6 — PUSH NOTIFICATIONS + FULL VIEWS
+     MAVRENT PWA V14.6 — PUSH NOTIFICATIONS + COMPLETE VIEWS
 ===================================================== -->
 
 <div id="mavLoading" class="mav-loading">
@@ -639,7 +639,7 @@ margin-top:7px
     flex:1;
     min-width:0;
     padding:6px 3px;
-    border-radius:9px;
+    border-radius:99px;
     background:transparent;
     color:#aeb7c5;
     font-size:10px;
@@ -793,9 +793,27 @@ if('serviceWorker' in navigator){
 async function subscribeToPushNotifications() {
   const statusEl = $('pushStatus');
   if (statusEl) statusEl.textContent = 'Requesting permission...';
-  
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
+  if (isIOS && !isStandalone) {
+    alert('On iPhone, push notifications require opening MavRent from your Home Screen.\n\n1. Tap Share\n2. Select "Add to Home Screen"\n3. Open MavRent from your Home Screen icon.');
+    if (statusEl) statusEl.textContent = 'Open from Home Screen';
+    return;
+  }
+
+  if (isIOS && typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert('Notification permission was denied.');
+      if (statusEl) statusEl.textContent = 'Permission denied';
+      return;
+    }
+  }
+
   if (!('PushManager' in window)) {
-    alert('Push notifications are not supported in this browser.');
+    alert('Push notifications are not supported in this browser version.');
     if (statusEl) statusEl.textContent = 'Not supported in browser';
     return;
   }
@@ -1194,27 +1212,56 @@ function renderCurrentView(){
     case 'home':
       renderDashboardView(main);
       break;
+
     case 'properties':
       renderPropertiesView(main);
       break;
+
     case 'units':
       renderUnitsView(main);
       break;
+
     case 'tenants':
       renderTenantsView(main);
       break;
+
+    case 'rent':
+    case 'myRent':
+      renderRentView(main);
+      break;
+
     case 'payments':
     case 'myPayments':
       renderPaymentsView(main);
       break;
+
+    case 'maintenance':
+    case 'myMaintenance':
+      renderMaintenanceView(main);
+      break;
+
+    case 'expenses':
+      renderExpensesView(main);
+      break;
+
+    case 'receipts':
+    case 'myReceipts':
+      renderReceiptsView(main);
+      break;
+
+    case 'reports':
+      renderReportsView(main);
+      break;
+
     case 'profile':
       renderProfileView(main);
       break;
+
     default:
       main.innerHTML = `
         <div class="card">
           <h2>${esc(activeTab.toUpperCase())}</h2>
-          <p>View content loaded successfully for ${esc(activeTab)}.</p>
+          <p>Section loading...</p>
         </div>`;
       break;
   }
@@ -1316,7 +1363,36 @@ function renderTenantsView(main){
     </div>`;
 }
 
+function renderRentView(main){
+  if(!cache.rent_records.length){
+    main.innerHTML = `<div class="card"><h2>💰 Rent Ledger</h2><div class="empty">No rent records found for this period.</div></div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="card">
+      <h2>💰 Rent Ledger (${cache.rent_records.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Period</th><th>Due</th><th>Paid</th><th>Status</th></tr></thead>
+          <tbody>
+            ${cache.rent_records.map(r => `
+              <tr>
+                <td><strong>${esc(r.period_month || r.month || 'Current')}</strong></td>
+                <td>${money(r.amount_due || r.rent_amount)}</td>
+                <td>${money(r.amount_paid)}</td>
+                <td><span class="badge ${r.status === 'paid' ? 'confirmed' : 'pending'}">${esc(r.status || 'unpaid')}</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
 function renderPaymentsView(main){
+  if(!cache.payments.length){
+    main.innerHTML = `<div class="card"><h2>💳 Payments</h2><div class="empty">No payment transactions recorded yet.</div></div>`;
+    return;
+  }
   main.innerHTML = `
     <div class="card">
       <h2>💳 Payment Records (${cache.payments.length})</h2>
@@ -1333,6 +1409,94 @@ function renderPaymentsView(main){
               </tr>`).join('')}
           </tbody>
         </table>
+      </div>
+    </div>`;
+}
+
+function renderMaintenanceView(main){
+  if(!cache.maintenance_requests.length){
+    main.innerHTML = `<div class="card"><h2>🔧 Maintenance Requests</h2><div class="empty">No pending or completed maintenance logs found.</div></div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="card">
+      <h2>🔧 Maintenance Requests (${cache.maintenance_requests.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Title</th><th>Priority</th><th>Status</th></tr></thead>
+          <tbody>
+            ${cache.maintenance_requests.map(m => `
+              <tr>
+                <td><strong>${esc(m.title || m.description || 'Maintenance Log')}</strong></td>
+                <td>${esc(m.priority || 'Medium')}</td>
+                <td><span class="badge ${m.status === 'completed' ? 'confirmed' : 'pending'}">${esc(m.status || 'open')}</span></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderExpensesView(main){
+  if(!cache.expenses.length){
+    main.innerHTML = `<div class="card"><h2>🧾 Operating Expenses</h2><div class="empty">No expense logs added yet.</div></div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="card">
+      <h2>🧾 Expenses (${cache.expenses.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Title</th><th>Category</th><th>Amount</th></tr></thead>
+          <tbody>
+            ${cache.expenses.map(e => `
+              <tr>
+                <td><strong>${esc(e.title || e.description || 'Expense')}</strong></td>
+                <td>${esc(e.category || 'General')}</td>
+                <td><strong>${money(e.amount)}</strong></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderReceiptsView(main){
+  if(!cache.receipts.length){
+    main.innerHTML = `<div class="card"><h2>🧾 Receipts</h2><div class="empty">No receipts issued yet.</div></div>`;
+    return;
+  }
+  main.innerHTML = `
+    <div class="card">
+      <h2>🧾 Receipts (${cache.receipts.length})</h2>
+      <div class="tablewrap">
+        <table class="table">
+          <thead><tr><th>Receipt No</th><th>Issued Date</th><th>Amount</th></tr></thead>
+          <tbody>
+            ${cache.receipts.map(rc => `
+              <tr>
+                <td><code>${esc(rc.receipt_number || shortId(rc.id))}</code></td>
+                <td>${esc(rc.issued_at?.slice(0,10) || '—')}</td>
+                <td><strong>${money(rc.amount)}</strong></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function renderReportsView(main){
+  const totalIncome = cache.payments.reduce((acc, p) => acc + Number(p.amount || 0), 0);
+  const totalExpense = cache.expenses.reduce((acc, e) => acc + Number(e.amount || 0), 0);
+  const netIncome = totalIncome - totalExpense;
+
+  main.innerHTML = `
+    <div class="card">
+      <h2>📊 Financial Overview & Reports</h2>
+      <div class="stats" style="margin-top:15px;">
+        <div class="card"><small>Gross Collected</small><div class="big green">${money(totalIncome)}</div></div>
+        <div class="card"><small>Total Expenses</small><div class="big red">${money(totalExpense)}</div></div>
+        <div class="card"><small>Net Portfolio Yield</small><div class="big blue">${money(netIncome)}</div></div>
       </div>
     </div>`;
 }
