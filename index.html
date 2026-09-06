@@ -5,28 +5,17 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- =====================================================
-     MAVRENT PWA V14.8 — PUSH NOTIFICATIONS + NEXT MONTH
+     MAVRENT PWA V14.9 — PUSH NOTIFICATIONS + NEXT MONTH
 ===================================================== -->
 
-<!-- MAVRENT V14.5 STABLE LOADING SCREEN -->
-<div id="mavLoading" class="mav-loading">
-  <div class="mav-loading-logo">M</div>
-  <div class="mav-loading-name">Mav<span>Rent</span></div>
-  <div class="mav-loading-text">Rental management platform</div>
-  <div class="mav-spinner"></div>
-</div>
-
-<!-- ONLINE STATUS -->
-<div id="connectionStatus" class="connection-status online">
-  <span class="connection-dot"></span>
-  <span id="connectionText">Online</span>
-</div>
-
-<link rel="manifest" href="manifest.json">
-
-<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="./icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
 
 <meta name="theme-color" content="#111827">
+<meta name="application-name" content="MavRent">
 
 <meta name="mobile-web-app-capable" content="yes">
 
@@ -40,7 +29,7 @@ content="black-translucent">
 name="apple-mobile-web-app-title"
 content="MavRent">
 
-<title>MavRent V14.8</title>
+<title>MavRent V14.9</title>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1017,10 +1006,31 @@ grid-template-columns:1fr
 .dashboardNavCard h3{margin:0 0 5px}.dashboardNavCard p{margin:0;color:#667085;font-size:13px}
 @media(max-width:700px){.navDrawerPanel{width:94vw;padding:16px}.dashboardClean{grid-template-columns:1fr}.navDrawerGrid{grid-template-columns:1fr 1fr}.navMenuBtn{padding:8px 10px}}
 
+
+/* V14.9 iOS PUSH + APP ICON FIX */
+.pushBadge.install{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
+.pushBadge.install .pushDot{background:#f97316}
+.iosInstallCard{border:1px solid #dbeafe;background:#eff6ff;border-radius:14px;padding:12px;margin-top:10px}
+.iosInstallCard strong{display:block;margin-bottom:5px}
+
 </style>
 </head>
 
 <body>
+
+<!-- MAVRENT V14.5 STABLE LOADING SCREEN -->
+<div id="mavLoading" class="mav-loading">
+  <div class="mav-loading-logo">M</div>
+  <div class="mav-loading-name">Mav<span>Rent</span></div>
+  <div class="mav-loading-text">Rental management platform</div>
+  <div class="mav-spinner"></div>
+</div>
+
+<!-- ONLINE STATUS -->
+<div id="connectionStatus" class="connection-status online">
+  <span class="connection-dot"></span>
+  <span id="connectionText">Online</span>
+</div>
 
 <!-- =====================================================
      LOGIN
@@ -1144,7 +1154,8 @@ Log out
     <div class="card" style="margin-top:16px">
       <h3 style="margin-top:0">🔔 Phone notifications</h3>
       <div id="drawerPushStatus"></div>
-      <div class="pushActions">
+      <div class="iosInstallCard"><strong>📱 iPhone users</strong><span>First add MavRent to the Home Screen, open it from the new icon, then enable notifications.</span></div>
+<div class="pushActions">
         <button class="btn successBtn" onclick="enablePushFromUI()">🔔 Enable notifications</button>
         <button class="btn" onclick="testMavRentNotification()">🧪 Test</button>
       </div>
@@ -1207,7 +1218,7 @@ let mavrentSWRegistration=null;
 async function registerMavRentServiceWorker(){
   if(!('serviceWorker' in navigator)) return null;
   try{
-    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=14.8',{scope:'./'});
+    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=14.9',{scope:'./'});
     await navigator.serviceWorker.ready;
     console.log('MavRent service worker ready:',mavrentSWRegistration.scope);
     return mavrentSWRegistration;
@@ -3856,149 +3867,149 @@ function urlBase64ToUint8Array(base64String){
   return Uint8Array.from([...rawData].map(c=>c.charCodeAt(0)));
 }
 
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+}
+function isStandaloneMavRent(){
+  return !!(window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches);
+}
+function getIOSVersion(){
+  const m=navigator.userAgent.match(/OS (\d+)[._](\d+)/i);
+  return m ? {major:Number(m[1]),minor:Number(m[2])} : null;
+}
+function iosPushSupported(){
+  if(!isIOSDevice()) return true;
+  const v=getIOSVersion();
+  return !!v && (v.major>16 || (v.major===16 && v.minor>=4));
+}
+function showIOSInstallInstructions(){
+  alert('MavRent phone notifications on iPhone work only after MavRent is added to the Home Screen.\n\n1. In Safari, tap Share.\n2. Tap “Add to Home Screen”.\n3. Make sure “Open as Web App” is enabled if shown.\n4. Tap Add.\n5. Open MavRent from the new MavRent Home Screen icon.\n6. Log in, then tap “Enable phone notifications”.\n\nDo not enable notifications from the normal Safari browser tab.');
+}
+
 function pushState(){
-  if(!('Notification' in window))return {state:'unsupported',label:'Not supported'};
-  if(Notification.permission==='denied')return {state:'blocked',label:'Blocked'};
-  if(Notification.permission!=='granted')return {state:'off',label:'Not enabled'};
+  if(!('Notification' in window) || !('PushManager' in window)) return {state:'unsupported',label:'Not supported'};
+  if(isIOSDevice() && !iosPushSupported()) return {state:'unsupported',label:'Update iPhone'};
+  if(isIOSDevice() && !isStandaloneMavRent()) return {state:'install',label:'Add MavRent to Home Screen'};
+  if(Notification.permission==='denied') return {state:'blocked',label:'Blocked'};
+  if(Notification.permission!=='granted') return {state:'off',label:'Not enabled'};
   return {state:'on',label:'Activated'};
 }
 async function refreshPushState(){
   const st=pushState();
-  if(st.state==='on'&&'serviceWorker' in navigator){
-    try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();if(!sub)return {state:'off',label:'Not enabled'};}catch(e){}
+  if(st.state==='on' && 'serviceWorker' in navigator){
+    try{
+      const reg=await navigator.serviceWorker.ready;
+      const sub=await reg.pushManager.getSubscription();
+      if(!sub)return {state:'off',label:'Not enabled'};
+    }catch(e){}
   }
   return st;
 }
 async function updatePushStatusUI(){
   const st=await refreshPushState();
-  const cls=st.state==='on'?'on':st.state==='blocked'?'blocked':'off';
+  const cls=st.state==='on'?'on':(st.state==='blocked'?'blocked':(st.state==='install'?'install':'off'));
   const html=`<span class="pushBadge ${cls}"><span class="pushDot"></span>${esc(st.label)}</span>`;
   ['pushStatus','drawerPushStatus'].forEach(id=>{const el=$(id);if(el)el.innerHTML=html;});
   const btn=$('enablePushBtn');
-  if(btn)btn.textContent=st.state==='on'?'✓ Notifications activated':'🔔 Enable phone notifications';
+  if(btn){
+    btn.textContent=st.state==='on'?'✓ Notifications activated':(st.state==='install'?'📱 Open Home Screen instructions':'🔔 Enable phone notifications');
+  }
 }
-async function enablePushFromUI(){await requestRentNotifications();await updatePushStatusUI();}
+async function enablePushFromUI(){
+  if(isIOSDevice() && !iosPushSupported()){
+    alert('Web Push for MavRent requires iOS/iPadOS 16.4 or later. Please update the device and try again.');
+    return;
+  }
+  if(isIOSDevice() && !isStandaloneMavRent()){
+    showIOSInstallInstructions();
+    await updatePushStatusUI();
+    return;
+  }
+  await requestRentNotifications();
+  await updatePushStatusUI();
+}
 
 async function requestRentNotifications(){
-
   try{
-
     if(!window.isSecureContext){
-      alert('MavRent notifications require a secure connection (HTTPS).');
+      alert('MavRent notifications require a secure HTTPS connection.');
       return;
     }
-
-    if(!('serviceWorker' in navigator)){
-      alert('This browser does not support service workers.');
+    if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)){
+      alert('This device/browser does not support MavRent web push notifications.');
       return;
     }
-
-    if(!('PushManager' in window)){
-      alert('This browser does not support push notifications.');
-      return;
+    if(isIOSDevice()){
+      if(!iosPushSupported()){
+        alert('Web Push for iPhone/iPad requires iOS/iPadOS 16.4 or later.');
+        return;
+      }
+      if(!isStandaloneMavRent()){
+        showIOSInstallInstructions();
+        return;
+      }
     }
-
-    if(!('Notification' in window)){
-      alert('Notifications are not supported on this browser.');
-      return;
-    }
-
     if(!sb){
       alert('MavRent could not connect to Supabase. Please refresh and try again.');
       return;
     }
-
     if(!user){
       alert('Please log in to MavRent before enabling notifications.');
       return;
     }
 
-    const permission = await Notification.requestPermission();
+    // iOS requires the permission request to happen from a direct user action.
+    const permission=Notification.permission==='granted'
+      ? 'granted'
+      : await Notification.requestPermission();
 
-    if(permission !== 'granted'){
+    if(permission!=='granted'){
       await updatePushStatusUI();
-      if(permission === 'denied'){
-        alert('Notifications are blocked for MavRent. Open your browser site settings and allow notifications, then try again.');
+      if(permission==='denied'){
+        alert('Notifications are blocked for MavRent. On iPhone, open Settings > Notifications > MavRent and allow notifications, then reopen MavRent.');
       }else{
         alert('Notification permission was not granted.');
       }
       return;
     }
 
-    const registration = await registerMavRentServiceWorker() || await navigator.serviceWorker.ready;
+    const registration=await registerMavRentServiceWorker() || await navigator.serviceWorker.ready;
+    if(!registration) throw new Error('MavRent service worker could not be started.');
+    try{await registration.update();}catch(e){}
 
-    try{ await registration.update(); }catch(e){}
-
-    let subscription =
-      await registration.pushManager.getSubscription();
-
+    let subscription=await registration.pushManager.getSubscription();
     if(!subscription){
-
-      subscription =
-        await registration.pushManager.subscribe({
-          userVisibleOnly:true,
-          applicationServerKey:
-            urlBase64ToUint8Array(
-              MAVRENT_VAPID_PUBLIC_KEY
-            )
-        });
-
-    }
-
-    const json = subscription.toJSON();
-
-    const endpoint = subscription.endpoint;
-    const p256dh = json.keys && json.keys.p256dh;
-    const auth = json.keys && json.keys.auth;
-
-    if(!endpoint || !p256dh || !auth){
-      throw new Error('The browser did not return a complete push subscription.');
-    }
-
-    const {error} = await sb
-      .from('push_subscriptions')
-      .upsert({
-        user_id:user.id,
-        endpoint:endpoint,
-        p256dh:p256dh,
-        auth:auth,
-        device_name:
-          /Android/i.test(navigator.userAgent)
-            ? 'Android'
-            : /iPhone|iPad|iPod/i.test(navigator.userAgent)
-              ? 'iPhone/iPad'
-              : 'Web Browser',
-        user_agent:navigator.userAgent,
-        updated_at:new Date().toISOString()
-      },{
-        onConflict:'user_id,endpoint'
+      subscription=await registration.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:urlBase64ToUint8Array(MAVRENT_VAPID_PUBLIC_KEY)
       });
+    }
 
-    if(error) throw error;
+    const json=subscription.toJSON();
+    const endpoint=subscription.endpoint;
+    const p256dh=json.keys&&json.keys.p256dh;
+    const auth=json.keys&&json.keys.auth;
+    if(!endpoint||!p256dh||!auth)throw new Error('The browser did not return a complete push subscription.');
 
-    alert('✅ MavRent phone notifications are activated on this device.');
+    const {error}=await sb.from('push_subscriptions').upsert({
+      user_id:user.id,
+      endpoint,
+      p256dh,
+      auth,
+      device_name:isIOSDevice()?'iPhone/iPad':(/Android/i.test(navigator.userAgent)?'Android':'Web Browser'),
+      user_agent:navigator.userAgent,
+      updated_at:new Date().toISOString()
+    },{onConflict:'user_id,endpoint'});
+    if(error)throw error;
+
     await updatePushStatusUI();
-
-    console.log(
-      'MavRent push subscription saved successfully.'
-    );
-
+    alert('✅ MavRent notifications are activated on this device. You can now close MavRent and receive supported push alerts.');
   }catch(error){
-
-    console.error(
-      'MavRent push notification setup failed:',
-      error
-    );
-
-    alert(
-      'MavRent could not enable notifications.\n\n' +
-      (error && error.message
-        ? error.message
-        : 'Please refresh the app and try again.')
-    );
-
+    console.error('MavRent push notification setup failed:',error);
+    alert('MavRent could not enable notifications.\n\n'+(error&&error.message?error.message:'Please refresh MavRent and try again.'));
+    await updatePushStatusUI();
   }
-
 }
 
 async function testMavRentNotification(){
