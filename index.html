@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
 <!-- =====================================================
-     MAVRENT PWA V14.9 — PUSH NOTIFICATIONS + NEXT MONTH
+     MAVRENT PWA V15.1 — EDITABLE MANAGEMENT + AUTO RECEIPTS + MISSING MONTHS
 ===================================================== -->
 
 <link rel="manifest" href="./manifest.json">
@@ -29,7 +29,7 @@ content="black-translucent">
 name="apple-mobile-web-app-title"
 content="MavRent">
 
-<title>MavRent V15.0</title>
+<title>MavRent V15.1</title>
 
 <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -1250,7 +1250,7 @@ let mavrentSWRegistration=null;
 async function registerMavRentServiceWorker(){
   if(!('serviceWorker' in navigator)) return null;
   try{
-    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=15.0',{scope:'./'});
+    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=15.1',{scope:'./'});
     await navigator.serviceWorker.ready;
     console.log('MavRent service worker ready:',mavrentSWRegistration.scope);
     return mavrentSWRegistration;
@@ -3013,7 +3013,8 @@ ${table(
 'Method',
 'Status',
 'Reference',
-'Rent'
+'Rent',
+'Actions'
 ],
 cache.payments,
 x=>{
@@ -3072,6 +3073,7 @@ ${rr
 ?monthLabel(rr.period_month)
 :'—'}
 </td>
+<td><div class="actions">${x.status==='pending'?`<button class="btn success" onclick="confirmPayment('${x.id}')">Confirm</button><button class="btn danger" onclick="rejectPayment('${x.id}')">Reject</button>`:x.status==='confirmed'?`<button class="btn" onclick="createAutomaticReceiptForPayment(cache.payments.find(p=>p.id==='${x.id}')).then(async r=>{if(!r.ok)return alert(r.error?.message||r.error);await refresh();await show('payments',false);alert('Receipt ready: '+(r.data?.receipt_number||''));})">Receipt</button>`:'—'}</div></td>
 
 </tr>
 
@@ -3186,7 +3188,7 @@ if(id==='receipts')
 
 return page(
 'Receipts',
-'Issue receipts for confirmed payments.',
+'Receipts are generated automatically when a payment is confirmed. You can also issue one manually if needed.',
 
 `
 
@@ -3222,8 +3224,7 @@ ${money(p.amount)}
 
 <input
 id="rnumber"
-placeholder="Receipt number"
-required>
+placeholder="Receipt number (leave blank for automatic)">
 
 <button
 class="primary full">
@@ -3676,20 +3677,23 @@ function landlordRent(){
 }
 
 async function generateRentForTenant(tenantId,months=12){
- const t=cache.tenants.find(x=>x.id===tenantId); if(!t)return {ok:false,error:'Tenant not found'};
- const unit=unitForTenant(t); const monthly=Number(t.rent_amount||unit?.monthly_rent||0); if(monthly<=0)return {ok:false,error:'Tenant has no rent amount'};
+ const t=cache.tenants.find(x=>x.id===tenantId);
+ if(!t)return {ok:false,error:'Tenant not found'};
+ if(t.status && t.status!=='active')return {ok:true,count:0};
+ const unit=unitForTenant(t);
+ const monthly=Number(t.rent_amount||unit?.monthly_rent||0);
+ if(monthly<=0)return {ok:false,error:'Tenant has no rent amount'};
  const existing=new Set(rentRecordsForTenant(tenantId).map(r=>String(r.period_month)));
- let base=monthStart(t.move_in_date||today());
- let start=base;
- if(cache.rent_records.length){
-   const last=rentRecordsForTenant(tenantId).sort((a,b)=>String(b.period_month).localeCompare(String(a.period_month)))[0];
-   if(last)start=addMonths(last.period_month,1);
- }
+ const start=monthStart(t.move_in_date||today());
+ const horizon=addMonths(monthStart(today()),Math.max(1,Number(months||12)-1));
  const rows=[];
- for(let i=0;i<months;i++){
-   const period=addMonths(start,i); if(existing.has(period))continue;
-   const due=dueDateFor(period,t.rent_due_day||1);
-   rows.push({landlord_id:user.id,tenant_id:tenantId,unit_id:t.unit_id||unit?.id||null,period_month:period,amount_due:monthly,amount_paid:0,due_date:due,status:due<today()?'overdue':'pending'});
+ let cursor=start;
+ while(String(cursor)<=String(horizon)){
+   if(!existing.has(cursor)){
+     const due=dueDateFor(cursor,t.rent_due_day||1);
+     rows.push({landlord_id:user.id,tenant_id:tenantId,unit_id:t.unit_id||unit?.id||null,period_month:cursor,amount_due:monthly,amount_paid:0,due_date:due,status:due<today()?'overdue':'pending'});
+   }
+   cursor=addMonths(cursor,1);
  }
  if(!rows.length)return {ok:true,count:0};
  const r=await sb.from('rent_records').insert(rows).select('*');
@@ -3702,9 +3706,9 @@ async function ensureRentSchedule(){
   if(!user || loading)return;
   try{
     if(role==='landlord'){
-      for(const t of cache.tenants) await generateRentForTenant(t.id,12);
+      for(const t of cache.tenants) await generateRentForTenant(t.id,13);
     }else if(cache.tenants[0]){
-      await generateRentForTenant(cache.tenants[0].id,12);
+      await generateRentForTenant(cache.tenants[0].id,13);
     }
     await loadNotifications();
     if(currentPage && ['rent','myRent','home'].includes(currentPage)) renderCurrent(false);
@@ -3716,7 +3720,7 @@ async function generateAllRentRecords(){
  const old=loading; loading=true;
  try{
    let total=0;
-   for(const t of cache.tenants){const r=await generateRentForTenant(t.id,12);if(!r.ok)throw new Error(r.error?.message||r.error);total+=r.count||0;}
+   for(const t of cache.tenants){const r=await generateRentForTenant(t.id,13);if(!r.ok)throw new Error(r.error?.message||r.error);total+=r.count||0;}
    alert(total?`Generated ${total} missing monthly rent record(s).`:'All monthly rent records are already generated.');
    await refresh(); await show('rent',false);
  }catch(e){alert('Could not generate rent records: '+(e.message||e));}
@@ -3770,13 +3774,50 @@ async function applyPaymentToRent(payment){
  }
 }
 
+async function createAutomaticReceiptForPayment(payment){
+ if(!payment?.id || payment.status!=='confirmed')return {ok:false,error:new Error('Payment is not confirmed')};
+ const existing=cache.receipts.find(r=>r.payment_id===payment.id);
+ if(existing)return {ok:true,data:existing,created:false};
+ const check=await sb.from('receipts').select('*').eq('payment_id',payment.id).limit(1);
+ if(check.error && !String(check.error.message||'').toLowerCase().includes('rows'))return {ok:false,error:check.error};
+ if(check.data?.length){
+   cache.receipts.push(check.data[0]);
+   return {ok:true,data:check.data[0],created:false};
+ }
+ const compact=String(payment.id).replace(/-/g,'').slice(0,10).toUpperCase();
+ const receiptNumber='MVR-RCPT-'+compact;
+ const r=await sb.from('receipts').insert({landlord_id:user.id,payment_id:payment.id,receipt_number:receiptNumber,issued_at:new Date().toISOString()}).select('*').single();
+ if(r.error)return {ok:false,error:r.error};
+ cache.receipts.push(r.data);
+ return {ok:true,data:r.data,created:true};
+}
+
 async function confirmPayment(id){
- const p=cache.payments.find(x=>x.id===id); if(!p)return;
- if(p.status==='confirmed')return;
- const up=await sb.from('payments').update({status:'confirmed'}).eq('id',id).select('*').single();
+ const p=cache.payments.find(x=>x.id===id);
+ if(!p)return;
+ if(p.status==='confirmed'){
+   const rr=await createAutomaticReceiptForPayment(p);
+   if(!rr.ok)alert('Payment is confirmed, but the receipt could not be created: '+(rr.error?.message||rr.error));
+   await refresh(); await show('payments',false);
+   return;
+ }
+ const up=await sb.from('payments').update({status:'confirmed'}).eq('id',id).eq('landlord_id',user.id).select('*').single();
  if(up.error)return alert(up.error.message);
- try{await applyPaymentToRent(up.data);}catch(e){await sb.from('payments').update({status:'pending'}).eq('id',id);return alert('Payment confirmed but rent allocation failed: '+(e.message||e));}
- await refresh(); await show('payments',false);
+ try{
+   await applyPaymentToRent(up.data);
+ }catch(e){
+   await sb.from('payments').update({status:'pending'}).eq('id',id).eq('landlord_id',user.id);
+   return alert('Payment confirmation was rolled back because rent allocation failed: '+(e.message||e));
+ }
+ const receipt=await createAutomaticReceiptForPayment(up.data);
+ if(!receipt.ok){
+   await refresh();
+   await show('payments',false);
+   return alert('Payment confirmed and rent updated, but automatic receipt creation failed: '+(receipt.error?.message||receipt.error));
+ }
+ await refresh();
+ await show('payments',false);
+ alert('Payment confirmed. Rent was updated and receipt '+(receipt.data?.receipt_number||'created')+' was generated automatically.');
 }
 
 async function rejectPayment(id){
@@ -3785,7 +3826,7 @@ async function rejectPayment(id){
 }
 
 async function createRentForTenant(id){
- const r=await generateRentForTenant(id,12); if(!r.ok)return alert(r.error?.message||r.error); alert(r.count?`Generated ${r.count} month(s).`:'No missing months.'); await refresh(); await show('rent',false);
+ const r=await generateRentForTenant(id,13); if(!r.ok)return alert(r.error?.message||r.error); alert(r.count?`Generated ${r.count} month(s).`:'No missing months.'); await refresh(); await show('rent',false);
 }
 
 function maintenanceLandlord(){
@@ -3799,29 +3840,102 @@ function maintenanceLandlord(){
 function closeEditModal(){ $('editModal')?.classList.remove('open'); }
 function openEditModal(title,body){ $('editModalTitle').textContent=title; $('editModalBody').innerHTML=body; $('editModal').classList.add('open'); }
 async function editProperty(id){
- const x=cache.properties.find(v=>v.id===id); if(!x)return;
- openEditModal('Edit Property',`<form id="editPropertyForm" class="formgrid"><input id="epname" value="${esc(x.name||'')}" placeholder="Property name" required><input id="eploc" value="${esc(x.location||'')}" placeholder="Location"><textarea id="epdesc" class="full" placeholder="Description">${esc(x.description||'')}</textarea><button class="primary full">Save changes</button></form>`);
- $('editPropertyForm').onsubmit=async e=>{e.preventDefault();const r=await sb.from('properties').update({name:$('epname').value.trim(),location:$('eploc').value.trim()||null,description:$('epdesc').value.trim()||null}).eq('id',id).eq('landlord_id',user.id);if(r.error)return alert(r.error.message);closeEditModal();await refresh();show('properties',false);};
+ const x=cache.properties.find(v=>v.id===id);
+ if(!x)return;
+ openEditModal('Edit Property',`<form id="editPropertyForm" class="formgrid">
+ <input id="epname" value="${esc(x.name||'')}" placeholder="Property name" required>
+ <input id="eploc" value="${esc(x.location||'')}" placeholder="Location">
+ <textarea id="epdesc" class="full" placeholder="Description">${esc(x.description||'')}</textarea>
+ <button type="submit" class="primary full">Save changes</button>
+ </form>`);
+ const form=$('editPropertyForm');
+ if(!form)return;
+ form.onsubmit=async e=>{
+   e.preventDefault();
+   const name=$('epname').value.trim();
+   if(!name)return alert('Enter a property name.');
+   const r=await sb.from('properties').update({name,location:$('eploc').value.trim()||null,description:$('epdesc').value.trim()||null}).eq('id',id).eq('landlord_id',user.id).select('*').single();
+   if(r.error)return alert('Could not update property: '+r.error.message);
+   const i=cache.properties.findIndex(v=>v.id===id); if(i>=0)cache.properties[i]=r.data;
+   closeEditModal(); await refresh(); await show('properties',false);
+ };
 }
+
 async function delProperty(id){
  if(!confirm('Delete this property? Make sure it has no units/tenants first.'))return;
- const linked=cache.units.filter(u=>u.property_id===id); if(linked.length)return alert('Cannot delete this property while it still has units. Remove or move the units first.');
- const r=await sb.from('properties').delete().eq('id',id).eq('landlord_id',user.id); if(r.error)return alert(r.error.message); await refresh(); show('properties',false);
+ const linked=cache.units.filter(u=>u.property_id===id);
+ if(linked.length)return alert('Cannot delete this property while it still has units. Remove or move the units first.');
+ const r=await sb.from('properties').delete().eq('id',id).eq('landlord_id',user.id);
+ if(r.error)return alert(r.error.message);
+ await refresh(); await show('properties',false);
 }
+
 async function editUnit(id){
- const x=cache.units.find(v=>v.id===id); if(!x)return;
- openEditModal('Edit Unit',`<form id="editUnitForm" class="formgrid"><select id="euproperty" required>${cache.properties.map(p=>`<option value="${p.id}" ${p.id===x.property_id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><input id="eunum" value="${esc(x.unit_number||'')}" placeholder="Unit number" required><input id="eurent" type="number" min="0" value="${Number(x.monthly_rent||x.rent_amount||0)}" placeholder="Monthly rent" required><input id="eudep" type="number" min="0" value="${Number(x.deposit_amount||0)}" placeholder="Deposit"><select id="eustatus"><option value="vacant" ${x.status==='vacant'?'selected':''}>Vacant</option><option value="maintenance" ${x.status==='maintenance'?'selected':''}>Maintenance</option><option value="occupied" ${x.status==='occupied'?'selected':''}>Occupied</option></select><button class="primary full">Save changes</button></form>`);
- $('editUnitForm').onsubmit=async e=>{e.preventDefault();const r=await sb.from('units').update({property_id:$('euproperty').value,unit_number:$('eunum').value.trim(),monthly_rent:Number($('eurent').value||0),deposit_amount:Number($('eudep').value||0),status:$('eustatus').value}).eq('id',id).eq('landlord_id',user.id);if(r.error)return alert(r.error.message);closeEditModal();await refresh();show('units',false);};
+ const x=cache.units.find(v=>v.id===id);
+ if(!x)return;
+ const occupied=cache.tenants.some(t=>t.unit_id===id && t.status==='active');
+ openEditModal('Edit Unit',`<form id="editUnitForm" class="formgrid">
+ <select id="euproperty" required>${cache.properties.map(p=>`<option value="${p.id}" ${p.id===x.property_id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+ <input id="eunum" value="${esc(x.unit_number||'')}" placeholder="Unit number" required>
+ <input id="eurent" type="number" min="0" value="${Number(x.monthly_rent||x.rent_amount||0)}" placeholder="Monthly rent" required>
+ <input id="eudep" type="number" min="0" value="${Number(x.deposit_amount||0)}" placeholder="Deposit">
+ <select id="eustatus">
+ <option value="vacant" ${x.status==='vacant'?'selected':''}>Vacant</option>
+ <option value="maintenance" ${x.status==='maintenance'?'selected':''}>Maintenance</option>
+ <option value="occupied" ${x.status==='occupied'?'selected':''}>Occupied</option>
+ </select>
+ ${occupied?'<div class="notice warningBtn full"><b>This unit is occupied.</b> MavRent will keep it occupied while an active tenant is assigned.</div>':''}
+ <button type="submit" class="primary full">Save changes</button>
+ </form>`);
+ const form=$('editUnitForm');
+ if(!form)return;
+ form.onsubmit=async e=>{
+   e.preventDefault();
+   const newStatus=occupied?'occupied':$('eustatus').value;
+   const r=await sb.from('units').update({property_id:$('euproperty').value,unit_number:$('eunum').value.trim(),monthly_rent:Number($('eurent').value||0),deposit_amount:Number($('eudep').value||0),status:newStatus}).eq('id',id).eq('landlord_id',user.id).select('*').single();
+   if(r.error)return alert('Could not update unit: '+r.error.message);
+   const i=cache.units.findIndex(v=>v.id===id); if(i>=0)cache.units[i]=r.data;
+   closeEditModal(); await refresh(); await show('units',false);
+ };
 }
+
 async function delUnit(id){
- const t=cache.tenants.find(v=>v.unit_id===id && v.status==='active'); if(t)return alert('This unit is occupied. Remove the tenant first.');
- if(!confirm('Delete this unit?'))return; const r=await sb.from('units').delete().eq('id',id).eq('landlord_id',user.id);if(r.error)return alert(r.error.message);await refresh();show('units',false);
+ const t=cache.tenants.find(v=>v.unit_id===id && v.status==='active');
+ if(t)return alert('This unit is occupied. Remove the tenant first.');
+ if(!confirm('Delete this unit?'))return;
+ const r=await sb.from('units').delete().eq('id',id).eq('landlord_id',user.id);
+ if(r.error)return alert(r.error.message);
+ await refresh(); await show('units',false);
 }
+
 async function editTenant(id){
  const x=cache.tenants.find(v=>v.id===id); if(!x)return;
- openEditModal('Edit Tenant / Rent Settings',`<form id="editTenantForm" class="formgrid"><input value="${esc(tenantName(x))}" disabled><select id="etunit" required>${cache.units.filter(u=>u.id===x.unit_id || u.status!=='occupied').map(u=>`<option value="${u.id}" ${u.id===x.unit_id?'selected':''}>${esc(u.unit_number)} — ${money(u.monthly_rent)}</option>`).join('')}</select><input id="etrent" type="number" min="0" value="${Number(x.rent_amount||0)}" placeholder="Monthly rent" required><input id="etdep" type="number" min="0" value="${Number(x.deposit_amount||0)}" placeholder="Deposit"><input id="etdue" type="number" min="1" max="28" value="${Number(x.rent_due_day||1)}" placeholder="Due day" required><input id="etmove" type="date" value="${esc(x.move_in_date||'')}"><select id="etstatus"><option value="active" ${x.status==='active'?'selected':''}>Active</option><option value="inactive" ${x.status==='inactive'?'selected':''}>Inactive</option></select><button class="primary full">Save changes</button></form>`);
- $('editTenantForm').onsubmit=async e=>{e.preventDefault();const newUnit=$('etunit').value;const newStatus=$('etstatus').value;const r=await sb.from('tenants').update({unit_id:newUnit,rent_amount:Number($('etrent').value||0),deposit_amount:Number($('etdep').value||0),rent_due_day:Number($('etdue').value||1),move_in_date:$('etmove').value||null,status:newStatus}).eq('id',id).eq('landlord_id',user.id);if(r.error)return alert(r.error.message);if(newStatus==='inactive'){if(x.unit_id)await sb.from('units').update({status:'vacant'}).eq('id',x.unit_id);}else{if(x.unit_id && x.unit_id!==newUnit)await sb.from('units').update({status:'vacant'}).eq('id',x.unit_id);await sb.from('units').update({status:'occupied'}).eq('id',newUnit);}closeEditModal();await refresh();show('tenants',false);};
+ openEditModal('Edit Tenant / Rent Settings',`<form id="editTenantForm" class="formgrid">
+ <input value="${esc(tenantName(x))}" disabled>
+ <select id="etunit" required>${cache.units.filter(u=>u.id===x.unit_id || u.status!=='occupied').map(u=>`<option value="${u.id}" ${u.id===x.unit_id?'selected':''}>${esc(u.unit_number)} — ${money(u.monthly_rent)}</option>`).join('')}</select>
+ <input id="etrent" type="number" min="0" value="${Number(x.rent_amount||0)}" placeholder="Monthly rent" required>
+ <input id="etdep" type="number" min="0" value="${Number(x.deposit_amount||0)}" placeholder="Deposit">
+ <input id="etdue" type="number" min="1" max="28" value="${Number(x.rent_due_day||1)}" placeholder="Due day" required>
+ <input id="etmove" type="date" value="${esc(x.move_in_date||'')}">
+ <select id="etstatus"><option value="active" ${x.status==='active'?'selected':''}>Active</option><option value="inactive" ${x.status==='inactive'?'selected':''}>Inactive</option></select>
+ <button type="submit" class="primary full">Save changes</button></form>`);
+ const form=$('editTenantForm'); if(!form)return;
+ form.onsubmit=async e=>{
+   e.preventDefault();
+   const newUnit=$('etunit').value, newStatus=$('etstatus').value;
+   const oldUnit=x.unit_id;
+   const r=await sb.from('tenants').update({unit_id:newUnit,rent_amount:Number($('etrent').value||0),deposit_amount:Number($('etdep').value||0),rent_due_day:Number($('etdue').value||1),move_in_date:$('etmove').value||null,status:newStatus}).eq('id',id).eq('landlord_id',user.id).select('*').single();
+   if(r.error)return alert('Could not update tenant: '+r.error.message);
+   if(newStatus==='inactive'){
+     if(oldUnit)await sb.from('units').update({status:'vacant'}).eq('id',oldUnit).eq('landlord_id',user.id);
+   }else{
+     if(oldUnit && oldUnit!==newUnit)await sb.from('units').update({status:'vacant'}).eq('id',oldUnit).eq('landlord_id',user.id);
+     await sb.from('units').update({status:'occupied'}).eq('id',newUnit).eq('landlord_id',user.id);
+   }
+   closeEditModal(); await refresh(); await show('tenants',false);
+ };
 }
+
 async function removeTenant(id,unitId){
  if(!confirm('Remove this tenant from the unit? Their historical payments and rent records will remain.'))return;
  const r=await sb.from('tenants').update({status:'inactive'}).eq('id',id).eq('landlord_id',user.id);if(r.error)return alert(r.error.message);if(unitId)await sb.from('units').update({status:'vacant'}).eq('id',unitId);await refresh();show('tenants',false);
@@ -3859,7 +3973,7 @@ async function assignTenant(e){
  e.target.reset();await refresh();alert(`Tenant assigned. ${advance} month(s) were prepared in the rent schedule. The tenant must pay the agreed advance amount before future months are treated as settled.`);show('tenants',false);
 }
 async function saveExpense(e){e.preventDefault();const r=await sb.from('expenses').insert({landlord_id:user.id,property_id:$('eprop').value||null,amount:Number($('eamount').value||0),category:$('ecat').value.trim(),expense_date:$('edate').value||today(),description:$('edesc').value.trim()||null}).select('*').single();if(r.error)return alert(r.error.message);e.target.reset();await refresh();show('expenses',false);}
-async function saveReceipt(e){e.preventDefault();const r=await sb.from('receipts').insert({landlord_id:user.id,payment_id:$('rpayment').value,receipt_number:$('rnumber').value.trim(),issued_at:new Date().toISOString()}).select('*').single();if(r.error)return alert(r.error.message);e.target.reset();await refresh();show('receipts',false);}
+async function saveReceipt(e){e.preventDefault();const paymentId=$('rpayment').value;const p=cache.payments.find(x=>x.id===paymentId);if(!p||p.status!=='confirmed')return alert('Select a confirmed payment.');if(cache.receipts.some(r=>r.payment_id===paymentId))return alert('A receipt already exists for this payment.');const number=$('rnumber').value.trim()||('MVR-RCPT-'+String(paymentId).replace(/-/g,'').slice(0,10).toUpperCase());const r=await sb.from('receipts').insert({landlord_id:user.id,payment_id:paymentId,receipt_number:number,issued_at:new Date().toISOString()}).select('*').single();if(r.error)return alert(r.error.message);e.target.reset();await refresh();show('receipts',false);}
 async function saveLandlordPayment(e){
  e.preventDefault();const tenantId=$('ptenant').value,rid=$('prentrecord').value||null,amount=Number($('pamount').value||0);if(!tenantId||amount<=0)return alert('Select a tenant and amount.');
  const r=await sb.from('payments').insert({landlord_id:user.id,tenant_id:tenantId,rent_record_id:rid,amount,payment_date:$('pdate').value||today(),payment_method:$('pmethod').value,status:'confirmed',transaction_reference:$('pref').value.trim()||null,notes:$('pnotes').value.trim()||null}).select('*').single();
