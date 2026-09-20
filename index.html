@@ -1585,27 +1585,54 @@ async e=>{
 
 e.preventDefault();
 
-try{await ensureSupabase();}catch(err){return msg(err.message);}
+const email=$('email').value.trim();
+const password=$('password').value;
 
-msg(
-'Logging in...',
-'success'
-);
+if(!email)return msg('Enter your email.');
+if(!password)return msg('Enter your password.');
 
-let r=
-await sb.auth.signInWithPassword({
-email:$('email').value.trim(),
-password:$('password').value
-});
+try{
+  await ensureSupabase();
 
-if(r.error)
-return msg(
-r.error.message
-);
+  msg('Logging in...','success');
 
-user=r.data.user;
+  const r=await sb.auth.signInWithPassword({
+    email,
+    password
+  });
 
-await loadApp();
+  if(r.error){
+    console.error('MavRent login error:',r.error);
+    return msg(r.error.message);
+  }
+
+  user=r.data.user;
+
+  // Show the application immediately after Supabase confirms the login.
+  // If a dashboard/database feature fails, keep the user inside MavRent
+  // and show the actual error instead of appearing to log out.
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  try{
+    await loadApp();
+  }catch(appError){
+    console.error('MavRent post-login error:',appError);
+    loading=false;
+    $('auth').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    if($('main')){
+      $('main').innerHTML=
+        '<div class="card"><h2>MavRent loaded, but some data could not be loaded.</h2>'+
+        '<div class="notice error">'+esc(appError?.message||appError)+'</div>'+
+        '<button class="btn" type="button" onclick="location.reload()">Refresh MavRent</button></div>';
+    }
+  }
+
+}catch(err){
+  console.error('MavRent login failed:',err);
+  msg(err?.message||'Login failed. Please try again.');
+}
 
 };
 
@@ -1671,52 +1698,67 @@ return;
 
 loading=true;
 
-profile=
-await loadProfile();
+try{
+  profile=await loadProfile();
 
-role=
-profile?.role||
-user.user_metadata?.role||
-role;
+  role=
+    profile?.role||
+    user.user_metadata?.role||
+    role;
 
-if(
-!['landlord','tenant']
-.includes(role)
-)
-role='tenant';
+  if(!['landlord','tenant'].includes(role))
+    role='tenant';
 
-$('auth')
-.classList.add(
-'hidden'
-);
+  // The shell must become visible before optional data/features load.
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
 
-$('app')
-.classList.remove(
-'hidden'
-);
+  buildNav();
 
-buildNav();
+  try{await updatePushStatusUI();}catch(e){
+    console.warn('MavRent notification status:',e);
+  }
 
-await updatePushStatusUI();
+  try{
+    await refresh();
+  }catch(e){
+    console.error('MavRent data refresh:',e);
+    dbErr('MavRent data could not be loaded',e);
+  }
 
-await refresh();
+  try{
+    await loadNotifications();
+  }catch(e){
+    console.warn('MavRent notifications:',e);
+  }
 
-await loadNotifications();
+  await show(
+    role==='landlord'
+      ?'dashboard'
+      :'home',
+    false
+  );
 
-show(
-role==='landlord'
-?'dashboard'
-:'home',
-false
-);
+  startRealtime();
 
-startRealtime();
+  // Prepare missing rent months after the first screen is visible.
+  setTimeout(()=>ensureRentSchedules(),250);
 
-loading=false;
-
-// Prepare missing rent months after the first screen is visible.
-setTimeout(()=>ensureRentSchedules(),250);
-
+}catch(error){
+  console.error('MavRent loadApp error:',error);
+  $('auth').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  if($('main')){
+    $('main').innerHTML=
+      '<div class="card"><h2>Welcome to MavRent</h2>'+
+      '<div class="notice error">Some MavRent data could not be loaded: '+
+      esc(error?.message||error)+
+      '</div></div>';
+  }
+  throw error;
+}finally{
+  loading=false;
+}
 
 }
 
@@ -4567,6 +4609,6 @@ document.addEventListener(
   }
 })();
 
-<script>
+<script src="/ai-assistant.js"></script>
 </body>
 </html>
