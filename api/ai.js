@@ -4,6 +4,16 @@
 
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.6-luna';
 
+// Supabase URL and publishable/anon key are safe to use for authenticated
+// browser-style requests. The user's JWT + Supabase RLS still control access.
+const SUPABASE_URL =
+  process.env.SUPABASE_URL ||
+  'https://wborvbuqdiscoasnsrwa.supabase.co';
+
+const SUPABASE_ANON_KEY =
+  process.env.SUPABASE_ANON_KEY ||
+  'sb_publishable_1mthstK0eNmIFL1PHmBDLg_-5YJYScn';
+
 function json(res, status, body) {
   res.status(status).setHeader('Content-Type', 'application/json');
   return res.end(JSON.stringify(body));
@@ -29,14 +39,10 @@ function cleanRow(row) {
 }
 
 async function supabaseGet(table, query, token) {
-  const base = process.env.SUPABASE_URL;
-  const anon = process.env.SUPABASE_ANON_KEY;
+  const base = SUPABASE_URL.replace(/\/$/, '');
+  const anon = SUPABASE_ANON_KEY;
 
-  if (!base || !anon) {
-    throw new Error('Supabase server environment variables are missing.');
-  }
-
-  const url = new URL(base.replace(/\/$/, '') + '/rest/v1/' + table);
+  const url = new URL(base + '/rest/v1/' + table);
   url.searchParams.set('select', '*');
   url.searchParams.set('limit', '100');
 
@@ -66,10 +72,10 @@ async function supabaseGet(table, query, token) {
 }
 
 async function getAuthenticatedUser(token) {
-  const base = process.env.SUPABASE_URL;
-  const anon = process.env.SUPABASE_ANON_KEY;
+  const base = SUPABASE_URL.replace(/\/$/, '');
+  const anon = SUPABASE_ANON_KEY;
 
-  const r = await fetch(base.replace(/\/$/, '') + '/auth/v1/user', {
+  const r = await fetch(base + '/auth/v1/user', {
     headers: {
       apikey: anon,
       Authorization: 'Bearer ' + token
