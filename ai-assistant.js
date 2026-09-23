@@ -85,7 +85,7 @@
       if(typeof role!=='undefined'&&role!=='landlord'){addMessage('This action is available to landlords only.','bot');return false}return true;
     }
 
-    async function showAddTenant(){
+    async function showAddTenant(seed={}){
       if(!landlordOnly())return;
       try{await session();}catch(e){addMessage(e.message,'bot');return;}
       if(!window.cache?.registeredTenants?.length){addMessage('There are no registered tenant accounts available to assign yet. Create a tenant account first.','bot');return;}
@@ -105,7 +105,7 @@
         <label>Initial rent schedule</label>
         <select id="aiTAdvance"><option value="1">1 month</option><option value="3" selected>3 months</option><option value="4">4 months</option></select>
         <div class="mavAiConfirm"><button class="ok" id="aiPrepareConfirm">Review assignment</button><button class="cancel" id="aiCancel">Cancel</button></div>`);
-      const unit=vacant[0];document.getElementById('aiTRent').value=unit.monthly_rent||0;
+      const unit=vacant.find(u=>seed.unit_number && String(u.unit_number).toLowerCase()===String(seed.unit_number).toLowerCase()) || vacant[0];\n      const profSeed=seed.tenant_name ? cache.registeredTenants.find(x=>String(x.full_name||x.email||'').toLowerCase().includes(String(seed.tenant_name).toLowerCase())) : null;\n      if(profSeed) document.getElementById('aiTProfile').value=profSeed.id;\n      document.getElementById('aiTUnit').value=unit.id;\n      document.getElementById('aiTRent').value=seed.monthly_rent || unit.monthly_rent || 0;\n      document.getElementById('aiTDeposit').value=seed.deposit_amount || 0;\n      document.getElementById('aiTDue').value=seed.rent_due_day || 1;\n      document.getElementById('aiTMove').value=seed.move_in_date || new Date().toISOString().slice(0,10);\n      document.getElementById('aiTAdvance').value=seed.initial_advance_months || 3;
       p.querySelector('#aiCancel').onclick=()=>p.remove();
       p.querySelector('#aiPrepareConfirm').onclick=()=>reviewTenant(p);
     }
@@ -157,9 +157,9 @@
       };
     }
 
-    async function ask(){
+    function detectLocalAction(q){\n      const s=q.trim(); const l=s.toLowerCase();\n      if(/\\b(assign|add|register)\\b.*\\btenant\\b/.test(l)||/\\bassign\\b/.test(l)){\n        const tenant=(s.match(/(?:tenant\\s+)?([A-Za-z][A-Za-z .'-]{1,50}?)(?=\\s+to\\s+|\\s+in\\s+|\\s+at\\s+)/i)||[])[1]||'';\n        const unit=(s.match(/(?:room|unit)\\s*([A-Za-z0-9-]+)/i)||[])[1]||'';\n        const rent=Number(((s.match(/(?:rent|monthly rent)\\s*(?:is|=|of)?\\s*(?:ugx\\s*)?([0-9,]+)/i)||[])[1]||'0').replace(/,/g,''));\n        const dep=Number(((s.match(/(?:deposit)\\s*(?:is|=|of)?\\s*(?:ugx\\s*)?([0-9,]+)/i)||[])[1]||'0').replace(/,/g,''));\n        const due=Number(((s.match(/(?:due day|due on)\\s*(?:is|=|of)?\\s*(\\d{1,2})/i)||[])[1]||'1'));\n        const advance=Number(((s.match(/(?:advance|initial)\\s*(?:of|for)?\\s*(\\d+)\\s*month/i)||[])[1]||'3'));\n        return {type:'assign_tenant',tenant_name:tenant,unit_number:unit,monthly_rent:rent,deposit_amount:dep,rent_due_day:due,initial_advance_months:advance};\n      }\n      if(/\\b(create|make|generate)\\b.*\\breceipt\\b/.test(l)) return {type:'create_receipt'};\n      if(/\\b(remind|reminder)\\b.*\\boverdue\\b/.test(l)) return {type:'send_reminder',target:'overdue'};\n      return null;\n    }\n\n    async function ask(){
       const question=input.value.trim();if(!question)return;
-      addMessage(question,'user');input.value='';send.disabled=true;send.textContent='...';
+      addMessage(question,'user');input.value='';\n      const localAction=detectLocalAction(question);\n      if(localAction){\n        if(localAction.type==='assign_tenant'){addMessage('I understood this as a tenant assignment. I will prepare it for your final confirmation.','bot');await showAddTenant(localAction);return;}\n        if(localAction.type==='create_receipt'){addMessage('I understood this as a receipt request. I will prepare it for your final confirmation.','bot');await showReceipt();return;}\n        if(localAction.type==='send_reminder'){addMessage('I understood this as an overdue reminder request. Reminder sending will be the next communication upgrade.','bot');return;}\n      }\n      send.disabled=true;send.textContent='...';
       try{
         const token=await session();
         const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({message:question})});
