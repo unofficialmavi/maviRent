@@ -53,7 +53,7 @@
             '<button class="mavAiAction" id="mavAiAddTenant">👤 Assign new tenant</button>'+
             '<button class="mavAiAction" id="mavAiReceipt">🧾 Create receipt</button>'+
             '<button class="mavAiAction" id="mavAiOverdue">🔴 Show overdue</button>'+
-            '<button class="mavAiAction" id="mavAiMaintenance">🔧 Open maintenance</button>'+
+            '<button class="mavAiAction" id="mavAiMaintenance">🔧 Open maintenance</button><button class="mavAiAction" id="mavAiBrief">📋 Daily brief</button><button class="mavAiAction" id="mavAiContact">📲 Contact overdue</button>'+
           '</div>'+
         '</div>'+
         '<div class="mavAiHint">Try: “Who is overdue?” or “Assign Sarah to Room B12, rent 450000, deposit 450000.”</div>'+
@@ -240,6 +240,64 @@
       };
     }
 
+
+    function dailyBrief(){
+      const tenants=Array.isArray(cache.tenants)?cache.tenants:[];
+      const records=Array.isArray(cache.rent_records)?cache.rent_records:[];
+      const maintenance=Array.isArray(cache.maintenance_requests)?cache.maintenance_requests:[];
+      const vacant=(cache.units||[]).filter(function(u){return String(u.status||'').toLowerCase()!=='occupied';}).length;
+      const overdue=records.filter(function(r){
+        const due=Number(r.amount_due||0),paid=Number(r.amount_paid||0);
+        if(due-paid<=0)return false;
+        const d=r.due_date?new Date(r.due_date+'T23:59:59').getTime():0;
+        return String(r.status||'').toLowerCase()==='overdue'||(d&&d<Date.now());
+      });
+      const openMaint=maintenance.filter(function(r){return !['completed','resolved','cancelled','closed'].includes(String(r.status||'').toLowerCase());});
+      const total=overdue.reduce(function(a,r){return a+Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0));},0);
+      addMessage(
+        '📋 MavRent Daily Brief\n\n'+
+        '👥 Tenants: '+tenants.length+'\n'+
+        '🚪 Vacant units: '+vacant+'\n'+
+        '🔴 Overdue records: '+overdue.length+' — '+moneyLocal(total)+'\n'+
+        '🔧 Open maintenance: '+openMaint.length+'\n\n'+
+        (overdue.length?'Action: review overdue tenants and contact them.':'✅ No overdue rent detected.')+
+        (openMaint.length?'\\nAction: review open maintenance requests.':''),
+        'bot'
+      );
+    }
+
+    function contactOverdue(){
+      if(!landlordOnly())return;
+      const overdue=[];
+      (cache.tenants||[]).forEach(function(t){
+        const rows=(cache.rent_records||[]).filter(function(r){return r.tenant_id===t.id;});
+        const balance=rows.reduce(function(a,r){return a+Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0));},0);
+        const first=rows.find(function(r){
+          const b=Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0));
+          const d=r.due_date?new Date(r.due_date+'T23:59:59').getTime():0;
+          return b>0 && (String(r.status||'').toLowerCase()==='overdue'||(d&&d<Date.now()));
+        });
+        if(first&&balance>0)overdue.push({tenant:t,balance:balance,record:first});
+      });
+      if(!overdue.length){addMessage('✅ No overdue tenants need contact right now.','bot');return;}
+      let html='<h3>📲 Contact overdue tenants</h3><div class="mavAiSummary">MavRent will not send anything silently. Choose how you want to contact each tenant.</div>';
+      overdue.forEach(function(x){
+        const p=cache.registeredTenants.find(function(pr){return pr.id===x.tenant.profile_id;});
+        const name=p&& (p.full_name||p.email)||'Tenant';
+        const raw=String(p&&p.phone||x.tenant.phone||'').replace(/[^0-9+]/g,'');
+        const phone=raw.replace(/^00/,'+');
+        const wa=phone.replace(/^\+/,'');
+        const text=encodeURIComponent('Hello '+name+', this is a MavRent rent reminder. Your outstanding rent balance is '+moneyLocal(x.balance)+'. Please contact your landlord if you need to discuss payment.');
+        html+='<div class="mavAiSummary"><b>'+escLocal(name)+'</b><br>Outstanding: '+moneyLocal(x.balance)+
+          '<div class="mavAiConfirm">'+
+          (phone?'<a class="ok" style="display:grid;place-items:center;text-decoration:none" href="tel:'+escLocal(phone)+'">📞 Call</a>':'')+
+          (wa?'<a class="ok" style="display:grid;place-items:center;text-decoration:none" target="_blank" href="https://wa.me/'+escLocal(wa)+'?text='+text+'">💬 WhatsApp</a>':'')+
+          (phone?'<a class="cancel" style="display:grid;place-items:center;text-decoration:none" href="sms:'+escLocal(phone)+'?body='+text+'">✉️ SMS</a>':'')+
+          '</div></div>';
+      });
+      panel(html);
+    }
+
     function detectLocalAction(q){
       const s=q.trim(),l=s.toLowerCase();
       if(/\b(assign|add|register)\b.*\btenant\b/.test(l)||/\bassign\b/.test(l)){
@@ -278,6 +336,8 @@
     document.getElementById('mavAiReceipt').onclick=function(){showReceipt();};
     document.getElementById('mavAiOverdue').onclick=function(){input.value='Who is overdue?';ask();};
     document.getElementById('mavAiMaintenance').onclick=function(){input.value='Show open maintenance.';ask();};
+    document.getElementById('mavAiBrief').onclick=dailyBrief;
+    document.getElementById('mavAiContact').onclick=contactOverdue;
     send.onclick=ask;
     input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
 
