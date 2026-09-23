@@ -49,11 +49,11 @@
         '<div class="mavAiHead"><div><strong>✨ MavRent AI</strong><small>Ask questions, prepare actions, confirm important changes</small></div><button class="mavAiClose" type="button">✕</button></div>'+
         '<div class="mavAiMessages" id="mavAiMessages">'+
           '<div class="mavAiMsg bot">Hi. I am MavRent AI. I can read your rental data, answer questions, and prepare management actions. Important changes always require your final confirmation.</div>'+
-          '<div class="mavAiActions">'+
+          '<div class="mavAiActions" id="mavAiActions">'+
             '<button class="mavAiAction" id="mavAiAddTenant">👤 Assign new tenant</button>'+
             '<button class="mavAiAction" id="mavAiReceipt">🧾 Create receipt</button>'+
             '<button class="mavAiAction" id="mavAiOverdue">🔴 Show overdue</button>'+
-            '<button class="mavAiAction" id="mavAiMaintenance">🔧 Open maintenance</button><button class="mavAiAction" id="mavAiBrief">📋 Daily brief</button><button class="mavAiAction" id="mavAiContact">📲 Contact overdue</button>'+
+            '<button class="mavAiAction" id="mavAiMaintenance">🔧 Open maintenance</button><button class="mavAiAction" id="mavAiBrief">📋 Daily brief</button><button class="mavAiAction" id="mavAiContact">📲 Contact overdue</button><button class="mavAiAction" id="mavAiPhone">📱 My phone number</button>'+
           '</div>'+
         '</div>'+
         '<div class="mavAiHint">Try: “Who is overdue?” or “Assign Sarah to Room B12, rent 450000, deposit 450000.”</div>'+
@@ -98,20 +98,57 @@
     }
 
     async function session(){
-      if(typeof ensureSupabase==='function')await ensureSupabase();
-      if(!window.sb||!sb.auth)throw new Error('MavRent login service is not ready.');
-      const s=await sb.auth.getSession();
-      const token=s&&s.data&&s.data.session&&s.data.session.access_token;
-      if(!token)throw new Error('Please log in to MavRent first.');
-      return token;
+      try{
+        const client = typeof ensureSupabase==='function'
+          ? await ensureSupabase()
+          : (typeof sb!=='undefined' ? sb : null);
+        if(!client || !client.auth) throw new Error('MavRent authentication is still loading. Please wait a moment and try again.');
+        const s=await client.auth.getSession();
+        const token=s&&s.data&&s.data.session&&s.data.session.access_token;
+        if(!token)throw new Error('Your MavRent session has expired. Please log in again.');
+        return token;
+      }catch(e){
+        throw new Error(e&&e.message?e.message:'MavRent authentication is not ready.');
+      }
     }
 
     function landlordOnly(){
-      if(typeof role!=='undefined'&&role!=='landlord'){
-        addMessage('This action is available to landlords only.','bot');
-        return false;
-      }
-      return true;
+      return typeof role==='undefined' || role==='landlord';
+    }
+
+    function tenantOnly(){
+      return typeof role==='undefined' || role==='tenant';
+    }
+
+    function currentClient(){
+      return typeof sb!=='undefined' ? sb : null;
+    }
+
+    async function saveTenantPhone(){
+      if(!tenantOnly())return;
+      try{
+        const client=currentClient() || await ensureSupabase();
+        const phone=String(profile&&profile.phone||'').trim();
+        const p=panel(
+          '<h3>📱 My contact number</h3>'+
+          '<div class="mavAiSummary">This number is stored on your MavRent profile and can be used by your landlord for approved rent reminders and tenant communication.</div>'+
+          '<label>Phone number</label>'+
+          '<input id="aiTenantPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+256 7XX XXX XXX" value="'+escLocal(phone)+'">'+
+          '<div class="mavAiConfirm"><button class="ok" id="aiSavePhone">✓ Save number</button><button class="cancel" id="aiCancelPhone">Cancel</button></div>'
+        );
+        p.querySelector('#aiCancelPhone').onclick=function(){p.remove();};
+        p.querySelector('#aiSavePhone').onclick=async function(){
+          const b=this; const value=p.querySelector('#aiTenantPhone').value.trim();
+          if(!value){addMessage('Please enter a phone number.','bot');return;}
+          b.disabled=true;b.textContent='Saving...';
+          const res=await client.from('profiles').update({phone:value}).eq('id',user.id);
+          if(res.error){b.disabled=false;b.textContent='✓ Save number';addMessage('Could not save phone number: '+res.error.message,'bot');return;}
+          if(profile)profile.phone=value;
+          p.remove();
+          addMessage('✅ Your phone number has been saved to your MavRent profile.','bot');
+          if(typeof show==='function')await show('profile',false);
+        };
+      }catch(e){addMessage('Phone setup error: '+e.message,'bot');}
     }
 
     async function showAddTenant(seed){
@@ -345,12 +382,37 @@
       finally{send.disabled=false;send.textContent='Send';input.focus();}
     }
 
+    function configureRoleUI(){
+      const tenant=(typeof role!=='undefined'&&role==='tenant');
+      const add=document.getElementById('mavAiAddTenant');
+      const brief=document.getElementById('mavAiBrief');
+      const contact=document.getElementById('mavAiContact');
+      if(tenant){
+        if(add)add.style.display='none';
+        if(brief)brief.textContent='💰 My rent summary';
+        if(contact)contact.textContent='📱 My phone number';
+      }else{
+        if(add)add.style.display='';
+        if(brief)brief.textContent='📋 Daily brief';
+        if(contact)contact.textContent='📲 Contact overdue';
+      }
+    }
+
     document.getElementById('mavAiAddTenant').onclick=function(){showAddTenant();};
-    document.getElementById('mavAiReceipt').onclick=function(){showReceipt();};
-    document.getElementById('mavAiOverdue').onclick=function(){input.value='Who is overdue?';ask();};
-    document.getElementById('mavAiMaintenance').onclick=function(){input.value='Show open maintenance.';ask();};
-    document.getElementById('mavAiBrief').onclick=dailyBrief;
-    document.getElementById('mavAiContact').onclick=contactOverdue;
+    document.getElementById('mavAiReceipt').onclick=function(){
+      if(typeof role!=='undefined'&&role==='tenant'){input.value='Show my latest receipt';ask();}else showReceipt();
+    };
+    document.getElementById('mavAiOverdue').onclick=function(){
+      input.value=(typeof role!=='undefined'&&role==='tenant')?'What is my rent balance?':'Who is overdue?';ask();
+    };
+    document.getElementById('mavAiMaintenance').onclick=function(){input.value=(typeof role!=='undefined'&&role==='tenant')?'Show my maintenance requests.':'Show open maintenance.';ask();};
+    document.getElementById('mavAiBrief').onclick=function(){
+      if(typeof role!=='undefined'&&role==='tenant'){input.value='Give me my rent and payment summary.';ask();}else dailyBrief();
+    };
+    document.getElementById('mavAiContact').onclick=function(){
+      if(typeof role!=='undefined'&&role==='tenant'){saveTenantPhone();}else contactOverdue();
+    };
+    document.getElementById('mavAiPhone').onclick=saveTenantPhone;
     send.onclick=ask;
     input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
 
