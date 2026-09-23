@@ -306,6 +306,69 @@ function answerDirectly(question, context) {
     return '🏢 MavRent currently has ' + properties.length + ' property record(s) available to your account.';
   }
 
+
+  if (
+    q.includes('vacant') ||
+    q.includes('empty units') ||
+    q.includes('available units')
+  ) {
+    const vacant = units.filter(u =>
+      String(u.status || '').toLowerCase() !== 'occupied'
+    );
+
+    if (!vacant.length) {
+      return '🏠 No vacant units were found in the available MavRent data.';
+    }
+
+    const lines = vacant.slice(0, 50).map(u => {
+      const property = findProperty(properties, u.property_id);
+      return '• ' +
+        (u.unit_number || u.name || 'Unit') +
+        ' — ' +
+        (property?.name || 'Property') +
+        (u.monthly_rent ? ' — ' + money(u.monthly_rent) : '');
+    });
+
+    return '🏠 Vacant / available units: ' + vacant.length +
+      '\n\n' + lines.join('\n');
+  }
+
+  if (
+    q.includes('who paid today') ||
+    q.includes('payments today') ||
+    q.includes('paid today')
+  ) {
+    const todayDate = new Date().toISOString().slice(0, 10);
+    const todays = (Array.isArray(d.payments) ? d.payments : [])
+      .filter(p =>
+        String(p.payment_date || p.created_at || '').slice(0, 10) === todayDate &&
+        !['rejected','cancelled'].includes(String(p.status || '').toLowerCase())
+      );
+
+    if (!todays.length) {
+      return '💳 No payments dated today were found in the available MavRent data.';
+    }
+
+    const lines = todays.slice(0, 50).map(p => {
+      const tenant = findTenant(tenants, p.tenant_id);
+      const name =
+        tenant?.full_name ||
+        tenant?.name ||
+        tenant?.tenant_name ||
+        tenant?.email ||
+        'Unknown tenant';
+
+      return '• ' + name + ' — ' + money(p.amount) +
+        (p.payment_method ? ' — ' + p.payment_method : '');
+    });
+
+    const total = todays.reduce((sum, p) => sum + num(p.amount), 0);
+
+    return '💳 Payments dated today: ' + todays.length +
+      '\n\n' + lines.join('\n') +
+      '\n\nTotal: ' + money(total);
+  }
+
   if (
     q.includes('how many') &&
     (q.includes('unit') || q.includes('units'))
