@@ -327,8 +327,7 @@
         const text=encodeURIComponent('Hello '+name+', this is a MavRent rent reminder. Your outstanding rent balance is '+moneyLocal(x.balance)+'. Please contact your landlord if you need to discuss payment.');
         html+='<div class="mavAiSummary"><b>'+escLocal(name)+'</b><br>Outstanding: '+moneyLocal(x.balance)+
           '<div class="mavAiConfirm">'+
-          (phone?'<a class="ok" style="display:grid;place-items:center;text-decoration:none" href="tel:'+escLocal(phone)+'">📞 Call</a>':'')+
-          (wa?'<a class="ok" style="display:grid;place-items:center;text-decoration:none" target="_blank" href="https://wa.me/'+escLocal(wa)+'?text='+text+'">💬 WhatsApp</a>':'')+
+          (wa?'<a class="ok" style="display:grid;place-items:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/'+escLocal(wa)+'?text='+text+'">💬 WhatsApp</a>':'')+
           (phone?'<a class="cancel" style="display:grid;place-items:center;text-decoration:none" href="sms:'+escLocal(phone)+'?body='+text+'">✉️ SMS</a>':'')+
           '</div></div>';
       });
