@@ -1690,6 +1690,13 @@ try{
   if(!['landlord','tenant'].includes(role))
     role='tenant';
 
+  // Keep profile contact information synchronized with registration metadata.
+  const metaPhone=String(user.user_metadata?.phone||'').trim();
+  if(profile && !profile.phone && metaPhone){
+    const phoneSync=await sb.from('profiles').update({phone:metaPhone}).eq('id',user.id);
+    if(!phoneSync.error) profile.phone=metaPhone;
+  }
+
   // The shell must become visible before optional data/features load.
   $('auth').classList.add('hidden');
   $('app').classList.remove('hidden');
