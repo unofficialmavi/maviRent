@@ -261,7 +261,7 @@
         '🔴 Overdue records: '+overdue.length+' — '+moneyLocal(total)+'\n'+
         '🔧 Open maintenance: '+openMaint.length+'\n\n'+
         (overdue.length?'Action: review overdue tenants and contact them.':'✅ No overdue rent detected.')+
-        (openMaint.length?'\\nAction: review open maintenance requests.':''),
+        (openMaint.length?'\nAction: review open maintenance requests.':''),
         'bot'
       );
     }
