@@ -419,6 +419,7 @@
     function syncVisibility(){
       const app=document.getElementById('app');
       button.classList.toggle('show',!!app&&!app.classList.contains('hidden'));
+      configureRoleUI();
     }
     syncVisibility();
     setInterval(syncVisibility,500);
