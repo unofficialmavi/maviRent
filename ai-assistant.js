@@ -310,6 +310,13 @@
         return {type:'assign_tenant',tenant_name:tenant,unit_number:unit,monthly_rent:rent,deposit_amount:dep,rent_due_day:due,initial_advance_months:advance};
       }
       if(/\b(create|make|generate)\b.*\breceipt\b/.test(l))return {type:'create_receipt'};
+      if(/\b(remind|contact|message|whatsapp|sms|call)\b.*\b(overdue|tenant|tenants)\b/.test(l))return {type:'contact_overdue'};
+      if(/\b(record|add|enter)\b.*\bpayment\b/.test(l))return {type:'open_page',page:'payments'};
+      if(/\b(add|create|new)\b.*\bproperty\b/.test(l))return {type:'open_page',page:'properties'};
+      if(/\b(add|create|new)\b.*\bunit\b/.test(l))return {type:'open_page',page:'units'};
+      if(/\b(maintenance|repair)\b/.test(l))return {type:'open_page',page:'maintenance'};
+      if(/\b(expense|expenses)\b/.test(l))return {type:'open_page',page:'expenses'};
+      if(/\b(report|reports|analytics)\b/.test(l))return {type:'open_page',page:'reports'};
       return null;
     }
 
@@ -320,6 +327,12 @@
       if(action){
         if(action.type==='assign_tenant'){addMessage('I understood this as a tenant assignment. I will prepare it for your final confirmation.','bot');await showAddTenant(action);return;}
         if(action.type==='create_receipt'){addMessage('I understood this as a receipt request. I will prepare it for your final confirmation.','bot');await showReceipt();return;}
+        if(action.type==='contact_overdue'){addMessage('I will prepare the overdue-tenant contact options. MavRent will not send anything silently.','bot');contactOverdue();return;}
+        if(action.type==='open_page'){
+          if(typeof show==='function')await show(action.page,false);
+          addMessage('Opened the '+action.page+' section for you. Any consequential change still requires your normal confirmation.','bot');
+          return;
+        }
       }
       send.disabled=true;send.textContent='...';
       try{
