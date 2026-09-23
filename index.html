@@ -1490,58 +1490,39 @@ async function signup(){
 
 await ensureSupabase().catch(e=>{msg(e.message);throw e});
 
-let email=$('email')
-.value.trim();
+let email=$('email').value.trim();
+let password=$('password').value;
 
-let password=$('password')
-.value;
+if(!email)return msg('Enter your email.');
+if(password.length<6)return msg('Password must be at least 6 characters.');
 
-if(!email)
-return msg(
-'Enter your email.'
-);
+let fullName=prompt('Full name:');
+if(fullName===null)return;
+fullName=fullName.trim();
+if(!fullName)return msg('Full name is required.');
 
-if(password.length<6)
-return msg(
-'Password must be at least 6 characters.'
-);
+let phone='';
+if(role==='tenant'){
+  phone=prompt('Tenant phone number (example: +256 7XX XXX XXX):')||'';
+  phone=phone.trim();
+  if(!phone)return msg('A tenant phone number is required so MavRent can store the correct contact for approved rent reminders.');
+}
 
-msg(
-'Creating account...',
-'success'
-);
+msg('Creating '+role+' account...','success');
 
-let r=
-await sb.auth.signUp({
+let r=await sb.auth.signUp({
 email,
 password,
-options:{
-data:{
-role,
-full_name:'',
-phone:''
-}
-}
+options:{data:{role,full_name:fullName,phone:phone}}
 });
 
-if(r.error)
-return msg(
-r.error.message
-);
+if(r.error)return msg(r.error.message);
 
 if(r.data.session){
-
-user=r.data.user;
-
-await loadApp();
-
+  user=r.data.user;
+  await loadApp();
 }else{
-
-msg(
-'Account created. Check your email, confirm it, then log in.',
-'success'
-);
-
+  msg('Account created. Check your email, confirm it, then log in. Your profile information will be available after verification.','success');
 }
 
 }
