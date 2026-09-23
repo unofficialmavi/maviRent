@@ -413,6 +413,7 @@
       if(typeof role!=='undefined'&&role==='tenant'){saveTenantPhone();}else contactOverdue();
     };
     document.getElementById('mavAiPhone').onclick=saveTenantPhone;
+    configureRoleUI();
     send.onclick=ask;
     input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
 
