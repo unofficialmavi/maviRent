@@ -1,6 +1,6 @@
 /* MavRent AI Assistant V3 — visible AI + confirmed actions */
 (function(){
-  const STYLE = \`
+  const STYLE = `
     #mavAiButton{position:fixed;right:18px;bottom:88px;z-index:260;border:0;border-radius:999px;padding:13px 17px;background:linear-gradient(135deg,#087cff,#00b8ff);color:#fff;font-weight:900;box-shadow:0 14px 35px #087cff55;display:none}
     #mavAiButton.show{display:block}
     #mavAiModal{position:fixed;inset:0;z-index:1000;display:none;background:#0008;align-items:center;justify-content:center;padding:15px}
@@ -27,7 +27,7 @@
     .mavAiConfirm .ok{background:#087cff;color:#fff}.mavAiConfirm .cancel{background:#eef1f5;color:#111827}
     .mavAiSummary{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:11px;margin-top:10px;font-size:13px;line-height:1.6}
     @media(max-width:600px){.mavAiActions,.mavAiGrid,.mavAiConfirm{grid-template-columns:1fr}.mavAiBox{height:96vh}#mavAiButton{right:12px;bottom:78px}}
-  \`;
+  `;
 
   function boot(){
     if(document.getElementById('mavAiButton'))return;
