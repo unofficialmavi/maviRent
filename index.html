@@ -3550,8 +3550,18 @@ return`
 
 function profilePage(){
  return`<section>
- <div class="title"><h1>👤 Profile</h1><p>Account details and notification settings.</p></div>
- <div class="card"><p>Email: <b>${esc(user.email)}</b></p><p>Role: <b>${esc(role)}</b></p><p>User ID: <b class="code">${shortId(user.id)}</b></p></div>
+ <div class="title"><h1>👤 Profile</h1><p>Account details, contact information and notification settings.</p></div>
+ <div class="card">
+  <p>Email: <b>${esc(user.email)}</b></p>
+  <p>Role: <b>${esc(role)}</b></p>
+  <p>User ID: <b class="code">${shortId(user.id)}</b></p>
+  <form id="phoneProfileForm" class="formgrid" style="margin-top:12px">
+   <label>Phone number</label>
+   <input id="profilePhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+256 7XX XXX XXX" value="${esc(profile?.phone||'')}">
+   <button class="primary full" type="submit">📱 Save phone number</button>
+  </form>
+  <div class="hint">Your phone number is stored on your MavRent profile so approved tenant communication and rent reminders can use the correct number.</div>
+ </div>
  <div class="pushStatusCard">
   <div class="pushStatusRow">
    <div><div class="pushStatusTitle">🔔 Phone notifications</div><div class="hint">Rent reminders can appear on supported devices.</div></div>
@@ -3680,6 +3690,16 @@ function reminderItemsForLandlord(){
 function reminderHtml(items){
   if(!items.length)return `<div class="alertStrip success"><div class="alertTitle">✓ Rent is up to date</div>No urgent rent reminders right now.</div>`;
   return items.map(x=>`<div class="alertStrip ${x.type}"><div class="alertTitle">${esc(x.title)}</div>${esc(x.text)}</div>`).join('');
+}
+
+async function saveProfilePhone(){
+ const phone=$('profilePhone')?.value.trim();
+ if(!phone)return msg('Enter your phone number.');
+ const r=await sb.from('profiles').update({phone}).eq('id',user.id);
+ if(r.error)return msg(r.error.message);
+ profile=profile||{};
+ profile.phone=phone;
+ msg('Phone number saved successfully.','success');
 }
 
 function guidePage(){
@@ -3989,6 +4009,8 @@ function printReceipt(id){
 }
 
 function attach(){
+  const phoneForm=$('phoneProfileForm');
+  if(phoneForm)phoneForm.onsubmit=async e=>{e.preventDefault();await saveProfilePhone();};
  const pf=$('propertyForm'); if(pf)pf.onsubmit=saveProperty;
  const uf=$('unitForm'); if(uf)uf.onsubmit=saveUnit;
  const tf=$('tenantForm'); if(tf)tf.onsubmit=assignTenant;
