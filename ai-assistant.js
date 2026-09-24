@@ -176,6 +176,56 @@
       }catch(e){addMessage('Care Mode error: '+(e.message||e),'bot');}
     }
 
+    async function careTasksCenter(){
+      if(!landlordOnly())return;
+      try{
+        const token=await session();
+        const r=await fetch('/api/care-tasks',{headers:{'Authorization':'Bearer '+token}});
+        const data=await r.json().catch(function(){return {};});
+        if(!r.ok)throw new Error(data.error||'Could not load Care Tasks.');
+        const tasks=Array.isArray(data.tasks)?data.tasks:[];
+        if(!tasks.length){
+          addMessage('🛡️ CARE MODE\n\nNo prepared Care Mode tasks are waiting for you.','bot');
+          return;
+        }
+        const html='<h3>🛡️ Care Mode — '+tasks.length+' prepared task'+(tasks.length===1?'':'s')+'</h3>'+
+          '<div class="mavAiSummary">These tasks were prepared by the server scheduler. MavRent does not send financial or irreversible actions automatically.</div>'+
+          tasks.map(function(t){
+            const payload=t.payload||{};
+            return '<div class="mavAiTask" data-id="'+escLocal(t.id)+'" style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:10px 0">'+
+              '<b>'+escLocal(t.title||'Care task')+'</b><br><small>'+escLocal(t.message||'')+'</small>'+
+              (payload.balance?'<br><b>Balance:</b> '+moneyLocal(payload.balance):'')+
+              '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn success careApprove" data-id="'+escLocal(t.id)+'">✓ Approve</button><button class="btn careSkip" data-id="'+escLocal(t.id)+'">Skip</button></div></div>';
+          }).join('');
+        const p=panel(html);
+        p.querySelectorAll('.careApprove').forEach(function(btn){
+          btn.onclick=async function(){
+            btn.disabled=true;btn.textContent='Approving...';
+            try{
+              const token=await session();
+              const rr=await fetch('/api/care-tasks',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({task_id:btn.dataset.id,decision:'approve'})});
+              const d=await rr.json().catch(function(){return {};});
+              if(!rr.ok)throw new Error(d.error||'Task could not be approved.');
+              btn.closest('.mavAiTask').remove();
+              addMessage('✅ Care task approved and executed. '+(d.message||''),'bot');
+              aiAudit('Care task','confirmed',btn.dataset.id);
+            }catch(e){btn.disabled=false;btn.textContent='✓ Approve';addMessage('Care task failed: '+(e.message||e),'bot');}
+          };
+        });
+        p.querySelectorAll('.careSkip').forEach(function(btn){
+          btn.onclick=async function(){
+            try{
+              const token=await session();
+              const rr=await fetch('/api/care-tasks',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({task_id:btn.dataset.id,decision:'skip'})});
+              const d=await rr.json().catch(function(){return {};});
+              if(!rr.ok)throw new Error(d.error||'Task could not be skipped.');
+              btn.closest('.mavAiTask').remove();
+            }catch(e){addMessage('Care task error: '+(e.message||e),'bot');}
+          };
+        });
+      }catch(e){addMessage('Care Mode tasks error: '+(e.message||e),'bot');}
+    }
+
     function operationsCenter(){
       if(!landlordOnly()){input.value='Give me my rent, payment and maintenance summary.';ask();return;}
       const tenants=Array.isArray(cache.tenants)?cache.tenants:[];
