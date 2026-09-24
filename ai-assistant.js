@@ -379,6 +379,11 @@
           const b=this;b.disabled=true;b.textContent='Creating...';
           try{
             if(typeof createAutomaticReceiptForPayment!=='function')throw new Error('Receipt function is not available.');
+            // The receipts table requires tenant_id. The existing helper is kept as the
+            // single receipt-writing path, but we validate the payment relationship first.
+            if(!pay || !pay.tenant_id)throw new Error('This payment is not linked to a tenant, so MavRent cannot safely issue its receipt.');
+            const tenantForReceipt=cache.tenants.find(function(x){return String(x.id)===String(pay.tenant_id);});
+            if(!tenantForReceipt)throw new Error('The tenant linked to this payment could not be found.');
             const out=await createAutomaticReceiptForPayment(pay);
             if(!out.ok)throw out.error||new Error('Receipt could not be created.');
             aiAudit('Receipt created','confirmed',(out.data&&out.data.receipt_number)||'MavRent receipt');
@@ -519,24 +524,67 @@
     autoBtn.onclick=setCareMode;
     auditBtn.onclick=showAudit;
 
-    if('SpeechRecognition' in window || 'webkitSpeechRecognition' in window){
+    // Voice is progressive enhancement. Safari/iOS may expose SpeechRecognition
+    // but still reject it with service-not-allowed, so do not leave the user with a dead button.
+    let recognition=null;
+    let voiceFinal='';
+    function setupVoice(){
       const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      const recognition=new SR();
-      recognition.lang='en-UG';
-      recognition.interimResults=true;
-      recognition.continuous=false;
-      recognition.onstart=function(){mic.classList.add('listening');mic.textContent='⏹️';addMessage('🎤 Listening… speak your MavRent instruction.','bot');};
-      recognition.onresult=function(e){
-        let finalText='';
-        for(let i=e.resultIndex;i<e.results.length;i++)finalText+=e.results[i][0].transcript;
-        input.value=finalText;
-      };
-      recognition.onerror=function(e){addMessage('🎤 Voice input could not start: '+(e.error||'permission denied')+'. You can still type.','bot');};
-      recognition.onend=function(){mic.classList.remove('listening');mic.textContent='🎤';};
-      mic.onclick=function(){try{if(mic.classList.contains('listening'))recognition.stop();else recognition.start();}catch(e){}};
-    }else{
-      mic.disabled=true;mic.title='Voice input is not supported by this browser.';
+      if(!SR){
+        mic.title='Voice input is not supported by this browser.';
+        mic.onclick=function(){addMessage('🎤 Voice input is not available in this browser. You can still type or use your device keyboard microphone.','bot');};
+        return;
+      }
+      try{
+        recognition=new SR();
+        recognition.lang=(navigator.language||'en-UG').startsWith('en')?'en-UG':(navigator.language||'en');
+        recognition.interimResults=true;
+        recognition.continuous=false;
+        recognition.onstart=function(){
+          voiceFinal='';
+          mic.classList.add('listening');mic.textContent='⏹️';
+          addMessage('🎤 Listening… speak your MavRent instruction.','bot');
+        };
+        recognition.onresult=function(e){
+          let text='';
+          for(let i=e.resultIndex;i<e.results.length;i++){
+            text+=e.results[i][0].transcript;
+            if(e.results[i].isFinal)voiceFinal+=e.results[i][0].transcript;
+          }
+          input.value=(voiceFinal||text).trim();
+        };
+        recognition.onerror=function(e){
+          mic.classList.remove('listening');mic.textContent='🎤';
+          const code=e&&e.error||'unknown';
+          if(code==='service-not-allowed'||code==='not-allowed'){
+            addMessage('🎤 Browser voice recognition is blocked or unavailable here. On iPhone, use the keyboard microphone in the MavRent AI text box; on supported browsers, allow microphone/speech access and try again.','bot');
+          }else if(code==='audio-capture'){
+            addMessage('🎤 No microphone was available. Check your microphone permission and try again.','bot');
+          }else{
+            addMessage('🎤 Voice input could not start: '+code+'. You can still type.','bot');
+          }
+        };
+        recognition.onend=function(){
+          mic.classList.remove('listening');mic.textContent='🎤';
+          if(input.value.trim()&&voiceFinal.trim()){
+            setTimeout(function(){ask();},80);
+          }
+        };
+        mic.onclick=function(){
+          try{
+            if(mic.classList.contains('listening')){recognition.stop();return;}
+            voiceFinal='';
+            recognition.start();
+          }catch(e){
+            addMessage('🎤 Voice input is temporarily unavailable. Use the keyboard microphone or type your request.','bot');
+          }
+        };
+      }catch(e){
+        mic.title='Voice input is unavailable.';
+        mic.onclick=function(){addMessage('🎤 Voice input is unavailable in this browser. You can still type.','bot');};
+      }
     }
+    setupVoice();
 
     document.getElementById('mavAiAddTenant').onclick=function(){showAddTenant();};
     document.getElementById('mavAiReceipt').onclick=function(){
