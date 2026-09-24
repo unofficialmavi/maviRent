@@ -84,37 +84,31 @@ async function getAuthenticatedUser(token) {
 async function getMavRentContext(token, userId) {
   const profileRows = await supabaseGet('profiles', { id: 'eq.' + userId }, token);
   const profile = Array.isArray(profileRows) ? profileRows[0] : null;
+  const role = profile?.role || 'unknown';
 
-  const names = [
-    'properties',
-    'units',
-    'tenants',
-    'rent_records',
-    'payments',
-    'maintenance_requests',
-    'expenses',
-    'receipts'
-  ];
+  // Keep the AI lightweight: fetch only data relevant to the logged-in role.
+  // Supabase RLS remains the security boundary; this only reduces payload and latency.
+  const names = role === 'tenant'
+    ? ['properties','units','tenants','rent_records','payments','maintenance_requests','receipts']
+    : ['properties','units','tenants','rent_records','payments','maintenance_requests','expenses','receipts'];
 
   const context = {
     current_user: {
       id: userId,
-      role: profile?.role || 'unknown',
+      role,
       full_name: profile?.full_name || null
     },
     data: {}
   };
 
-  for (const name of names) {
+  const results = await Promise.all(names.map(async name => {
     try {
-      context.data[name] = await supabaseGet(name, null, token);
+      return [name, await supabaseGet(name, null, token)];
     } catch (e) {
-      context.data[name] = {
-        unavailable: true,
-        reason: e.message
-      };
+      return [name, {unavailable:true, reason:e.message}];
     }
-  }
+  }));
+  for (const [name, value] of results) context.data[name] = value;
 
   return context;
 }
@@ -191,6 +185,72 @@ function answerDirectly(question, context) {
   const properties = Array.isArray(d.properties) ? d.properties : [];
   const maintenance = Array.isArray(d.maintenance_requests)
     ? d.maintenance_requests : [];
+
+  // Tenant-first answers stay deterministic and never need Gemini.
+  if (context.current_user?.role === 'tenant') {
+    const myTenant = tenants.find(t =>
+      String(t.profile_id || '') === String(context.current_user.id)
+    ) || tenants[0];
+
+    const myRecords = myTenant
+      ? records.filter(r => String(r.tenant_id) === String(myTenant.id))
+      : [];
+
+    const myPayments = (Array.isArray(d.payments) ? d.payments : [])
+      .filter(p => !myTenant || String(p.tenant_id) === String(myTenant.id));
+
+    const myMaintenance = maintenance.filter(r =>
+      !myTenant || String(r.tenant_id) === String(myTenant.id)
+    );
+
+    if (/\b(my|my current|my outstanding|my rent)\b/.test(q) &&
+        /\b(balance|owe|outstanding|rent)\b/.test(q)) {
+      const balance = myRecords.reduce((sum,r)=>sum+rentBalance(r),0);
+      const next = myRecords
+        .filter(r=>!isPaid(r))
+        .sort((a,b)=>String(a.due_date||'').localeCompare(String(b.due_date||'')))[0];
+      return '💰 Your current MavRent balance is ' + money(balance) +
+        (next?.due_date ? '. Next outstanding due date: ' + next.due_date + '.' : '.');
+    }
+
+    if (/\b(when|what|date).*(rent|payment).*(due|deadline)|\bwhen is my rent due\b/.test(q)) {
+      const next = myRecords
+        .filter(r=>!isPaid(r))
+        .sort((a,b)=>String(a.due_date||'').localeCompare(String(b.due_date||'')))[0];
+      return next ? '📅 Your next outstanding rent is due on ' + (next.due_date||'a date not recorded') +
+        ' and the balance is ' + money(rentBalance(next)) + '.' :
+        '✅ I could not find an outstanding rent record for you.';
+    }
+
+    if (/\b(my|show my).*(payment|payments|payment history)\b/.test(q)) {
+      if(!myPayments.length)return '💳 No payment records were found for your account.';
+      const lines=myPayments.slice(0,30).map(p=>'• '+money(p.amount)+' — '+(p.payment_date||p.created_at||'date not recorded')+' — '+(p.status||'pending'));
+      return '💳 Your recent payments:\n\n'+lines.join('\n');
+    }
+
+    if (/\b(my|show my).*(maintenance|repair|repairs)\b/.test(q)) {
+      if(!myMaintenance.length)return '🔧 You have no maintenance requests in MavRent.';
+      const lines=myMaintenance.slice(0,20).map(r=>'• '+(r.title||r.subject||'Maintenance')+' — '+(r.status||'pending')+(r.priority?' — '+r.priority:''));
+      return '🔧 Your maintenance requests:\n\n'+lines.join('\n');
+    }
+
+    if (/\b(my|my latest|show my).*(receipt|receipts)\b/.test(q)) {
+      const mine=(Array.isArray(d.receipts)?d.receipts:[]).filter(r=>{
+        const p=myPayments.find(x=>String(x.id)===String(r.payment_id));
+        return !!p;
+      });
+      if(!mine.length)return '🧾 No receipt has been issued for your payments yet.';
+      const r=mine[0];
+      return '🧾 Latest receipt: '+(r.receipt_number||'MavRent receipt')+
+        (r.issued_at?' — issued '+new Date(r.issued_at).toLocaleDateString():'')+'.';
+    }
+
+    if (/\b(my|my)\s*(tenant code|code)\b/.test(q)) {
+      return myTenant?.tenant_code
+        ? '🔑 Your tenant code is '+myTenant.tenant_code+'.'
+        : '🔑 I could not find a tenant code on your active MavRent assignment.';
+    }
+  }
 
   // This answer never calls an AI API.
   if (
