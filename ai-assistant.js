@@ -146,19 +146,22 @@
       addMessage('🧾 AI ACTIVITY LOG\n\n'+text,'bot');
     }
 
-    function setCareMode(){
+    async function setCareMode(){
       if(!landlordOnly()){addMessage('Care Mode is a landlord control. Your tenant AI remains personal and does not expose landlord controls.','bot');return;}
-      const key='mavrent_care_mode_'+user.id;
-      const current=localStorage.getItem(key)==='on';
-      if(current){
-        localStorage.removeItem(key);
-        aiAudit('Care Mode','confirmed','Disabled');
-        addMessage('⚪ MavRent Care Mode is now OFF.','bot');
-      }else{
-        localStorage.setItem(key,'on');
-        aiAudit('Care Mode','confirmed','Enabled with approval boundaries');
-        addMessage('🟢 MavRent Care Mode is ON. Routine reminders and monitoring may be prepared, but financial, tenant, property and irreversible changes still require your confirmation.','bot');
-      }
+      try{
+        const token=await session();
+        const current=await fetch('/api/care-mode',{method:'GET',headers:{'Authorization':'Bearer '+token}});
+        const currentData=await current.json().catch(function(){return {};});
+        if(!current.ok)throw new Error(currentData.error||'Could not read Care Mode.');
+        const enabled=currentData.enabled===true;
+        const next=!enabled;
+        const r=await fetch('/api/care-mode',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({enabled:next,settings:currentData.settings||{}})});
+        const data=await r.json().catch(function(){return {};});
+        if(!r.ok)throw new Error(data.error||'Could not update Care Mode.');
+        addMessage(next
+          ? '🟢 MavRent Care Mode is ON. Routine monitoring and reminder tasks can be prepared automatically. Financial, tenant, property and irreversible changes still require your confirmation.'
+          : '⚪ MavRent Care Mode is now OFF.','bot');
+      }catch(e){addMessage('Care Mode error: '+(e.message||e),'bot');}
     }
 
     function operationsCenter(){
