@@ -134,16 +134,28 @@
       }catch(e){}
     }
 
-    function showAudit(){
+    async function showAudit(){
+      try{
+        const client=currentClient() || await ensureSupabase();
+        const r=await client.from('ai_audit_log').select('*').order('created_at',{ascending:false}).limit(30);
+        if(!r.error&&Array.isArray(r.data)&&r.data.length){
+          const text=r.data.map(function(x){
+            const d=new Date(x.created_at);
+            const icon=x.status==='confirmed'||x.status==='executed'?'✅':(x.status==='failed'||x.status==='denied'?'❌':'🟡');
+            const details=x.details&&typeof x.details==='object'?JSON.stringify(x.details):String(x.details||'');
+            return d.toLocaleString()+'\n'+icon+' '+x.action+' — '+x.status+(details?'\n'+details:'');
+          }).join('\n\n');
+          addMessage('🧾 SERVER AI AUDIT LOG\n\n'+text,'bot');
+          return;
+        }
+      }catch(e){console.warn('Server AI audit log:',e);}
       const key='mavrent_ai_audit_'+(user&&user.id||'session');
       let rows=[];
       try{rows=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
-      if(!rows.length){addMessage('🧾 No AI activity has been recorded on this device yet.','bot');return;}
-      const text=rows.slice(0,20).map(x=>{
-        const d=new Date(x.time);
-        return d.toLocaleString()+'\n'+(x.status==='confirmed'?'✅':'🟡')+' '+x.action+(x.details?'\n'+x.details:'');
-      }).join('\n\n');
-      addMessage('🧾 AI ACTIVITY LOG\n\n'+text,'bot');
+      if(!rows.length){addMessage('🧾 No AI activity has been recorded yet.','bot');return;}
+      addMessage('🧾 LOCAL AI ACTIVITY\n\n'+rows.slice(0,20).map(function(x){
+        return new Date(x.time).toLocaleString()+'\n'+(x.status==='confirmed'?'✅':'🟡')+' '+x.action+(x.details?'\n'+x.details:'');
+      }).join('\n\n'),'bot');
     }
 
     async function setCareMode(){
