@@ -12,7 +12,7 @@ async function insert(path,body){return sb(path,{method:'POST',headers:{Prefer:'
 module.exports=async(req,res)=>{
  try{
   if(!SERVICE_KEY)return res.status(500).json({error:'SUPABASE_SERVICE_ROLE_KEY is not configured.'});
-  await sb('/rest/v1/rpc/update_overdue_rent_status',{method:'POST',body:{}});
+  // Overdue status is evaluated from due_date/balance below; no optional RPC is required.
   const modes=await sb('/rest/v1/ai_care_mode?select=user_id,enabled,settings&enabled=eq.true&limit=500');
   let prepared=0;
   for(const mode of modes||[]){
