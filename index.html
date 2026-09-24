@@ -3836,7 +3836,11 @@ async function createAutomaticReceiptForPayment(payment){
  }
  const compact=String(payment.id).replace(/-/g,'').slice(0,10).toUpperCase();
  const receiptNumber='MVR-RCPT-'+compact;
- const r=await sb.from('receipts').insert({landlord_id:user.id,payment_id:payment.id,receipt_number:receiptNumber,issued_at:new Date().toISOString()}).select('*').single();
+ const tenantId=payment.tenant_id||null;
+ if(!tenantId)return {ok:false,error:new Error('This payment is not linked to a tenant.')};
+ const tenant=cache.tenants.find(t=>String(t.id)===String(tenantId));
+ if(!tenant)return {ok:false,error:new Error('The tenant linked to this payment could not be found.')};
+ const r=await sb.from('receipts').insert({landlord_id:user.id,tenant_id:tenantId,payment_id:payment.id,receipt_number:receiptNumber,issued_at:new Date().toISOString()}).select('*').single();
  if(r.error)return {ok:false,error:r.error};
  cache.receipts.push(r.data);
  return {ok:true,data:r.data,created:true};
