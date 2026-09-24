@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/care-scheduler",
-      "schedule": "15 8 * * *"
+      "schedule": "15 5 * * *"
     }
   ]
 }
