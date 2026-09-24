@@ -251,6 +251,7 @@
         'Ask me what needs attention and I can drill into the relevant records without flooding the dashboard.'
       ];
       addMessage(lines.join('\n'),'bot');
+      careTasksCenter();
     }
 
     function parsePaymentCommand(s){
