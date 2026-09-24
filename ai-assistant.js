@@ -218,12 +218,16 @@
       p.querySelector('#aiPayConfirm').onclick=async function(){
         const b=this;b.disabled=true;b.textContent='Recording...';
         try{
-          const rid=(rows.find(r=>Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0))>0)||{}).id||null;
-          const r=await sb.from('payments').insert({landlord_id:user.id,tenant_id:x.t.id,rent_record_id:rid,amount:Number(action.amount),payment_date:action.date,payment_method:'other',status:'confirmed',notes:'Recorded by MavRent AI'}).select('*').single();
-          if(r.error)throw r.error;
-          if(typeof applyPaymentToRent==='function')await applyPaymentToRent(r.data);
+          const token=await session();
+          const server=await fetch('/api/ai-action',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({
+            action:'record_payment',confirmed:true,tenant_id:x.t.id,amount:Number(action.amount),payment_date:action.date,
+            payment_method:'other',notes:'Recorded by MavRent AI Permission Engine'
+          })});
+          const data=await server.json().catch(function(){return {};});
+          if(!server.ok)throw new Error(data.error||'Server permission check failed.');
+          const result=data.result||{};
           aiAudit('Payment recorded','confirmed',(x.p?.full_name||'Tenant')+' • '+moneyLocal(action.amount));
-          p.remove();addMessage('✅ Payment recorded for '+(x.p?.full_name||'the tenant')+'. Current balance before this payment was '+moneyLocal(balance)+'.','bot');
+          p.remove();addMessage('✅ Payment recorded for '+(x.p?.full_name||'the tenant')+'. Current balance before this payment was '+moneyLocal(balance)+'. Receipt '+(result.receipt&&result.receipt.receipt_number||'created')+' was generated.','bot');
           if(typeof refresh==='function')await refresh();
           if(typeof show==='function')await show('payments',false);
         }catch(e){b.disabled=false;b.textContent='✓ Record payment';addMessage('Payment failed: '+(e.message||e),'bot');aiAudit('Payment','failed',e.message||e);}
@@ -331,14 +335,13 @@
       p.querySelector('#aiFinalConfirm').onclick=async function(){
         const b=this;b.disabled=true;b.textContent='Assigning...';
         try{
-          const r=await sb.from('tenants').insert({landlord_id:user.id,profile_id:profileId,unit_id:unitId,rent_amount:rent,deposit_amount:deposit,rent_due_day:due,move_in_date:move,status:'active'}).select('*').single();
-          if(r.error)throw r.error;
-          const u=await sb.from('units').update({status:'occupied'}).eq('id',unitId).eq('landlord_id',user.id);
-          if(u.error)throw u.error;
-          if(typeof generateRentForTenant==='function'){
-            const gen=await generateRentForTenant(r.data.id,Math.max(12,advance));
-            if(!gen.ok)throw new Error(gen.error&&gen.error.message||'Rent schedule generation failed.');
-          }
+          const token=await session();
+          const server=await fetch('/api/ai-action',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({
+            action:'assign_tenant',confirmed:true,profile_id:profileId,unit_id:unitId,monthly_rent:rent,deposit_amount:deposit,rent_due_day:due,move_in_date:move,
+            details:{advance_months:advance}
+          })});
+          const data=await server.json().catch(function(){return {};});
+          if(!server.ok)throw new Error(data.error||'Server permission check failed.');
           p.remove();
           aiAudit('Tenant assignment','confirmed',(prof&& (prof.full_name||prof.email)||'Tenant')+' → '+(unit&&unit.unit_number||'Unit'));
           addMessage('✅ Tenant assigned successfully. The unit is now occupied and the rent schedule has been prepared.','bot');
@@ -384,10 +387,13 @@
             if(!pay || !pay.tenant_id)throw new Error('This payment is not linked to a tenant, so MavRent cannot safely issue its receipt.');
             const tenantForReceipt=cache.tenants.find(function(x){return String(x.id)===String(pay.tenant_id);});
             if(!tenantForReceipt)throw new Error('The tenant linked to this payment could not be found.');
-            const out=await createAutomaticReceiptForPayment(pay);
-            if(!out.ok)throw out.error||new Error('Receipt could not be created.');
-            aiAudit('Receipt created','confirmed',(out.data&&out.data.receipt_number)||'MavRent receipt');
-            p.remove();addMessage('🧾 Receipt created: '+(out.data&&out.data.receipt_number||'MavRent receipt'),'bot');
+            const token=await session();
+            const server=await fetch('/api/ai-action',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:'create_receipt',confirmed:true,payment_id:pay.id})});
+            const data=await server.json().catch(function(){return {};});
+            if(!server.ok)throw new Error(data.error||'Server permission check failed.');
+            const out=data.result||{};
+            aiAudit('Receipt created','confirmed',(out.receipt&&out.receipt.receipt_number)||'MavRent receipt');
+            p.remove();addMessage('🧾 Receipt created: '+(out.receipt&&out.receipt.receipt_number||'MavRent receipt'),'bot');
             if(typeof refresh==='function')await refresh();
           }catch(e){b.disabled=false;b.textContent='✓ Create receipt';addMessage('Receipt failed: '+(e.message||e),'bot');}
         };
