@@ -28,7 +28,7 @@ async function userFromToken(token){
 }
 
 async function profile(userId){
-  const rows=await sb('/rest/v1/profiles?select=id,full_name,role& id=eq.'+encodeURIComponent(userId).replace('%20',''),{});
+  const rows=await sb('/rest/v1/profiles?select=id,full_name,role&id=eq.'+encodeURIComponent(userId),{});
   return Array.isArray(rows)?rows[0]:null;
 }
 
