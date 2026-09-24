@@ -57,13 +57,18 @@
           '</div>'+
         '</div>'+
         '<div class="mavAiHint">Try: “Who is overdue?” or “Assign Sarah to Room B12, rent 450000, deposit 450000.”</div>'+
-        '<div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask MavRent AI..." maxlength="4000"></textarea><button class="mavAiSend" id="mavAiSend" type="button">Send</button></div>'+
+        '<div class="mavAiTools"><button class="mavAiTool" id="mavAiOps" type="button">🧠 Operations Center</button><button class="mavAiTool" id="mavAiAuto" type="button">🟢 Care Mode</button><button class="mavAiTool" id="mavAiAudit" type="button">🧾 AI activity</button></div>'+
+        '<div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask MavRent AI..." maxlength="4000"></textarea><button class="mavAiMic" id="mavAiMic" type="button" title="Talk to MavRent AI">🎤</button><button class="mavAiSend" id="mavAiSend" type="button">Send</button></div>'+
       '</div>';
     document.body.appendChild(modal);
 
     const messages=document.getElementById('mavAiMessages');
     const input=document.getElementById('mavAiInput');
     const send=document.getElementById('mavAiSend');
+    const mic=document.getElementById('mavAiMic');
+    const opsBtn=document.getElementById('mavAiOps');
+    const autoBtn=document.getElementById('mavAiAuto');
+    const auditBtn=document.getElementById('mavAiAudit');
 
     const close=function(){modal.classList.remove('open');};
     button.onclick=function(){modal.classList.add('open');};
@@ -113,11 +118,116 @@
     }
 
     function landlordOnly(){
-      return typeof role==='undefined' || role==='landlord';
+      return typeof role!=='undefined' && role==='landlord';
     }
 
     function tenantOnly(){
-      return typeof role==='undefined' || role==='tenant';
+      return typeof role!=='undefined' && role==='tenant';
+    }
+
+    function aiAudit(action,status,details){
+      try{
+        const key='mavrent_ai_audit_'+(user&&user.id||'session');
+        const rows=JSON.parse(localStorage.getItem(key)||'[]');
+        rows.unshift({time:new Date().toISOString(),action,status,details:String(details||'')});
+        localStorage.setItem(key,JSON.stringify(rows.slice(0,100)));
+      }catch(e){}
+    }
+
+    function showAudit(){
+      const key='mavrent_ai_audit_'+(user&&user.id||'session');
+      let rows=[];
+      try{rows=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+      if(!rows.length){addMessage('🧾 No AI activity has been recorded on this device yet.','bot');return;}
+      const text=rows.slice(0,20).map(x=>{
+        const d=new Date(x.time);
+        return d.toLocaleString()+'\n'+(x.status==='confirmed'?'✅':'🟡')+' '+x.action+(x.details?'\n'+x.details:'');
+      }).join('\n\n');
+      addMessage('🧾 AI ACTIVITY LOG\n\n'+text,'bot');
+    }
+
+    function setCareMode(){
+      if(!landlordOnly()){addMessage('Care Mode is a landlord control. Your tenant AI remains personal and does not expose landlord controls.','bot');return;}
+      const key='mavrent_care_mode_'+user.id;
+      const current=localStorage.getItem(key)==='on';
+      if(current){
+        localStorage.removeItem(key);
+        aiAudit('Care Mode','confirmed','Disabled');
+        addMessage('⚪ MavRent Care Mode is now OFF.','bot');
+      }else{
+        localStorage.setItem(key,'on');
+        aiAudit('Care Mode','confirmed','Enabled with approval boundaries');
+        addMessage('🟢 MavRent Care Mode is ON. Routine reminders and monitoring may be prepared, but financial, tenant, property and irreversible changes still require your confirmation.','bot');
+      }
+    }
+
+    function operationsCenter(){
+      if(!landlordOnly()){input.value='Give me my rent, payment and maintenance summary.';ask();return;}
+      const tenants=Array.isArray(cache.tenants)?cache.tenants:[];
+      const records=Array.isArray(cache.rent_records)?cache.rent_records:[];
+      const maint=Array.isArray(cache.maintenance_requests)?cache.maintenance_requests:[];
+      const units=Array.isArray(cache.units)?cache.units:[];
+      const overdue=records.filter(r=>{
+        const b=Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0));
+        const d=r.due_date?new Date(r.due_date+'T23:59:59').getTime():0;
+        return b>0&&(String(r.status||'').toLowerCase()==='overdue'||(d&&d<Date.now()));
+      });
+      const open=maint.filter(r=>!['completed','resolved','cancelled','closed'].includes(String(r.status||'').toLowerCase()));
+      const vacant=units.filter(u=>String(u.status||'').toLowerCase()!=='occupied');
+      const total=overdue.reduce((a,r)=>a+Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0)),0);
+      const lines=[
+        '🧠 MAVRENT OPERATIONS CENTER',
+        '',
+        '🔴 Overdue: '+overdue.length+' — '+moneyLocal(total),
+        '🔧 Open maintenance: '+open.length,
+        '🏠 Vacant units: '+vacant.length,
+        '👥 Active tenant records: '+tenants.filter(t=>String(t.status||'active')==='active').length,
+        '',
+        'Ask me what needs attention and I can drill into the relevant records without flooding the dashboard.'
+      ];
+      addMessage(lines.join('\n'),'bot');
+    }
+
+    function parsePaymentCommand(s){
+      const l=String(s||'').toLowerCase();
+      if(!/\b(has paid|paid|payment of|record.*payment)\b/.test(l))return null;
+      const amountMatch=s.match(/(?:ugx\s*)?([0-9][0-9,\.]*)(?:\s*(?:ugx|shs))?/i);
+      const amount=amountMatch?Number(amountMatch[1].replace(/[,.]/g,'')):0;
+      const nameMatch=s.match(/(?:tenant\s+)?([A-Za-z][A-Za-z .'-]{1,50}?)(?:\s+(?:has\s+paid|paid|made\s+a\s+payment)|\s+paid\s+)/i);
+      const name=(nameMatch&&nameMatch[1]||'').trim();
+      if(!name||!amount)return null;
+      return {type:'record_payment',tenant_name:name,amount,date:new Date().toISOString().slice(0,10)};
+    }
+
+    async function showPaymentConfirmation(action){
+      if(!landlordOnly())return;
+      const tenants=Array.isArray(cache.tenants)?cache.tenants:[];
+      const profiles=Array.isArray(cache.registeredTenants)?cache.registeredTenants:[];
+      const wanted=String(action.tenant_name||'').toLowerCase();
+      const matches=tenants.map(t=>({t,p:profiles.find(p=>p.id===t.profile_id)})).filter(x=>{
+        const n=String(x.p?.full_name||x.p?.email||'').toLowerCase();
+        return n.includes(wanted)||wanted.includes(n);
+      });
+      if(!matches.length){addMessage('I could not find an active MavRent tenant matching “'+action.tenant_name+'”.','bot');return;}
+      const x=matches[0], rows=(cache.rent_records||[]).filter(r=>r.tenant_id===x.t.id);
+      const balance=rows.reduce((a,r)=>a+Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0)),0);
+      const unit=cache.units.find(u=>u.id===x.t.unit_id);
+      const p=panel('<h3>💳 Confirm payment</h3><div class="mavAiSummary"><b>Tenant:</b> '+escLocal(x.p?.full_name||'Tenant')+'<br><b>Unit:</b> '+escLocal(unit?.unit_number||'—')+'<br><b>Amount:</b> '+moneyLocal(action.amount)+'<br><b>Date:</b> '+escLocal(action.date)+'<br><b>Current balance:</b> '+moneyLocal(balance)+'<br><br>Payment method is not specified. MavRent will record it as “other” only if you confirm.</div><div class="mavAiConfirm"><button class="ok" id="aiPayConfirm">✓ Record payment</button><button class="cancel" id="aiPayCancel">Cancel</button></div>');
+      aiAudit('Payment prepared','prepared',(x.p?.full_name||'Tenant')+' • '+moneyLocal(action.amount));
+      p.querySelector('#aiPayCancel').onclick=function(){p.remove();aiAudit('Payment','cancelled','Landlord cancelled before recording');};
+      p.querySelector('#aiPayConfirm').onclick=async function(){
+        const b=this;b.disabled=true;b.textContent='Recording...';
+        try{
+          const rid=(rows.find(r=>Math.max(0,Number(r.amount_due||0)-Number(r.amount_paid||0))>0)||{}).id||null;
+          const r=await sb.from('payments').insert({landlord_id:user.id,tenant_id:x.t.id,rent_record_id:rid,amount:Number(action.amount),payment_date:action.date,payment_method:'other',status:'confirmed',notes:'Recorded by MavRent AI'}).select('*').single();
+          if(r.error)throw r.error;
+          if(typeof applyPaymentToRent==='function')await applyPaymentToRent(r.data);
+          aiAudit('Payment recorded','confirmed',(x.p?.full_name||'Tenant')+' • '+moneyLocal(action.amount));
+          p.remove();addMessage('✅ Payment recorded for '+(x.p?.full_name||'the tenant')+'. Current balance before this payment was '+moneyLocal(balance)+'.','bot');
+          if(typeof refresh==='function')await refresh();
+          if(typeof show==='function')await show('payments',false);
+        }catch(e){b.disabled=false;b.textContent='✓ Record payment';addMessage('Payment failed: '+(e.message||e),'bot');aiAudit('Payment','failed',e.message||e);}
+      };
     }
 
     function currentClient(){
@@ -230,6 +340,7 @@
             if(!gen.ok)throw new Error(gen.error&&gen.error.message||'Rent schedule generation failed.');
           }
           p.remove();
+          aiAudit('Tenant assignment','confirmed',(prof&& (prof.full_name||prof.email)||'Tenant')+' → '+(unit&&unit.unit_number||'Unit'));
           addMessage('✅ Tenant assigned successfully. The unit is now occupied and the rent schedule has been prepared.','bot');
           if(typeof refresh==='function')await refresh();
           if(typeof show==='function')await show('tenants',false);
@@ -270,6 +381,7 @@
             if(typeof createAutomaticReceiptForPayment!=='function')throw new Error('Receipt function is not available.');
             const out=await createAutomaticReceiptForPayment(pay);
             if(!out.ok)throw out.error||new Error('Receipt could not be created.');
+            aiAudit('Receipt created','confirmed',(out.data&&out.data.receipt_number)||'MavRent receipt');
             p.remove();addMessage('🧾 Receipt created: '+(out.data&&out.data.receipt_number||'MavRent receipt'),'bot');
             if(typeof refresh==='function')await refresh();
           }catch(e){b.disabled=false;b.textContent='✓ Create receipt';addMessage('Receipt failed: '+(e.message||e),'bot');}
@@ -359,6 +471,12 @@
     async function ask(){
       const question=input.value.trim();if(!question)return;
       addMessage(question,'user');input.value='';
+      const paymentAction=parsePaymentCommand(question);
+      if(paymentAction){
+        addMessage('I heard a payment instruction. I found: '+paymentAction.tenant_name+' • '+moneyLocal(paymentAction.amount)+' • '+paymentAction.date+'. I will not record it until you confirm.','bot');
+        await showPaymentConfirmation(paymentAction);
+        return;
+      }
       const action=detectLocalAction(question);
       if(action){
         if(action.type==='assign_tenant'){addMessage('I understood this as a tenant assignment. I will prepare it for your final confirmation.','bot');await showAddTenant(action);return;}
@@ -377,7 +495,7 @@
         const data=await r.json().catch(function(){return {};});
         if(!r.ok)throw new Error(data.error||'MavRent AI request failed.');
         addMessage(data.answer||'No answer returned.','bot');
-      }catch(e){addMessage('AI error: '+(e.message||'Unknown error'),'bot');}
+      }catch(e){addMessage('AI error: '+(e.message||'Unknown error'),'bot');aiAudit('AI question','failed',e.message||'Unknown error');}
       finally{send.disabled=false;send.textContent='Send';input.focus();}
     }
 
@@ -395,6 +513,29 @@
         if(brief)brief.textContent='📋 Daily brief';
         if(contact)contact.textContent='📲 Contact overdue';
       }
+    }
+
+    opsBtn.onclick=operationsCenter;
+    autoBtn.onclick=setCareMode;
+    auditBtn.onclick=showAudit;
+
+    if('SpeechRecognition' in window || 'webkitSpeechRecognition' in window){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      const recognition=new SR();
+      recognition.lang='en-UG';
+      recognition.interimResults=true;
+      recognition.continuous=false;
+      recognition.onstart=function(){mic.classList.add('listening');mic.textContent='⏹️';addMessage('🎤 Listening… speak your MavRent instruction.','bot');};
+      recognition.onresult=function(e){
+        let finalText='';
+        for(let i=e.resultIndex;i<e.results.length;i++)finalText+=e.results[i][0].transcript;
+        input.value=finalText;
+      };
+      recognition.onerror=function(e){addMessage('🎤 Voice input could not start: '+(e.error||'permission denied')+'. You can still type.','bot');};
+      recognition.onend=function(){mic.classList.remove('listening');mic.textContent='🎤';};
+      mic.onclick=function(){try{if(mic.classList.contains('listening'))recognition.stop();else recognition.start();}catch(e){}};
+    }else{
+      mic.disabled=true;mic.title='Voice input is not supported by this browser.';
     }
 
     document.getElementById('mavAiAddTenant').onclick=function(){showAddTenant();};
