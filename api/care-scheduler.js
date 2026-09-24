@@ -8,7 +8,7 @@ async function sb(path,opts={}){
  const t=await r.text();let d=null;try{d=t?JSON.parse(t):null}catch{d=t}
  if(!r.ok)throw new Error(d?.message||d?.hint||d?.error||('Supabase '+r.status));return d;
 }
-async function insert(path,body){return sb(path,{method:'POST',headers:{Prefer:'return=minimal'},body});}
+async function insert(path,body){return sb(path,{method:'POST',headers:{Prefer:'return=representation'},body});}
 module.exports=async(req,res)=>{
  try{
   if(!SERVICE_KEY)return res.status(500).json({error:'SUPABASE_SERVICE_ROLE_KEY is not configured.'});
