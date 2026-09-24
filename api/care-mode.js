@@ -8,7 +8,7 @@ async function sb(path,opts={}){const r=await fetch(SUPABASE_URL+path,{method:op
 module.exports=async(req,res)=>{
  try{
   const token=String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');const u=await auth(token);
-  const prof=(await sb('/rest/v1/profiles?select=id,role& id=eq.'+encodeURIComponent(u.id))).find(x=>x.id===u.id);
+  const prof=(await sb('/rest/v1/profiles?select=id,role&id=eq.'+encodeURIComponent(u.id))).find(x=>x.id===u.id);
   if(!prof||prof.role!=='landlord')return res.status(403).json({error:'Care Mode is landlord-only.'});
   if(req.method==='GET'){const rows=await sb('/rest/v1/ai_care_mode?select=*&user_id=eq.'+encodeURIComponent(u.id)+'&limit=1');return res.status(200).json({enabled:!!rows[0]?.enabled,settings:rows[0]?.settings||{}});}
   if(req.method!=='POST')return res.status(405).json({error:'GET or POST required'});
