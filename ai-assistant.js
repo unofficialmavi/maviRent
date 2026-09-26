@@ -1288,6 +1288,9 @@
     setInterval(syncVisibility,500);
   }
 
+  // Expose the launcher before startup so the production watchdog can retry Mav AI.
+  window.MavAIBoot = boot;
+
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
 })();
