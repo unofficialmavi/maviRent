@@ -1,4 +1,4 @@
-/* MavRent AI Assistant V3 — visible AI + confirmed actions */
+/* Mav AI Assistant V3 — visible AI + confirmed actions */
 (function(){
   const STYLE = `
     #mavAiButton{position:fixed;right:18px;bottom:88px;z-index:260;border:0;border-radius:999px;padding:13px 17px;background:linear-gradient(135deg,#087cff,#00b8ff);color:#fff;font-weight:900;box-shadow:0 14px 35px #087cff55;display:none}
@@ -39,26 +39,26 @@
     const button=document.createElement('button');
     button.id='mavAiButton';
     button.type='button';
-    button.textContent='✨ MavRent AI';
+    button.textContent='✨ Mav AI';
     document.body.appendChild(button);
 
     const modal=document.createElement('div');
     modal.id='mavAiModal';
     modal.innerHTML=
       '<div class="mavAiBox">'+
-        '<div class="mavAiHead"><div><strong>✨ MavRent AI</strong><small>Ask questions, prepare actions, confirm important changes</small></div><button class="mavAiClose" type="button">✕</button></div>'+
+        '<div class="mavAiHead"><div><strong>✨ Mav AI</strong><small>Ask questions, prepare actions, confirm important changes</small></div><button class="mavAiClose" type="button">✕</button></div>'+
         '<div class="mavAiMessages" id="mavAiMessages">'+
-          '<div class="mavAiMsg bot">Hi. I am MavRent AI. I can read your rental data, answer questions, and prepare management actions. Important changes always require your final confirmation.</div>'+
+          '<div class="mavAiMsg bot">Hi. I am Mav AI. I can read your rental data, answer questions, and prepare management actions. Important changes always require your final confirmation.</div>'+
           '<div class="mavAiActions" id="mavAiActions">'+
             '<button class="mavAiAction" id="mavAiAddTenant">👤 Assign new tenant</button>'+
-            '<button class="mavAiAction" id="mavAiReceipt">🧾 Create receipt</button>'+
+            '<button class="mavAiAction" id="mavAiReceipt">🧾 Create receipt</button><button class="mavAiAction" id="mavAiPrn">💳 Payment PRN</button>'+
             '<button class="mavAiAction" id="mavAiOverdue">🔴 Show overdue</button>'+
             '<button class="mavAiAction" id="mavAiMaintenance">🔧 Open maintenance</button><button class="mavAiAction" id="mavAiBrief">📋 Daily brief</button><button class="mavAiAction" id="mavAiContact">📲 Contact overdue</button><button class="mavAiAction" id="mavAiPhone">📱 My phone number</button>'+
           '</div>'+
         '</div>'+
         '<div class="mavAiHint">Try: “Who is overdue?” or “Assign Sarah to Room B12, rent 450000, deposit 450000.”</div>'+
         '<div class="mavAiTools"><button class="mavAiTool" id="mavAiOps" type="button">🧠 Operations Center</button><button class="mavAiTool" id="mavAiAuto" type="button">🟢 Care Mode</button><button class="mavAiTool" id="mavAiAudit" type="button">🧾 AI activity</button></div>'+
-        '<div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask MavRent AI..." maxlength="4000"></textarea><button class="mavAiMic" id="mavAiMic" type="button" title="Talk to MavRent AI">🎤</button><button class="mavAiSend" id="mavAiSend" type="button">Send</button></div>'+
+        '<div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask Mav AI..." maxlength="4000"></textarea><button class="mavAiMic" id="mavAiMic" type="button" title="Talk to Mav AI">🎤</button><button class="mavAiSend" id="mavAiSend" type="button">Send</button></div>'+
       '</div>';
     document.body.appendChild(modal);
 
@@ -69,6 +69,7 @@
     const opsBtn=document.getElementById('mavAiOps');
     const autoBtn=document.getElementById('mavAiAuto');
     const auditBtn=document.getElementById('mavAiAudit');
+    const prnBtn=document.getElementById('mavAiPrn');
 
     const close=function(){modal.classList.remove('open');};
     button.onclick=function(){modal.classList.add('open');};
@@ -287,7 +288,7 @@
           const token=await session();
           const server=await fetch('/api/ai-action',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({
             action:'record_payment',confirmed:true,tenant_id:x.t.id,amount:Number(action.amount),payment_date:action.date,
-            payment_method:'other',notes:'Recorded by MavRent AI Permission Engine'
+            payment_method:'other',notes:'Recorded by Mav AI Permission Engine'
           })});
           const data=await server.json().catch(function(){return {};});
           if(!server.ok)throw new Error(data.error||'Server permission check failed.');
@@ -523,6 +524,54 @@
       panel(html);
     }
 
+    async function paymentPrnCenter(){
+      if(typeof role!=='undefined'&&role!=='tenant'){
+        addMessage('💳 Payment PRNs are currently generated from the tenant side. As a landlord, you can verify provider payments through the secure payment workflow.','bot');
+        return;
+      }
+      const p=panel('<h3>💳 Mav AI Payment PRN</h3><div class="mavAiSummary">Generate a secure payment reference, pay using your supported provider, then submit the PRN and transaction reference. A PRN by itself never proves that money was paid.</div><div class="mavAiConfirm"><button class="ok" id="mavPrnCreate">Generate PRN</button><button class="cancel" id="mavPrnStatus">Check PRN status</button></div>');
+      p.querySelector('#mavPrnCreate').onclick=async function(){
+        const b=this;b.disabled=true;b.textContent='Generating...';
+        try{
+          const token=await session();
+          const r=await fetch('/api/payment-prn',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:'create'})});
+          const d=await r.json().catch(function(){return {};});
+          if(!r.ok)throw new Error(d.error||'Could not generate a PRN.');
+          const x=d.payment_request;
+          p.innerHTML='<h3>💳 Payment PRN generated</h3><div class="mavAiSummary"><b>PRN:</b> '+escLocal(x.prn)+'<br><b>Amount:</b> '+moneyLocal(x.amount)+'<br><b>Expires:</b> '+escLocal(new Date(x.expires_at).toLocaleString())+'<br><br>Use this PRN when paying through the supported payment provider. After payment, return here and submit the PRN plus the provider transaction reference.</div><div class="mavAiConfirm"><button class="ok" id="mavPrnSubmit">Submit after payment</button><button class="cancel" id="mavPrnDone">Done</button></div>';
+          p.querySelector('#mavPrnDone').onclick=function(){p.remove();};
+          p.querySelector('#mavPrnSubmit').onclick=function(){
+            p.innerHTML='<h3>📨 Submit payment</h3><label>PRN</label><input id="mavPrnInput" value="'+escLocal(x.prn)+'"><label>Provider transaction reference</label><input id="mavTxInput" placeholder="e.g. transaction ID"><div class="mavAiConfirm"><button class="ok" id="mavPrnSend">Submit for verification</button><button class="cancel" id="mavPrnCancel">Cancel</button></div>';
+            p.querySelector('#mavPrnCancel').onclick=function(){p.remove();};
+            p.querySelector('#mavPrnSend').onclick=async function(){
+              const s=this;const prn=p.querySelector('#mavPrnInput').value.trim();const tx=p.querySelector('#mavTxInput').value.trim();
+              if(!prn){alert('Enter the PRN.');return;} s.disabled=true;s.textContent='Submitting...';
+              try{
+                const token=await session();
+                const r=await fetch('/api/payment-prn',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:'submit',prn,transaction_reference:tx})});
+                const d=await r.json().catch(function(){return {};});
+                if(!r.ok)throw new Error(d.error||'Payment submission failed.');
+                p.innerHTML='<h3>✅ Payment submitted</h3><div class="mavAiSummary">Mav AI has submitted PRN <b>'+escLocal(prn)+'</b> for provider verification. It will only be approved automatically when the trusted provider confirms the transaction and Care Mode permits it.</div><div class="mavAiConfirm"><button class="ok" id="mavPrnClose">Done</button></div>';
+                p.querySelector('#mavPrnClose').onclick=function(){p.remove();};
+              }catch(e){s.disabled=false;s.textContent='Submit for verification';addMessage('Payment PRN error: '+(e.message||e),'bot');}
+            };
+          };
+        }catch(e){b.disabled=false;b.textContent='Generate PRN';addMessage('Payment PRN error: '+(e.message||e),'bot');}
+      };
+      p.querySelector('#mavPrnStatus').onclick=async function(){
+        const prn=prompt('Enter your Mav AI PRN:','');if(!prn)return;
+        try{
+          const token=await session();
+          const r=await fetch('/api/payment-prn',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:'status',prn:prn.trim()})});
+          const d=await r.json().catch(function(){return {};});
+          if(!r.ok)throw new Error(d.error||'Could not check PRN.');
+          const x=d.payment_request;
+          addMessage('💳 PRN '+x.prn+' status: '+x.status+(x.transaction_reference?' • Transaction: '+x.transaction_reference:'')+(x.approved_at?' • Approved: '+new Date(x.approved_at).toLocaleString():''),'bot');
+          p.remove();
+        }catch(e){addMessage('PRN status error: '+(e.message||e),'bot');}
+      };
+    }
+
     function detectLocalAction(q){
       const s=q.trim(),l=s.toLowerCase();
       if(/\b(assign|add|register)\b.*\btenant\b/.test(l)||/\bassign\b/.test(l)){
@@ -534,6 +583,7 @@
         const advance=Number(((s.match(/(?:advance|initial)\s*(?:of|for)?\s*(\d+)\s*month/i)||[])[1]||'3'));
         return {type:'assign_tenant',tenant_name:tenant,unit_number:unit,monthly_rent:rent,deposit_amount:dep,rent_due_day:due,initial_advance_months:advance};
       }
+      if(/\b(prn|payment reference|payment code)\b/.test(l))return {type:'payment_prn'};
       if(/\b(create|make|generate)\b.*\breceipt\b/.test(l))return {type:'create_receipt'};
       if(/\b(remind|contact|message|whatsapp|sms|call)\b.*\b(overdue|tenant|tenants)\b/.test(l))return {type:'contact_overdue'};
       if(/\b(record|add|enter)\b.*\bpayment\b/.test(l))return {type:'open_page',page:'payments'};
@@ -558,6 +608,7 @@
       if(action){
         if(action.type==='assign_tenant'){addMessage('I understood this as a tenant assignment. I will prepare it for your final confirmation.','bot');await showAddTenant(action);return;}
         if(action.type==='create_receipt'){addMessage('I understood this as a receipt request. I will prepare it for your final confirmation.','bot');await showReceipt();return;}
+        if(action.type==='payment_prn'){await paymentPrnCenter();return;}
         if(action.type==='contact_overdue'){addMessage('I will prepare the overdue-tenant contact options. MavRent will not send anything silently.','bot');contactOverdue();return;}
         if(action.type==='open_page'){
           if(typeof show==='function')await show(action.page,false);
@@ -570,7 +621,7 @@
         const token=await session();
         const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({message:question})});
         const data=await r.json().catch(function(){return {};});
-        if(!r.ok)throw new Error(data.error||'MavRent AI request failed.');
+        if(!r.ok)throw new Error(data.error||'Mav AI request failed.');
         addMessage(data.answer||'No answer returned.','bot'); speakMavRent(data.answer||'');
       }catch(e){addMessage('AI error: '+(e.message||'Unknown error'),'bot');aiAudit('AI question','failed',e.message||'Unknown error');}
       finally{send.disabled=false;send.textContent='Send';input.focus();}
@@ -634,7 +685,7 @@
           mic.classList.remove('listening');mic.textContent='🎤';
           const code=e&&e.error||'unknown';
           if(code==='service-not-allowed'||code==='not-allowed'){
-            addMessage('🎤 Browser voice recognition is blocked or unavailable here. On iPhone, use the keyboard microphone in the MavRent AI text box; on supported browsers, allow microphone/speech access and try again.','bot');
+            addMessage('🎤 Browser voice recognition is blocked or unavailable here. On iPhone, use the keyboard microphone in the Mav AI text box; on supported browsers, allow microphone/speech access and try again.','bot');
           }else if(code==='audio-capture'){
             addMessage('🎤 No microphone was available. Check your microphone permission and try again.','bot');
           }else{
@@ -664,6 +715,7 @@
     setupVoice();
 
     document.getElementById('mavAiAddTenant').onclick=function(){showAddTenant();};
+    prnBtn.onclick=paymentPrnCenter;
     document.getElementById('mavAiReceipt').onclick=function(){
       if(typeof role!=='undefined'&&role==='tenant'){input.value='Show my latest receipt';ask();}else showReceipt();
     };
@@ -832,7 +884,7 @@
           const token=await session();
           const server=await fetch('/api/ai-action',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({
             action:'record_payment',confirmed:true,tenant_id:x.t.id,amount:Number(action.amount),payment_date:action.date,
-            payment_method:'other',notes:'Recorded by MavRent AI Permission Engine'
+            payment_method:'other',notes:'Recorded by Mav AI Permission Engine'
           })});
           const data=await server.json().catch(function(){return {};});
           if(!server.ok)throw new Error(data.error||'Server permission check failed.');
@@ -1115,7 +1167,7 @@
         const token=await session();
         const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({message:question})});
         const data=await r.json().catch(function(){return {};});
-        if(!r.ok)throw new Error(data.error||'MavRent AI request failed.');
+        if(!r.ok)throw new Error(data.error||'Mav AI request failed.');
         addMessage(data.answer||'No answer returned.','bot');
       }catch(e){addMessage('AI error: '+(e.message||'Unknown error'),'bot');aiAudit('AI question','failed',e.message||'Unknown error');}
       finally{send.disabled=false;send.textContent='Send';input.focus();}
@@ -1174,7 +1226,7 @@
           mic.classList.remove('listening');mic.textContent='🎤';
           const code=e&&e.error||'unknown';
           if(code==='service-not-allowed'||code==='not-allowed'){
-            addMessage('🎤 Browser voice recognition is blocked or unavailable here. On iPhone, use the keyboard microphone in the MavRent AI text box; on supported browsers, allow microphone/speech access and try again.','bot');
+            addMessage('🎤 Browser voice recognition is blocked or unavailable here. On iPhone, use the keyboard microphone in the Mav AI text box; on supported browsers, allow microphone/speech access and try again.','bot');
           }else if(code==='audio-capture'){
             addMessage('🎤 No microphone was available. Check your microphone permission and try again.','bot');
           }else{
