@@ -745,7 +745,8 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
-})()    async function approveAllCareTasks(tasks){
+
+    async function approveAllCareTasks(tasks){
       const routine=(tasks||[]).filter(t=>['rent_reminder','maintenance_followup'].includes(t.task_type));
       const blocked=(tasks||[]).filter(t=>!['rent_reminder','maintenance_followup'].includes(t.task_type));
       const summary='MavRent will execute '+routine.length+' routine task'+(routine.length===1?'':'s')+
