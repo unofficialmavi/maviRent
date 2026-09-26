@@ -1,4 +1,4 @@
-// MavRent AI — FREE HYBRID VERSION
+// Mav AI — FREE HYBRID VERSION
 // Uses Supabase directly for common rental questions.
 // Uses Google Gemini free-tier for natural-language questions.
 // IMPORTANT: GEMINI_API_KEY must be stored only in Vercel Environment Variables.
@@ -190,7 +190,7 @@ function answerDirectly(question, context) {
   if (context.current_user?.role === 'tenant') {
     const myTenant = tenants.find(t =>
       String(t.profile_id || '') === String(context.current_user.id)
-    ) || tenants[0];
+    ) || null;
 
     const myRecords = myTenant
       ? records.filter(r => String(r.tenant_id) === String(myTenant.id))
@@ -447,7 +447,7 @@ async function askGemini(message, context) {
   }
 
   const system = [
-    'You are MavRent AI, a read-only rental management assistant.',
+    'You are Mav AI, a read-only rental management assistant.',
     'Use ONLY the supplied MavRent account data for account-specific facts.',
     'Never invent tenants, payments, balances, dates, properties, receipts or maintenance records.',
     'If account data is missing, say so clearly.',
@@ -527,7 +527,7 @@ export default async function handler(req, res) {
     const auth = req.headers.authorization || '';
     if (!auth.toLowerCase().startsWith('bearer ')) {
       return json(res, 401, {
-        error: 'You must be logged in to use MavRent AI.'
+        error: 'You must be logged in to use Mav AI.'
       });
     }
 
@@ -572,10 +572,10 @@ export default async function handler(req, res) {
       role: context.current_user.role
     });
   } catch (error) {
-    console.error('MavRent AI error:', error);
+    console.error('Mav AI error:', error);
 
     return json(res, 500, {
-      error: error?.message || 'MavRent AI failed.'
+      error: error?.message || 'Mav AI failed.'
     });
   }
 }
