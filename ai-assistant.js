@@ -744,7 +744,14 @@
         authenticated=(typeof user!=='undefined' && !!user);
       }catch(e){}
       const appReady=!!app&&!app.classList.contains('hidden');
-      button.classList.toggle('show',authenticated||appReady);
+      const shouldShow=authenticated||appReady;
+      // Set the inline display as well as the class. This bypasses any
+      // dashboard stylesheet/service-worker CSS that could override .show.
+      button.classList.toggle('show',shouldShow);
+      button.style.display=shouldShow?'block':'none';
+      button.style.visibility=shouldShow?'visible':'hidden';
+      button.style.opacity=shouldShow?'1':'0';
+      button.style.pointerEvents=shouldShow?'auto':'none';
       configureRoleUI();
     }
     syncVisibility();
