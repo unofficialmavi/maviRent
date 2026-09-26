@@ -4635,7 +4635,8 @@ document.addEventListener(
         window.MavAIBoot();
         return;
       }
-      if(button && window.user && !button.classList.contains('show')){
+      var app=document.getElementById('app');
+      if(button && app && !app.classList.contains('hidden') && !button.classList.contains('show')){
         button.classList.add('show');
       }
     }catch(e){
