@@ -4624,16 +4624,32 @@ document.addEventListener(
 })();
 
 </script>
-<script src="/ai-assistant.js?v=7"></script>
+<script src="/ai-assistant.js?v=8"></script>
 <script>
-/* Mav AI production watchdog: retry the launcher after the full app has loaded. */
-window.addEventListener('load',function(){
-  setTimeout(function(){
-    if(!document.getElementById('mavAiButton') && window.MavAIBoot){
-      try{window.MavAIBoot();}catch(e){console.error('Mav AI bootstrap retry failed:',e);}
+/* Mav AI production watchdog — deliberately independent of dashboard rendering. */
+(function(){
+  function recoverMavAI(){
+    try{
+      var button=document.getElementById('mavAiButton');
+      if(!button && window.MavAIBoot){
+        window.MavAIBoot();
+        return;
+      }
+      if(button && window.user && !button.classList.contains('show')){
+        button.classList.add('show');
+      }
+    }catch(e){
+      console.error('Mav AI recovery failed:',e);
     }
-  },300);
-});
+  }
+  window.addEventListener('load',function(){
+    setTimeout(recoverMavAI,300);
+    setTimeout(recoverMavAI,1200);
+    setTimeout(recoverMavAI,2500);
+  });
+  window.addEventListener('pageshow',function(){setTimeout(recoverMavAI,250);});
+  setInterval(recoverMavAI,1000);
+})();
 </script>
 </body>
 </html>
