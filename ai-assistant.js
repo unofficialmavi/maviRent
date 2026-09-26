@@ -736,11 +736,21 @@
 
     function syncVisibility(){
       const app=document.getElementById('app');
-      button.classList.toggle('show',!!app&&!app.classList.contains('hidden'));
+      // Do not depend only on #app's CSS class. MavRent has several startup
+      // paths, and the AI launcher must appear as soon as authentication has
+      // produced a user even if the dashboard shell is still rendering.
+      let authenticated=false;
+      try{
+        authenticated=(typeof user!=='undefined' && !!user);
+      }catch(e){}
+      const appReady=!!app&&!app.classList.contains('hidden');
+      button.classList.toggle('show',authenticated||appReady);
       configureRoleUI();
     }
     syncVisibility();
-    setInterval(syncVisibility,500);
+    // Keep checking because MavRent login state is established by index.html
+    // after this standalone AI script has already loaded.
+    setInterval(syncVisibility,250);
     }
 
     // Keep every Mav AI helper inside the same closure so buttons, panels,
@@ -1288,9 +1298,16 @@
     setInterval(syncVisibility,500);
   }
 
-  // Expose the launcher before startup so the production watchdog can retry Mav AI.
+  // Expose the launcher before startup so both index.html and the
+  // post-login watchdog can start/restart Mav AI safely.
   window.MavAIBoot = boot;
+  window.MavAIReady = true;
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
-  else boot();
+  function startMavAIBoot(){
+    try{ boot(); }
+    catch(error){ console.error('Mav AI boot failed:',error); }
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startMavAIBoot,{once:true});
+  else startMavAIBoot();
 })();
