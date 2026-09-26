@@ -110,6 +110,13 @@ async function getMavRentContext(token, userId) {
   }));
   for (const [name, value] of results) context.data[name] = value;
 
+  // Landlord-safe tenant profile lookup. RLS limits this to profiles assigned to the landlord.
+  try {
+    context.data.tenant_profiles = await supabaseGet('profiles', { role: 'eq.tenant' }, token);
+  } catch (e) {
+    context.data.tenant_profiles = [];
+  }
+
   return context;
 }
 
@@ -185,6 +192,7 @@ function answerDirectly(question, context) {
   const properties = Array.isArray(d.properties) ? d.properties : [];
   const maintenance = Array.isArray(d.maintenance_requests)
     ? d.maintenance_requests : [];
+  const tenantProfiles = Array.isArray(d.tenant_profiles) ? d.tenant_profiles : [];
 
   // Tenant-first answers stay deterministic and never need Gemini.
   if (context.current_user?.role === 'tenant') {
@@ -286,11 +294,13 @@ function answerDirectly(question, context) {
     const total = overdue.reduce((sum, x) => sum + x.balance, 0);
 
     const lines = overdue.map(x => {
+      const profile = tenantProfiles.find(p => String(p.id) === String(x.tenant?.profile_id));
       const name =
+        profile?.full_name ||
+        profile?.email ||
         x.tenant?.full_name ||
         x.tenant?.name ||
         x.tenant?.tenant_name ||
-        x.tenant?.email ||
         'Unknown tenant';
 
       const unit =
