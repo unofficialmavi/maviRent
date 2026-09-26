@@ -1291,11 +1291,14 @@
 
     function syncVisibility(){
       const app=document.getElementById('app');
-      button.classList.toggle('show',!!app&&!app.classList.contains('hidden'));
+      let authenticated=false;
+      try{authenticated=(typeof user!=='undefined' && !!user);}catch(e){}
+      const appReady=!!app&&!app.classList.contains('hidden');
+      button.classList.toggle('show',authenticated||appReady);
       configureRoleUI();
     }
     syncVisibility();
-    setInterval(syncVisibility,500);
+    setInterval(syncVisibility,250);
   }
 
   // Expose the launcher before startup so both index.html and the
