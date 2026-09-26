@@ -741,10 +741,14 @@
     }
     syncVisibility();
     setInterval(syncVisibility,500);
-  }
+    }
 
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
-  else boot();
+    // Keep every Mav AI helper inside the same closure so buttons, panels,
+    // Care Mode, audit, voice and action helpers share their dependencies.
+    window.MavAIBoot = boot;
+
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+    else boot();
 
     async function approveAllCareTasks(tasks){
       const routine=(tasks||[]).filter(t=>['rent_reminder','maintenance_followup'].includes(t.task_type));
@@ -1286,4 +1290,5 @@
 
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
+})();
 })();
