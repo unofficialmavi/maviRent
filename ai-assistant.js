@@ -1299,66 +1299,115 @@
     autoBtn.onclick=setCareMode;
     auditBtn.onclick=showAudit;
 
-    // Voice is progressive enhancement. Safari/iOS may expose SpeechRecognition
-    // but still reject it with service-not-allowed, so do not leave the user with a dead button.
-    let recognition=null;
-    let voiceFinal='';
+    // Mav AI voice: speech-to-text + spoken replies + hands-free conversation.
+    // This is an in-app voice mode. Browser security does not allow a PWA to own a
+    // system-wide hotword such as Siri/Bixby/Alexa; microphone listening must begin
+    // from a user gesture.
+    let recognition=null, voiceFinal='', voiceEnabled=localStorage.getItem('mav_ai_voice_enabled')!=='0', conversationMode=false, speaking=false, voices=[];
+    const setVoiceState=function(t){if(voiceState)voiceState.textContent=t||'';};
+    const refreshVoices=function(){try{voices=window.speechSynthesis?window.speechSynthesis.getVoices():[]}catch(e){voices=[]}};
+    refreshVoices();
+    if(window.speechSynthesis)window.speechSynthesis.onvoiceschanged=refreshVoices;
+
+    function stopSpeaking(){
+      try{if(window.speechSynthesis)window.speechSynthesis.cancel()}catch(e){}
+      speaking=false;
+    }
+    function speak(text){
+      if(!voiceEnabled||!('speechSynthesis' in window))return;
+      const value=String(text||'').replace(/[🧠🟢🛡️🧾📋🔴🔧🏠👥💰📅💳📱🎤✨✓✅⚪]/g,'').trim();
+      if(!value)return;
+      stopSpeaking();
+      try{
+        const u=new SpeechSynthesisUtterance(value.slice(0,1800));
+        u.lang=(navigator.language||'en-UG').startsWith('en')?'en-UG':(navigator.language||'en');
+        u.rate=.98;u.pitch=1;
+        const preferred=voices.find(function(v){return /^en(-GB|-UG|-US)?$/i.test(v.lang)})||voices.find(function(v){return /^en/i.test(v.lang)});
+        if(preferred)u.voice=preferred;
+        u.onstart=function(){speaking=true;setVoiceState('🔊 Mav AI is speaking…')};
+        u.onend=function(){speaking=false;setVoiceState(conversationMode?'🎙️ Hands-free mode is ready.':'')};
+        u.onerror=function(){speaking=false;setVoiceState('')};
+        window.speechSynthesis.speak(u);
+      }catch(e){}
+    }
+    function toggleVoice(){
+      voiceEnabled=!voiceEnabled;
+      localStorage.setItem('mav_ai_voice_enabled',voiceEnabled?'1':'0');
+      if(!voiceEnabled)stopSpeaking();
+      if(voiceToggle){voiceToggle.textContent=voiceEnabled?'🔊':'🔇';voiceToggle.title=voiceEnabled?'Spoken replies ON':'Spoken replies OFF';}
+      if(voiceEnabled)speak('Spoken replies are on. I am Mav AI.');
+      else setVoiceState('');
+    }
     function setupVoice(){
+      if(voiceToggle){voiceToggle.textContent=voiceEnabled?'🔊':'🔇';voiceToggle.onclick=toggleVoice;}
       const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
       if(!SR){
-        mic.title='Voice input is not supported by this browser.';
-        mic.onclick=function(){addMessage('🎤 Voice input is not available in this browser. You can still type or use your device keyboard microphone.','bot');};
+        mic.onclick=function(){addMessage('🎤 Voice input is not available in this browser. You can still type and receive spoken replies.','bot')};
         return;
       }
       try{
         recognition=new SR();
         recognition.lang=(navigator.language||'en-UG').startsWith('en')?'en-UG':(navigator.language||'en');
-        recognition.interimResults=true;
-        recognition.continuous=false;
+        recognition.interimResults=true;recognition.continuous=false;recognition.maxAlternatives=1;
         recognition.onstart=function(){
-          voiceFinal='';
-          mic.classList.add('listening');mic.textContent='⏹️';
-          addMessage('🎤 Listening… speak your MavRent instruction.','bot');
+          voiceFinal='';mic.classList.add('listening');mic.textContent='⏹️';
+          setVoiceState(conversationMode?'🎙️ Listening…':'🎙️ Listening…');
+          addMessage('🎤 Listening… speak to Mav AI.','bot');
         };
         recognition.onresult=function(e){
-          let text='';
+          let interim='';
           for(let i=e.resultIndex;i<e.results.length;i++){
-            text+=e.results[i][0].transcript;
-            if(e.results[i].isFinal)voiceFinal+=e.results[i][0].transcript;
+            const part=e.results[i][0].transcript||'';
+            if(e.results[i].isFinal)voiceFinal+=part+' ';else interim+=part;
           }
-          input.value=(voiceFinal||text).trim();
+          input.value=(voiceFinal+interim).trim();
         };
         recognition.onerror=function(e){
           mic.classList.remove('listening');mic.textContent='🎤';
           const code=e&&e.error||'unknown';
+          if(code==='aborted')return;
           if(code==='service-not-allowed'||code==='not-allowed'){
-            addMessage('🎤 Browser voice recognition is blocked or unavailable here. On iPhone, use the keyboard microphone in the Mav AI text box; on supported browsers, allow microphone/speech access and try again.','bot');
+            setVoiceState('🎤 Microphone/speech permission is blocked.');
+            addMessage('🎤 Voice recognition was blocked. Allow microphone access for MavRent and try again. On iPhone/iPad, browser speech recognition can still be restricted; spoken replies remain available.','bot');
           }else if(code==='audio-capture'){
-            addMessage('🎤 No microphone was available. Check your microphone permission and try again.','bot');
-          }else{
-            addMessage('🎤 Voice input could not start: '+code+'. You can still type.','bot');
-          }
+            addMessage('🎤 No microphone was available. Check the microphone permission and try again.','bot');
+          }else addMessage('🎤 Voice input could not start: '+code+'. You can still type.','bot');
         };
         recognition.onend=function(){
           mic.classList.remove('listening');mic.textContent='🎤';
-          if(input.value.trim()&&voiceFinal.trim()){
-            setTimeout(function(){ask();},80);
-          }
+          const heard=voiceFinal.trim();
+          if(heard){
+            if(conversationMode){
+              const cleaned=heard.replace(/^\s*(?:hey\s+)?mav[,:]?\s*/i,'').trim();
+              if(!cleaned){setVoiceState('🎙️ Say “Mav” followed by your question.');return}
+              input.value=cleaned;
+            }
+            setTimeout(function(){ask(true)},120);
+          }else setVoiceState(conversationMode?'🎙️ Hands-free mode is ready.':'');
         };
         mic.onclick=function(){
           try{
-            if(mic.classList.contains('listening')){recognition.stop();return;}
-            voiceFinal='';
-            recognition.start();
-          }catch(e){
-            addMessage('🎤 Voice input is temporarily unavailable. Use the keyboard microphone or type your request.','bot');
-          }
+            if(mic.classList.contains('listening')){recognition.stop();return}
+            stopSpeaking();voiceFinal='';recognition.start();
+          }catch(e){addMessage('🎤 Voice input is temporarily unavailable. Tap again or use the keyboard microphone.','bot')}
         };
       }catch(e){
-        mic.title='Voice input is unavailable.';
-        mic.onclick=function(){addMessage('🎤 Voice input is unavailable in this browser. You can still type.','bot');};
+        mic.onclick=function(){addMessage('🎤 Voice input is unavailable in this browser. You can still type and receive spoken replies.','bot')};
       }
     }
+    function toggleHandsFree(){
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){addMessage('🎙️ Hands-free mode needs browser speech recognition. The normal voice button may still work.','bot');return}
+      conversationMode=!conversationMode;
+      if(!conversationMode){setVoiceState('');handsFree.textContent='🎙️ Hands-free';addMessage('🎙️ Hands-free mode is off.','bot');return}
+      handsFree.textContent='⏹️ Stop hands-free';
+      addMessage('🎙️ Hands-free mode is on. Tap the microphone to start listening, then say “Mav” followed by your question. I will answer aloud.','bot');
+      setVoiceState('🎙️ Hands-free mode is ready.');
+    }
+    const handsFree=document.createElement('button');
+    handsFree.type='button';handsFree.className='mavAiTool';handsFree.id='mavAiHandsFree';handsFree.textContent='🎙️ Hands-free';handsFree.onclick=toggleHandsFree;
+    const toolsRow=document.querySelector('.mavAiTools');
+    if(toolsRow)toolsRow.appendChild(handsFree);
     setupVoice();
 
     document.getElementById('mavAiAddTenant').onclick=function(){showAddTenant();};
