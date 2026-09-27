@@ -1282,7 +1282,7 @@ let mavrentSWRegistration=null;
 async function registerMavRentServiceWorker(){
   if(!('serviceWorker' in navigator)) return null;
   try{
-    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=15.1',{scope:'./'});
+    mavrentSWRegistration=await navigator.serviceWorker.register('./sw.js?v=15.8',{scope:'./'});
     await navigator.serviceWorker.ready;
     console.log('MavRent service worker ready:',mavrentSWRegistration.scope);
     return mavrentSWRegistration;
