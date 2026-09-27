@@ -3537,10 +3537,16 @@ return`
 ===================================================== */
 
 function profilePage(){
+ const displayName=(profile?.full_name||'').trim() || 'MavRent User';
  return`<section>
- <div class="title"><h1>👤 Profile</h1><p>Account details, contact information and notification settings.</p></div>
+ <div class="title"><h1>👤 Profile</h1><p>Your MavRent account and contact settings.</p></div>
  <div class="card">
-  <p>Email: <b>${esc(user.email)}</b></p>
+  <div class="profileHero">
+   <div class="avatar">${esc(displayName.charAt(0).toUpperCase())}</div>
+   <div><h2 style="margin:0">${esc(displayName)}</h2><div class="hint">${role==='landlord'?'Landlord account':'Tenant account'}</div></div>
+  </div>
+  <p>Name: <b>${esc(displayName)}</b></p>
+  <p>Email: <b>${esc(user.email||'—')}</b></p>
   <p>Role: <b>${esc(role)}</b></p>
   <p>User ID: <b class="code">${shortId(user.id)}</b></p>
   <form id="phoneProfileForm" class="formgrid" style="margin-top:12px">
