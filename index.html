@@ -1005,6 +1005,12 @@ grid-template-columns:1fr
 .dashboardNavCard{background:#fff;border:1px solid #e3e6ea;border-radius:14px;padding:16px}
 .dashboardNavCard h3{margin:0 0 5px}.dashboardNavCard p{margin:0;color:#667085;font-size:13px}
 @media(max-width:700px){.navDrawerPanel{width:94vw;padding:16px}.dashboardClean{grid-template-columns:1fr}.navDrawerGrid{grid-template-columns:1fr 1fr}.navMenuBtn{padding:8px 10px}}
+.mavDashboardAi{margin-top:14px;background:linear-gradient(135deg,#071b41,#0869d7 58%,#00b8ff);color:#fff;border:0;border-radius:16px;padding:18px;box-shadow:0 14px 34px #087cff33}
+.mavDashboardAi h3{margin:0 0 5px;font-size:18px}
+.mavDashboardAi p{margin:0 0 12px;color:#ffffffcf;font-size:13px;line-height:1.45}
+.mavDashboardAi button{border:0;border-radius:11px;background:#fff;color:#075ec4;padding:11px 16px;font-weight:900;cursor:pointer}
+#mavAiButton.show{display:flex!important;align-items:center;justify-content:center!important;visibility:visible!important;opacity:1!important}
+
 
 
 
@@ -2488,6 +2494,11 @@ Open Rent System
   </div>
  </div>
 </div>
+<div class="mavDashboardAi">
+ <h3>✨ Mav AI</h3>
+ <p>Your rental management assistant. Ask about rent, overdue tenants, payments, maintenance, receipts and more — by typing or voice.</p>
+ <button type="button" onclick="openMavAIFromDashboard()">✨ Open Mav AI</button>
+</div>
 
 </div>
 
@@ -3526,6 +3537,11 @@ return`
 <h1>MavRent</h1>
 <p>Welcome back.</p>
 </div>
+<div class="mavDashboardAi">
+ <h3>✨ Mav AI</h3>
+ <p>Your personal MavRent assistant. Ask about your rent, payments, maintenance and receipts, or use your voice.</p>
+ <button type="button" onclick="openMavAIFromDashboard()">✨ Open Mav AI</button>
+</div>
 </section>
 `;
 
@@ -4003,7 +4019,41 @@ async function removeTenant(id,unitId){
 async function updateMaintenanceStatus(id,status){const r=await sb.from('maintenance_requests').update({status}).eq('id',id);if(r.error)return alert(r.error.message);await refresh();show('maintenance',false);}
 function printReceipt(id){
  const r=cache.receipts.find(x=>x.id===id);if(!r)return; const p=cache.payments.find(x=>x.id===r.payment_id); const t=cache.tenants.find(x=>x.id===p?.tenant_id); const prof=cache.registeredTenants.find(x=>x.id===t?.profile_id); const w=window.open('','_blank'); if(!w)return alert('Please allow pop-ups to print the receipt.');
- w.document.write(`<html><head><title>${esc(r.receipt_number||'MavRent Receipt')}</title><style>body{font-family:Arial;padding:35px;max-width:700px;margin:auto}h1{color:#111827}.box{border:1px solid #ddd;border-radius:12px;padding:20px}hr{border:0;border-top:1px solid #ddd;margin:18px 0}</style></head><body><h1>MavRent — Rent Receipt</h1><div class="box"><p><b>Receipt:</b> ${esc(r.receipt_number||shortId(r.id))}</p><p><b>Tenant:</b> ${esc(prof?.full_name||prof?.email||'Tenant')}</p><p><b>Amount:</b> ${money(p?.amount)}</p><p><b>Payment date:</b> ${esc(p?.payment_date||'—')}</p><p><b>Method:</b> ${esc(p?.payment_method||'—')}</p><p><b>Reference:</b> ${esc(p?.transaction_reference||'—')}</p><p><b>Issued:</b> ${esc(r.issued_at?new Date(r.issued_at).toLocaleString():'—')}</p></div><hr><p>Thank you for your payment.</p><script>window.onload=()=>window.print()<\/script></body></html>`);w.document.close();
+ w.document.write(`<html><head><title>${esc(r.receipt_number||'MavRent Receipt')}</title><style>body{font-family:Arial;padding:35px;max-width:700px;margin:auto}h1{color:#111827}.box{border:1px solid #ddd;border-radius:12px;padding:20px}hr{border:0;border-top:1px solid #ddd;margin:18px 0}</style></head><body><h1>MavRent — Rent Receipt</h1><div class="box"><p><b>Receipt:</b> ${esc(r.receipt_number||shortId(r.id))}</p><p><b>Tenant:</b> ${esc(prof?.full_name||prof?.email||'Tenant')}</p><p><b>Amount:</b> ${money(p?.amount)}</p><p><b>Payment date:</b> ${esc(p?.payment_date||'—')}</p><p><b>Method:</b> ${esc(p?.payment_method||'—')}</p><p><b>Reference:</b> ${esc(p?.transaction_reference||'—')}</p><p><b>Issued:</b> ${esc(r.issued_at?new Date(r.issued_at).toLocaleString():'—')}</p></div><hr><p>Thank you for your payment.</p><script>window.onload=()=>window.print()<\/script><script>
+/* Mav AI dashboard launcher: independent of the floating button/watchdog. */
+(function(){
+  window.openMavAIFromDashboard=function(){
+    function openNow(){
+      var modal=document.getElementById('mavAiModal');
+      if(modal){
+        modal.classList.add('open');
+        var input=document.getElementById('mavAiInput');
+        if(input)setTimeout(function(){input.focus();},80);
+        return true;
+      }
+      if(window.MavAIBoot){
+        try{window.MavAIBoot();}catch(e){console.error('Mav AI boot:',e);}
+        setTimeout(openNow,120);
+        return true;
+      }
+      return false;
+    }
+    if(!openNow()){
+      var existing=document.getElementById('mavAiRecoveryLoader');
+      if(!existing){
+        var sc=document.createElement('script');
+        sc.id='mavAiRecoveryLoader';
+        sc.src='/ai-assistant.js?v=13-recovery';
+        sc.onload=function(){setTimeout(openNow,50);};
+        sc.onerror=function(){console.error('Mav AI recovery script could not load.');};
+        document.head.appendChild(sc);
+      }else{
+        setTimeout(openNow,250);
+      }
+    }
+  };
+})();
+</script></body></html>`);w.document.close();
 }
 
 function attach(){
