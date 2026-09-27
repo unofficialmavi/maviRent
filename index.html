@@ -31,7 +31,33 @@ content="MavRent">
 
 <title>MavRent V15.1</title>
 
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase loader: primary CDN + automatic fallback so the login screen never depends on one CDN. -->
+<script>
+(function loadMavRentSupabase(){
+  if(window.supabase && typeof window.supabase.createClient==='function') return;
+  var sources=[
+    'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
+    'https://unpkg.com/@supabase/supabase-js@2'
+  ];
+  var index=0;
+  function next(){
+    if(window.supabase && typeof window.supabase.createClient==='function') return;
+    if(index>=sources.length){
+      window.__mavSupabaseLoadFailed=true;
+      return;
+    }
+    var script=document.createElement('script');
+    script.src=sources[index++];
+    script.async=true;
+    script.onload=function(){
+      window.__mavSupabaseLoadFailed=false;
+    };
+    script.onerror=function(){next();};
+    document.head.appendChild(script);
+  }
+  next();
+})();
+</script>
 
 <style>
 *{box-sizing:border-box}
@@ -1567,10 +1593,13 @@ msg(
 }
 
 
+let mavLoginBusy=false;
+
 $('loginForm').onsubmit=
 async e=>{
 
 e.preventDefault();
+if(mavLoginBusy)return;
 
 const email=$('email').value.trim();
 const password=$('password').value;
@@ -1578,26 +1607,38 @@ const password=$('password').value;
 if(!email)return msg('Enter your email.');
 if(!password)return msg('Enter your password.');
 
+const loginButton=$('loginForm').querySelector('button[type="submit"]');
+mavLoginBusy=true;
+if(loginButton){loginButton.disabled=true;loginButton.textContent='Signing in...';}
+
 try{
-  await ensureSupabase();
+  msg('Connecting to MavRent...','success');
 
-  msg('Logging in...','success');
+  const client=await Promise.race([
+    ensureSupabase(),
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('MavRent login service is taking too long to load. Please refresh once and try again.')),15000))
+  ]);
 
-  const r=await sb.auth.signInWithPassword({
-    email,
-    password
-  });
+  msg('Signing in...','success');
+
+  const r=await Promise.race([
+    client.auth.signInWithPassword({email,password}),
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('Login request timed out. Please check your internet connection and try again.')),20000))
+  ]);
 
   if(r.error){
     console.error('MavRent login error:',r.error);
-    return msg(r.error.message);
+    return msg(r.error.message||'Login failed. Check your email and password.');
+  }
+
+  if(!r.data||!r.data.user){
+    return msg('MavRent signed in but did not receive a user session. Please try again.');
   }
 
   user=r.data.user;
 
-  // Show the application immediately after Supabase confirms the login.
-  // If a dashboard/database feature fails, keep the user inside MavRent
-  // and show the actual error instead of appearing to log out.
+  // Move into the application immediately after Supabase confirms authentication.
+  // Dashboard/database failures must never send the user back to the login screen.
   $('auth').classList.add('hidden');
   $('app').classList.remove('hidden');
 
@@ -1619,6 +1660,9 @@ try{
 }catch(err){
   console.error('MavRent login failed:',err);
   msg(err?.message||'Login failed. Please try again.');
+}finally{
+  mavLoginBusy=false;
+  if(loginButton){loginButton.disabled=false;loginButton.textContent='Login';}
 }
 
 };
@@ -4680,7 +4724,7 @@ document.addEventListener(
 })();
 
 </script>
-<script src="/ai-assistant.js?v=12"></script>
+<script src="/ai-assistant.js?v=13"></script>
 <script>
 /* Mav AI production watchdog — deliberately independent of dashboard rendering. */
 (function(){
