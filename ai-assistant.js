@@ -38,6 +38,7 @@
 
     const button=document.createElement('button');
     button.id='mavAiButton';
+    button.setAttribute('aria-label','Open Mav AI');
     button.type='button';
     button.textContent='✨ Mav AI';
     document.body.appendChild(button);
@@ -57,7 +58,7 @@
           '</div>'+
         '</div>'+
         '<div class="mavAiHint">Try: “Who is overdue?” or “Assign Sarah to Room B12, rent 450000, deposit 450000.”</div>'+
-        '<div class="mavAiTools"><button class="mavAiTool" id="mavAiOps" type="button">🧠 Operations Center</button><button class="mavAiTool" id="mavAiAuto" type="button">🟢 Care Mode</button><button class="mavAiTool" id="mavAiAudit" type="button">🧾 AI activity</button></div>'+
+        '<div class="mavAiTools"><button class="mavAiTool" id="mavAiOps" type="button">🧠 Operations Center</button><button class="mavAiTool" id="mavAiAuto" type="button">🟢 Care Mode</button><button class="mavAiTool" id="mavAiCareTasks" type="button">🛡️ Approval Center</button><button class="mavAiTool" id="mavAiAudit" type="button">🧾 AI activity</button></div>'+
         '<div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask Mav AI..." maxlength="4000"></textarea><button class="mavAiMic" id="mavAiMic" type="button" title="Talk to Mav AI">🎤</button><button class="mavAiSend" id="mavAiSend" type="button">Send</button></div>'+
       '</div>';
     document.body.appendChild(modal);
@@ -69,6 +70,7 @@
     const opsBtn=document.getElementById('mavAiOps');
     const autoBtn=document.getElementById('mavAiAuto');
     const auditBtn=document.getElementById('mavAiAudit');
+    const careTasksBtn=document.getElementById('mavAiCareTasks');
     const prnBtn=document.getElementById('mavAiPrn');
 
     const close=function(){modal.classList.remove('open');};
@@ -646,6 +648,7 @@
     opsBtn.onclick=operationsCenter;
     autoBtn.onclick=setCareMode;
     auditBtn.onclick=showAudit;
+    if(careTasksBtn)careTasksBtn.onclick=careTasksCenter;
 
     let mavRentSpeakEnabled=true;
     function speakMavRent(text){
