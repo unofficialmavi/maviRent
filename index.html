@@ -60,13 +60,65 @@ content="MavRent">
 </script>
 
 <style>
+:root {
+  --bg-page: #f4f6fa;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f8fafc;
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --header-bg: #0c182c;
+  --header-border: #1e293b;
+  --primary-blue: #0284c7;
+  --primary-hover: #0369a1;
+  --accent-cyan: #38bdf8;
+  --card-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 10px 25px -5px rgba(15, 23, 42, 0.04);
+  
+  /* Glassmorphism design tokens */
+  --glass-bg: rgba(255, 255, 255, 0.74);
+  --glass-hero-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.90) 0%, rgba(248, 250, 252, 0.74) 100%);
+  --glass-border: rgba(226, 232, 240, 0.85);
+  --glass-border-highlight: rgba(255, 255, 255, 0.95);
+  --glass-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  --glass-hover-shadow: 0 10px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.03);
+  --glass-blur: blur(16px);
+}
+
+body.care-mode-active {
+  --bg-page: #070d18;
+  --bg-surface: #0c1527;
+  --bg-surface-subtle: #101c34;
+  --border-subtle: #1a2947;
+  --border-strong: #22375d;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --header-bg: #050a12;
+  --header-border: #162238;
+  --primary-blue: #0284c7;
+  --accent-cyan: #38bdf8;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.04);
+  
+  /* Glassmorphism tokens in dark Care Mode */
+  --glass-bg: rgba(12, 21, 39, 0.72);
+  --glass-hero-bg: linear-gradient(135deg, rgba(16, 28, 52, 0.82) 0%, rgba(10, 18, 34, 0.72) 100%);
+  --glass-border: rgba(56, 189, 248, 0.18);
+  --glass-border-highlight: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.42);
+  --glass-hover-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.55), 0 0 20px rgba(56, 189, 248, 0.08);
+  --glass-blur: blur(16px);
+}
+
 *{box-sizing:border-box}
 
 body{
 margin:0;
 font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
-background:#f4f5f7;
-color:#17202a
+background:var(--bg-page);
+color:var(--text-main);
+transition:background-color .25s ease,color .25s ease;
 }
 
 button,input,select,textarea{font:inherit}
@@ -1064,8 +1116,140 @@ grid-template-columns:1fr
 /* V15.0 UNIVERSAL NOTIFICATIONS + iOS COMPATIBILITY */
 .pushBadge.install{background:#fff7ed;color:#9a3412;border-color:#fed7aa}
 .pushBadge.install .pushDot{background:#f97316}
-.iosInstallCard{border:1px solid #dbeafe;background:#eff6ff;border-radius:14px;padding:12px;margin-top:10px}
-.iosInstallCard strong{display:block;margin-bottom:5px}
+/* CARE MODE ACTIVE THEME OVERRIDES */
+body.care-mode-active .card{background:var(--bg-surface);border-color:var(--border-subtle);color:var(--text-main);box-shadow:var(--card-shadow)}
+body.care-mode-active header{background:var(--header-bg);border-bottom:1px solid var(--header-border)}
+body.care-mode-active #app input,
+body.care-mode-active #app select,
+body.care-mode-active #app textarea{background:#091222;border-color:#1e3052;color:#f8fafc!important}
+body.care-mode-active #app input:focus,
+body.care-mode-active #app select:focus,
+body.care-mode-active #app textarea:focus{border-color:var(--accent-cyan);box-shadow:0 0 0 3px rgba(56,189,248,0.15)}
+body.care-mode-active .btn{background:#101c34;border-color:#1e3256;color:#f1f5f9}
+body.care-mode-active .btn:hover{background:#162646}
+body.care-mode-active .table th,
+body.care-mode-active .table td{border-bottom-color:var(--border-subtle);color:#f1f5f9}
+body.care-mode-active .table th{color:var(--text-muted)}
+body.care-mode-active .navDrawerPanel{background:#0c1527;color:#f8fafc}
+body.care-mode-active .navDrawerGrid button{background:#101c34;border-color:#1e3256;color:#f8fafc}
+body.care-mode-active .pushStatusCard{background:#0c1527;border-color:#1a2947;color:#f8fafc}
+body.care-mode-active .amountBox,
+body.care-mode-active .reminderItem,
+body.care-mode-active .guideStep{background:#101c34;border-color:#1e3256;color:#f8fafc}
+body.care-mode-active .title p{color:var(--text-muted)}
+
+/* CARE MODE HEADER INTEGRATION & BADGE */
+.brandGroup{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.careModeBadge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.35);color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap;cursor:pointer;transition:all .2s ease;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.careModeBadge:hover{background:rgba(56,189,248,0.22);border-color:rgba(56,189,248,0.6);transform:translateY(-1px)}
+.careModeBadge.hidden{display:none!important}
+.careDot{width:7px;height:7px;border-radius:50%;background:#38bdf8;box-shadow:0 0 8px #38bdf8;animation:carePulse 1.8s infinite;flex-shrink:0}
+@keyframes carePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.25)}}
+.careBadgeText{display:inline-flex;align-items:center}
+.careBadgeShort{display:none}
+.careBadgeFull{display:inline}
+
+.navRow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.navRow nav{margin-top:0;flex:1}
+.headerCareStatus{display:inline-flex;align-items:center;gap:7px;padding:8px 13px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);color:#cbd5e1;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s ease;user-select:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.headerCareStatus:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.28);color:#fff}
+.headerCareStatus.active{background:rgba(56,189,248,0.16);border-color:rgba(56,189,248,0.45);color:#38bdf8}
+.headerCareStatus.hidden{display:none!important}
+
+@media(max-width:680px){
+  header{padding:12px 14px}
+  .bar{gap:8px}
+  .brand.small{font-size:20px}
+  .userbox{gap:6px}
+  .userbox #who{max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px}
+  .careModeBadge{padding:3px 8px;font-size:10px;gap:5px}
+  .careBadgeFull{display:none}
+  .careBadgeShort{display:inline}
+  .headerCareStatus{display:none!important}
+}
+@media(max-width:440px){
+  .userbox #who{display:none}
+  .careModeBadge{padding:5px;border-radius:50%}
+  .careBadgeShort{display:none}
+  .brand.small{font-size:19px}
+  .logout,.notifyBtn{padding:6px 9px;font-size:11.5px}
+}
+
+/* GLASSMORPHISM DASHBOARD STYLES */
+.landlordDashboard{max-width:1100px;margin:0 auto}
+
+/* Glass Greeting Header */
+.dashGreetingHeader.glassHeader{background:var(--glass-hero-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow),inset 0 1px 0 0 var(--glass-border-highlight);border-radius:20px;padding:22px 24px;margin-bottom:20px;position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;transition:all .25s ease}
+.dashGreetingHeader.glassHeader::before{content:"";position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(56,189,248,0.12) 0%,transparent 70%);pointer-events:none}
+.dashKicker{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--primary-blue);margin-bottom:6px}
+.kickerDot{width:6px;height:6px;border-radius:50%;background:var(--primary-blue)}
+.dashGreeting{margin:0 0 6px 0;font-size:25px;font-weight:900;letter-spacing:-.025em;color:var(--text-main)}
+.dashDate{margin:0;color:var(--text-muted);font-size:13.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.dashTopControls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.careModeStatusCard{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:14px;background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow),inset 0 1px 0 0 var(--glass-border-highlight);transition:.2s}
+.careModeStatusCard.active{background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.4)}
+.careStatusTitle{font-size:12px;color:var(--text-main)}
+.careStatusSub{display:block;font-size:10.5px;color:var(--text-muted)}
+.careToggleBtn{border:0;background:var(--primary-blue);color:#fff;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;cursor:pointer;transition:.15s}
+.careToggleBtn:hover{opacity:.9}
+.careModeStatusCard.active .careToggleBtn{background:#334155}
+
+/* Glass KPI Grid & Cards */
+.dashKpiGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:1024px){.dashKpiGrid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.dashKpiGrid{grid-template-columns:repeat(2,1fr);gap:10px}}
+
+.glassKpiCard{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow),inset 0 1px 0 0 var(--glass-border-highlight);border-radius:16px;padding:16px 17px;position:relative;overflow:hidden;transition:transform .2s cubic-bezier(0.16,1,0.3,1),box-shadow .2s ease,border-color .2s ease;display:flex;flex-direction:column;justify-content:space-between;min-height:114px}
+.glassKpiCard:hover{transform:translateY(-2px);box-shadow:var(--glass-hover-shadow),inset 0 1px 0 0 var(--glass-border-highlight);border-color:rgba(2,132,199,0.38)}
+.glassKpiHeader{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}
+.glassKpiLabel{font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.glassKpiIcon{font-size:15px;line-height:1;opacity:.88}
+.glassKpiValue{font-size:23px;font-weight:900;letter-spacing:-.03em;color:var(--text-main);line-height:1.15;overflow-wrap:anywhere;margin-bottom:6px}
+.glassKpiFooter{font-size:11px;color:var(--text-dim);font-weight:600;display:flex;align-items:center;gap:4px}
+.glassGlow{position:absolute;top:-24px;right:-24px;width:75px;height:75px;border-radius:50%;background:radial-gradient(circle,rgba(2,132,199,0.08) 0%,transparent 70%);pointer-events:none}
+.glassGlow.green{background:radial-gradient(circle,rgba(16,185,129,0.13) 0%,transparent 70%)}
+.glassGlow.amber{background:radial-gradient(circle,rgba(245,158,11,0.13) 0%,transparent 70%)}
+.glassGlow.red{background:radial-gradient(circle,rgba(239,68,68,0.13) 0%,transparent 70%)}
+.glassGlow.blue{background:radial-gradient(circle,rgba(14,165,233,0.13) 0%,transparent 70%)}
+
+.text-emerald{color:#059669!important}
+.text-amber{color:#d97706!important}
+.text-rose{color:#e11d48!important}
+.text-cyan{color:#0284c7!important}
+body.care-mode-active .text-emerald{color:#34d399!important}
+body.care-mode-active .text-amber{color:#fbbf24!important}
+body.care-mode-active .text-rose{color:#f87171!important}
+body.care-mode-active .text-cyan{color:#38bdf8!important}
+
+/* Glass Section Headers & Glass Cards */
+.card.glassCard{background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow),inset 0 1px 0 0 var(--glass-border-highlight);border-radius:18px;padding:20px;transition:border-color .2s ease,box-shadow .2s ease}
+.card.glassCard:hover{border-color:rgba(2,132,199,0.28)}
+
+.glassSectionHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;margin-bottom:14px;border-bottom:1px solid var(--border-subtle)}
+.glassSectionTitle{margin:0;font-size:17px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;color:var(--text-main)}
+.glassSectionSub{font-size:12px;color:var(--text-muted);font-weight:500}
+
+/* Glass Action Row */
+.dashActionRow.glassActionRow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;padding:12px 14px;background:var(--glass-bg);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border:1px solid var(--glass-border);box-shadow:var(--glass-shadow),inset 0 1px 0 0 var(--glass-border-highlight);border-radius:16px}
+.glassActionBtn{border:1px solid var(--glass-border);background:rgba(255,255,255,0.72);color:var(--text-main);border-radius:10px;padding:9px 15px;font-size:13px;font-weight:800;cursor:pointer;transition:all .18s ease;display:inline-flex;align-items:center;gap:6px}
+body.care-mode-active .glassActionBtn{background:rgba(16,28,52,0.8);color:#f8fafc;border-color:var(--glass-border)}
+.glassActionBtn:hover{border-color:var(--primary-blue);background:rgba(2,132,199,0.08);transform:translateY(-1px);box-shadow:0 4px 12px rgba(2,132,199,0.12)}
+body.care-mode-active .glassActionBtn:hover{background:rgba(56,189,248,0.15);border-color:var(--accent-cyan)}
+.aiLauncherBtn{background:linear-gradient(135deg,#0284c7,#0ea5e9)!important;color:#fff!important;border:0!important;box-shadow:0 4px 14px rgba(2,132,199,0.28)!important}
+
+/* RENT HERO FOR TENANT */
+.rentHeroCard{background:linear-gradient(135deg,#071b41,#0869d7 55%,#00b8ff);color:#fff;border-radius:18px;padding:22px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:16px;box-shadow:0 10px 30px rgba(8,105,215,0.25);flex-wrap:wrap}
+.rentHeroMain small{color:#cbd5e1;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.rentHeroBalance{font-size:32px;font-weight:900;margin:6px 0;letter-spacing:-.02em}
+.rentHeroMeta{display:flex;align-items:center;gap:8px;font-size:13px;color:#e2e8f0;flex-wrap:wrap}
+.rentHeroAction button{min-height:48px;padding:0 20px;font-size:14px;font-weight:800;background:#ffffff;color:#0369a1;border-radius:12px;border:0;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15)}
+.mavAiQuickPrompts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.mavAiPromoCard{background:linear-gradient(135deg,#071b41,#0869d7 60%,#00b8ff);color:#fff;border:0}
+.mavAiPromoCard p{color:rgba(255,255,255,0.85)}
+.mavAiPromoCard .btn{background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25)}
+.mavAiPromoCard .btn:hover{background:#fff;color:#0369a1}
+.mobileMenuNavBtn{border:0;background:transparent;color:#aeb7c5;border-radius:9px;padding:6px 3px;font-weight:800;display:flex;align-items:center;justify-content:center}
 
 </style>
 </head>
@@ -1179,8 +1363,14 @@ Forgot password?
 
 <div class="bar">
 
-<div class="brand small">
-Mav<span>Rent</span>
+<div class="brandGroup">
+  <div class="brand small">
+    Mav<span>Rent</span>
+  </div>
+  <div id="careModeBadge" class="careModeBadge hidden" role="status" aria-label="Care Mode is active" onclick="if(role==='landlord')toggleCareModeFromUI()" title="Care Mode Status — Click to toggle">
+    <span class="careDot"></span>
+    <span class="careBadgeText"><span class="careBadgeFull">CARE MODE ACTIVE</span><span class="careBadgeShort">CARE</span></span>
+  </div>
 </div>
 
 <div class="userbox">
@@ -1207,8 +1397,14 @@ Log out
 
 </div>
 
-<nav id="nav"></nav>
-<button id="navMenuBtn" class="navMenuBtn" type="button" onclick="toggleNavDrawer()" title="Open MavRent menu">☰ <span>Menu</span></button>
+<div class="navRow">
+  <nav id="nav"></nav>
+  <div id="headerCareStatus" class="headerCareStatus hidden" onclick="toggleCareModeFromUI()" title="Care Mode Status — Click to toggle" role="button" tabindex="0">
+    <span class="careDot"></span>
+    <span class="headerCareText">Care Mode OFF</span>
+  </div>
+  <button id="navMenuBtn" class="navMenuBtn" type="button" onclick="toggleNavDrawer()" title="Open MavRent menu">☰ <span>Menu</span></button>
+</div>
 </header>
 <div id="navDrawer" class="navDrawer" onclick="if(event.target===this)closeNavDrawer()">
   <div class="navDrawerPanel">
@@ -1722,6 +1918,90 @@ async function ensureRentSchedules(){
   finally{scheduleMaintenanceRunning=false;}
 }
 
+let careModeEnabled = false;
+
+async function checkCareMode(){
+  if(role !== 'landlord'){
+    applyCareModeVisuals(false);
+    return;
+  }
+  try{
+    const client = await ensureSupabase();
+    const session = await client.auth.getSession();
+    const token = session?.data?.session?.access_token;
+    if(!token) return;
+    const r = await fetch('/api/care-mode', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const d = await r.json().catch(() => ({}));
+    if(r.ok && typeof d.enabled === 'boolean'){
+      applyCareModeVisuals(d.enabled);
+    }
+  }catch(e){
+    console.warn('Care Mode check:', e);
+  }
+}
+
+function applyCareModeVisuals(enabled){
+  careModeEnabled = !!enabled;
+  if(careModeEnabled){
+    document.body.classList.add('care-mode-active');
+  }else{
+    document.body.classList.remove('care-mode-active');
+  }
+  const badge = $('careModeBadge');
+  if(badge){
+    badge.classList.toggle('hidden', !careModeEnabled);
+    badge.setAttribute('aria-label', careModeEnabled ? 'Care Mode is active' : 'Care Mode is standby');
+  }
+  const careNav = $('headerCareStatus');
+  if(careNav){
+    if(typeof role !== 'undefined' && role === 'landlord'){
+      careNav.classList.remove('hidden');
+      careNav.classList.toggle('active', careModeEnabled);
+      careNav.innerHTML = `<span class="careDot"></span><span class="headerCareText">${careModeEnabled ? 'Care Mode ON' : 'Care Mode OFF'}</span>`;
+    }else{
+      careNav.classList.add('hidden');
+    }
+  }
+}
+
+window.updateCareModeVisuals = applyCareModeVisuals;
+
+async function toggleCareModeFromUI(){
+  if(role !== 'landlord') return;
+  try{
+    const client = await ensureSupabase();
+    const session = await client.auth.getSession();
+    const token = session?.data?.session?.access_token;
+    if(!token) throw new Error('Session expired');
+    const next = !careModeEnabled;
+    const r = await fetch('/api/care-mode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({ enabled: next, settings: {} })
+    });
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.error || 'Could not update Care Mode');
+    applyCareModeVisuals(next);
+    const statusCard = $('dashCareStatus');
+    if(statusCard){
+      statusCard.className = 'careModeStatusCard ' + (next ? 'active' : '');
+      const title = statusCard.querySelector('.careStatusTitle');
+      if(title) title.innerHTML = 'Care Mode: <strong>' + (next ? 'ACTIVE' : 'STANDBY') + '</strong>';
+      const sub = statusCard.querySelector('.careStatusSub');
+      if(sub) sub.textContent = next ? 'Routine monitoring & reminders active' : 'Manual approvals only';
+      const btn = statusCard.querySelector('.careToggleBtn');
+      if(btn) btn.textContent = next ? 'Turn Off' : 'Turn On';
+    }
+  }catch(e){
+    alert('Care Mode update: ' + (e.message || e));
+  }
+}
+
 async function loadApp(){
 
 if(!user||loading)
@@ -1752,6 +2032,12 @@ try{
   $('app').classList.remove('hidden');
 
   buildNav();
+
+  if(role==='landlord'){
+    try{await checkCareMode();}catch(e){console.warn('Care Mode check:',e);}
+  }else{
+    applyCareModeVisuals(false);
+  }
 
   try{await updatePushStatusUI();}catch(e){
     console.warn('MavRent notification status:',e);
@@ -2221,12 +2507,13 @@ function buildNav(){
   $('who').textContent=(role==='landlord'?'Landlord: ':'Tenant: ')+(profile?.full_name||user.email);
   const items=navItems();
   const primary=role==='landlord'
-    ?items.filter(x=>['dashboard','rent','tenants'].includes(x[0]))
-    :items.filter(x=>['home','myRent','myMaintenance'].includes(x[0]));
-  $('nav').innerHTML=primary.map(x=>navButtonHtml(x)).join('');
-  $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.p));
+    ?items.filter(x=>['dashboard','rent','tenants','payments'].includes(x[0]))
+    :items.filter(x=>['home','myRent','myPayments','myMaintenance'].includes(x[0]));
+  $('nav').innerHTML=primary.map(x=>navButtonHtml(x)).join('') + `<button type="button" class="mobileMenuNavBtn" onclick="toggleNavDrawer()" aria-label="Open full menu">☰ Menu</button>`;
+  $('nav').querySelectorAll('button[data-p]').forEach(b=>b.onclick=()=>show(b.dataset.p));
   const drawer=$('navDrawerGrid');
   if(drawer)drawer.innerHTML=items.map(x=>navButtonHtml(x,true)).join('');
+  applyCareModeVisuals(careModeEnabled);
   updatePushStatusUI();
 }
 function toggleNavDrawer(){
@@ -2430,172 +2717,187 @@ x=>rentComputedStatus(x)==='overdue'
 0
 );
 
+const occupiedUnits = cache.units.filter(u => u.status === 'occupied').length;
+const vacantUnits = cache.units.filter(u => u.status === 'vacant' || !u.status).length;
+const openMaintenance = cache.maintenance_requests.filter(m => !['completed','resolved','cancelled'].includes(String(m.status||'').toLowerCase())).length;
+const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' });
+const landlordName = profile?.full_name || user.email || 'Landlord';
+
 return`
 
-<section>
+<section class="landlordDashboard">
 
-<div class="title">
-
-<h1>
-Landlord Dashboard
-</h1>
-
-<p>
-Manage your rental business.
-</p>
-
+<div class="dashGreetingHeader glassHeader">
+  <div class="greetingContent">
+    <div class="dashKicker"><span class="kickerDot"></span>Landlord Operations</div>
+    <h1 class="dashGreeting">Welcome, ${esc(landlordName)}</h1>
+    <p class="dashDate"><span>${todayStr}</span><span aria-hidden="true">·</span><span>${cache.properties.length} ${cache.properties.length === 1 ? 'property' : 'properties'}</span><span aria-hidden="true">·</span><span>${cache.units.length} total units</span></p>
+  </div>
+  <div class="dashTopControls">
+    <div id="dashCareStatus" class="careModeStatusCard ${careModeEnabled ? 'active' : ''}">
+      <span class="careDot"></span>
+      <div>
+        <div class="careStatusTitle">Care Mode: <strong>${careModeEnabled ? 'ACTIVE' : 'STANDBY'}</strong></div>
+        <small class="careStatusSub">${careModeEnabled ? 'Routine monitoring & reminders active' : 'Manual approvals only'}</small>
+      </div>
+      <button type="button" class="careToggleBtn" onclick="toggleCareModeFromUI()">${careModeEnabled ? 'Turn Off' : 'Turn On'}</button>
+    </div>
+    <button type="button" class="btn aiLauncherBtn" onclick="openMavAIFromDashboard()">✨ Mav AI</button>
+  </div>
 </div>
 
-<div class="stats">
+<div class="dashKpiGrid">
+  <div class="glassKpiCard" data-kpi="properties">
+    <div class="glassKpiHeader">
+      <span class="glassKpiLabel">Total Properties</span>
+      <span class="glassKpiIcon" aria-hidden="true">🏘️</span>
+    </div>
+    <div class="glassKpiValue">${cache.properties.length}</div>
+    <div class="glassKpiFooter">
+      <span class="glassKpiSub">${cache.properties.length === 1 ? 'Registered estate' : 'Active estates'}</span>
+    </div>
+    <div class="glassGlow" aria-hidden="true"></div>
+  </div>
 
-<div class="card">
-<small>Properties</small>
-<div class="big">
-${cache.properties.length}
-</div>
+  <div class="glassKpiCard" data-kpi="occupied">
+    <div class="glassKpiHeader">
+      <span class="glassKpiLabel">Occupied Units</span>
+      <span class="glassKpiIcon green" aria-hidden="true">🚪</span>
+    </div>
+    <div class="glassKpiValue text-emerald">${occupiedUnits}</div>
+    <div class="glassKpiFooter">
+      <span class="glassKpiSub">${cache.units.length ? Math.round((occupiedUnits / cache.units.length) * 100) : 0}% occupancy</span>
+    </div>
+    <div class="glassGlow green" aria-hidden="true"></div>
+  </div>
+
+  <div class="glassKpiCard" data-kpi="vacant">
+    <div class="glassKpiHeader">
+      <span class="glassKpiLabel">Vacant Units</span>
+      <span class="glassKpiIcon ${vacantUnits > 0 ? 'orange' : ''}" aria-hidden="true">✨</span>
+    </div>
+    <div class="glassKpiValue ${vacantUnits > 0 ? 'text-amber' : ''}">${vacantUnits}</div>
+    <div class="glassKpiFooter">
+      <span class="glassKpiSub">${vacantUnits > 0 ? 'Ready to lease' : 'Fully leased'}</span>
+    </div>
+    <div class="glassGlow amber" aria-hidden="true"></div>
+  </div>
+
+  <div class="glassKpiCard" data-kpi="collected">
+    <div class="glassKpiHeader">
+      <span class="glassKpiLabel">Rent Collected</span>
+      <span class="glassKpiIcon green" aria-hidden="true">💰</span>
+    </div>
+    <div class="glassKpiValue text-emerald">${money(paid)}</div>
+    <div class="glassKpiFooter">
+      <span class="glassKpiSub">${due > 0 ? Math.round((paid / due) * 100) : 100}% of billed</span>
+    </div>
+    <div class="glassGlow green" aria-hidden="true"></div>
+  </div>
+
+  <div class="glassKpiCard" data-kpi="outstanding">
+    <div class="glassKpiHeader">
+      <span class="glassKpiLabel">Outstanding</span>
+      <span class="glassKpiIcon ${outstanding > 0 ? 'red' : ''}" aria-hidden="true">⏱️</span>
+    </div>
+    <div class="glassKpiValue ${outstanding > 0 ? 'text-rose' : ''}">${money(outstanding)}</div>
+    <div class="glassKpiFooter">
+      <span class="glassKpiSub">${overdue > 0 ? `${money(overdue)} overdue` : 'No overdue arrears'}</span>
+    </div>
+    <div class="glassGlow red" aria-hidden="true"></div>
+  </div>
+
+  <div class="glassKpiCard" data-kpi="maintenance">
+    <div class="glassKpiHeader">
+      <span class="glassKpiLabel">Maintenance</span>
+      <span class="glassKpiIcon ${openMaintenance > 0 ? 'blue' : ''}" aria-hidden="true">🔧</span>
+    </div>
+    <div class="glassKpiValue ${openMaintenance > 0 ? 'text-cyan' : ''}">${openMaintenance}</div>
+    <div class="glassKpiFooter">
+      <span class="glassKpiSub">${openMaintenance > 0 ? 'Requires attention' : 'All resolved'}</span>
+    </div>
+    <div class="glassGlow blue" aria-hidden="true"></div>
+  </div>
 </div>
 
-<div class="card">
-<small>Units</small>
-<div class="big">
-${cache.units.length}
-</div>
-</div>
-
-<div class="card">
-<small>Rent Collected</small>
-<div class="big green">
-${money(paid)}
-</div>
-</div>
-
-<div class="card">
-<small>Outstanding Rent</small>
-<div class="big red">
-${money(outstanding)}
-</div>
-</div>
-
+<div class="dashActionRow glassActionRow">
+  <button class="glassActionBtn" onclick="show('properties')">+ Add Property</button>
+  <button class="glassActionBtn" onclick="show('tenants')">+ Add Tenant</button>
+  <button class="glassActionBtn" onclick="show('payments')">💳 Record Payment</button>
+  <button class="glassActionBtn" onclick="show('maintenance')">🔧 Maintenance ${openMaintenance ? `(${openMaintenance})` : ''}</button>
+  <button class="glassActionBtn" onclick="show('receipts')">🧾 Receipts</button>
+  <button class="glassActionBtn aiLauncherBtn" onclick="openMavAIFromDashboard()">✨ Mav AI</button>
 </div>
 
 <div class="grid">
 
-<div class="card">
-
-<h3>
-💰 Rent Overview
-</h3>
-
-<p>
-Total rent due:
-<b>${money(due)}</b>
-</p>
-
-<p>
-Collected:
-<b class="green">${money(paid)}</b>
-</p>
-
-<p>
-Outstanding:
-<b class="red">${money(outstanding)}</b>
-</p>
-
-<p>
-Overdue:
-<b class="red">${money(overdue)}</b>
-</p>
-
-<button
-class="primary"
-onclick="show('rent')">
-Open Rent System
-</button>
-
+<div class="card glassCard">
+  <div class="glassSectionHead">
+    <h3 class="glassSectionTitle">💰 Rent Overview</h3>
+    <span class="glassSectionSub">Monthly collection</span>
+  </div>
+  <p>Total rent due: <b>${money(due)}</b></p>
+  <p>Collected: <b class="green">${money(paid)}</b></p>
+  <p>Outstanding: <b class="red">${money(outstanding)}</b></p>
+  <p>Overdue: <b class="red">${money(overdue)}</b></p>
+  <div style="margin-top:16px">
+    <button class="primary" onclick="show('rent')">Open Rent System</button>
+  </div>
 </div>
 
-<div class="pushStatusCard">
+<div class="card glassCard">
+  <div class="glassSectionHead">
+    <h3 class="glassSectionTitle">📊 Financial Performance</h3>
+    <span class="glassSectionSub">Revenue & expenses</span>
+  </div>
+  <p>Confirmed payments: <b class="green">${money(confirmed)}</b></p>
+  <p>Expenses: <b class="red">${money(expenses)}</b></p>
+  <p>Net revenue: <b>${money(confirmed - expenses)}</b></p>
+  <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" onclick="show('expenses')">Manage Expenses</button>
+    <button class="btn" onclick="show('reports')">View Reports</button>
+  </div>
+</div>
+
+<div class="pushStatusCard glassCard">
   <div class="pushStatusRow">
-    <div><div class="pushStatusTitle">🔔 Phone notifications</div><div class="hint">Get rent reminders on this device.</div></div>
+    <div><div class="pushStatusTitle">🔔 Phone Notifications</div><div class="hint">Rent reminders and alerts on this device.</div></div>
     <div id="pushStatus"><span class="pushBadge off"><span class="pushDot"></span>Checking…</span></div>
   </div>
   <div class="pushActions">
-    <button id="enablePushBtn" class="btn successBtn" onclick="enablePushFromUI()">🔔 Enable phone notifications</button>
+    <button id="enablePushBtn" class="btn successBtn" onclick="enablePushFromUI()">🔔 Enable Notifications</button>
     <button class="btn" onclick="testMavRentNotification()">🧪 Test</button>
   </div>
 </div>
-<div class="dashboardClean">
- <div class="dashboardNavCard">
-  <h3>☰ Manage MavRent</h3>
-  <p>All features are now inside the Menu button. Your dashboard stays clean and easy to read.</p>
-  <button class="primary" onclick="toggleNavDrawer()">☰ Open full menu</button>
- </div>
- <div class="dashboardNavCard">
-  <h3>⚡ Shortcuts</h3>
-  <div class="actions">
-   <button class="btn" onclick="show('rent')">💰 Rent</button>
-   <button class="btn" onclick="show('tenants')">👥 Tenants</button>
+
+<div class="card mavAiPromoCard glassCard">
+  <div class="glassSectionHead" style="border-bottom:1px solid rgba(255,255,255,0.2)">
+    <h3 class="glassSectionTitle" style="color:#fff">✨ Mav AI Assistant</h3>
+    <span class="glassSectionSub" style="color:rgba(255,255,255,0.8)">Operations co-pilot</span>
   </div>
- </div>
-</div>
-<div class="mavDashboardAi">
- <h3>✨ Mav AI</h3>
- <p>Your rental management assistant. Ask about rent, overdue tenants, payments, maintenance, receipts and more — by typing or voice.</p>
- <button type="button" onclick="openMavAIFromDashboard()">✨ Open Mav AI</button>
-</div>
-
-</div>
-
-<div class="card">
-
-<h3>
-Financial Summary
-</h3>
-
-<p>
-Confirmed payments:
-<b class="green">
-${money(confirmed)}
-</b>
-</p>
-
-<p>
-Expenses:
-<b class="red">
-${money(expenses)}
-</b>
-</p>
-
-<p>
-Net:
-<b>
-${money(confirmed-expenses)}
-</b>
-</p>
-
+  <p>Ask anything about your properties, overdue rent, or prepare management actions.</p>
+  <div class="mavAiQuickPrompts">
+    <button type="button" class="btn" onclick="openMavAIPrompt('Who is overdue?')">Who is overdue?</button>
+    <button type="button" class="btn" onclick="openMavAIPrompt('What needs attention?')">What needs attention?</button>
+    <button type="button" class="btn" onclick="openMavAIPrompt('Show vacant units')">Vacant units</button>
+    <button type="button" class="btn" onclick="openMavAIFromDashboard()">Launch Mav AI →</button>
+  </div>
 </div>
 
-<div class="card">
-
-<h3>
-Account
-</h3>
-
-<p>
-${esc(user.email)}
-</p>
-
-<p>
-Profile ID:
-<b>
-${shortId(user.id)}
-</b>
-</p>
+<div class="card glassCard">
+  <div class="glassSectionHead">
+    <h3 class="glassSectionTitle">👤 Account</h3>
+    <span class="glassSectionSub">Profile ID: <b class="code">${shortId(user.id)}</b></span>
+  </div>
+  <p>${esc(user.email)}</p>
+  <div style="margin-top:14px">
+    <button class="btn" onclick="show('profile')">Manage Profile</button>
+  </div>
+</div>
 
 </div>
 
 </section>
-
 `;
 
 }
@@ -4454,9 +4756,107 @@ tenant=function(id){
  return tenantHomePage();
 };
 
+window.openMavAIPrompt = function(text){
+  if(typeof window.openMavAIFromDashboard === 'function') window.openMavAIFromDashboard();
+  setTimeout(function(){
+    var input = document.getElementById('mavAiInput');
+    var send = document.getElementById('mavAiSend');
+    if(input){
+      input.value = text;
+      if(send) send.click();
+    }
+  }, 160);
+};
+
 function tenantHomePage(){
- const t=cache.tenants[0],u=unitForTenant(t),p=propertyForUnit(u),next=t?nextDueRecord(t.id):null;
- return `<section><div class="title"><h1>🏠 My Home</h1><p>Welcome back, ${esc(profile?.full_name||user.email)}.</p></div>${t?`${rentAssignmentNotice()}<div class="card"><h3>${esc(p?.name||'Your rental')}</h3><p>Unit: <b>${esc(u?.unit_number||'—')}</b></p><p>Monthly rent: <b>${money(t.rent_amount)}</b></p><p>Payment day: <b>${t.rent_due_day||1}</b></p><p>Next due: <b>${next?localDate(next.due_date):'All paid'}</b></p></div>`:'<div class="card"><h3>No rental assigned</h3><p>Your landlord has not assigned a unit yet.</p></div>'}<div class="actions"><button class="btn" onclick="show('myRent')">💰 My Rent</button><button class="btn" onclick="show('myPayments')">💳 My Payments</button><button class="btn" onclick="show('myMaintenance')">🔧 Maintenance</button><button class="btn" onclick="show('guide')">❓ Guide</button></div></section>`;
+  const t = cache.tenants[0];
+  const u = unitForTenant(t);
+  const p = propertyForUnit(u);
+  const next = t ? nextDueRecord(t.id) : null;
+  const rows = t ? (cache.rent_records || []).filter(r => r.tenant_id === t.id) : [];
+  const balance = rows.reduce((a, r) => a + Math.max(0, Number(r.amount_due || 0) - Number(r.amount_paid || 0)), 0);
+  const myOpenMaint = t ? cache.maintenance_requests.filter(m => m.tenant_id === t.id && !['completed', 'resolved', 'cancelled'].includes(String(m.status || '').toLowerCase())).length : 0;
+  const lastPayment = t ? (cache.payments || []).filter(pm => pm.tenant_id === t.id && pm.status === 'confirmed').sort((a,b) => String(b.payment_date).localeCompare(String(a.payment_date)))[0] : null;
+
+  return `
+  <section class="tenantDashboard">
+    <div class="dashGreetingHeader">
+      <div>
+        <div class="dashKicker">Tenant Portal</div>
+        <h1 class="dashGreeting">Welcome, ${esc(profile?.full_name || user.email)}</h1>
+        <p class="dashDate">${t ? `${esc(p?.name || 'Your Rental')} · Unit ${esc(u?.unit_number || '—')}` : 'No rental unit assigned'}</p>
+      </div>
+      <div>
+        <button type="button" class="btn aiLauncherBtn" onclick="openMavAIFromDashboard()">✨ Ask Mav AI</button>
+      </div>
+    </div>
+
+    ${t ? `
+    ${rentAssignmentNotice()}
+    <div class="rentHeroCard">
+      <div class="rentHeroMain">
+        <small>Current Outstanding Rent</small>
+        <div class="rentHeroBalance">${money(balance)}</div>
+        <div class="rentHeroMeta">
+          <span>Monthly Rent: <b>${money(t.rent_amount)}</b></span>
+          <span>·</span>
+          <span>Payment Day: <b>${t.rent_due_day || 1}st of month</b></span>
+          <span>·</span>
+          <span>Next Due: <b>${next ? localDate(next.due_date) : 'All current'}</b></span>
+        </div>
+      </div>
+      <div class="rentHeroAction">
+        <button type="button" onclick="show('myRent')">💳 Pay Rent / Generate PRN</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>💳 Recent Payments</h3>
+        ${lastPayment ? `
+          <p>Last payment: <b class="green">${money(lastPayment.amount)}</b> on ${localDate(lastPayment.payment_date)}</p>
+          <p class="hint">Reference: <b class="code">${esc(lastPayment.transaction_reference || 'PRN Verified')}</b></p>
+        ` : '<p class="hint">No confirmed payments recorded yet.</p>'}
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn" onclick="show('myPayments')">Payment History</button>
+          <button class="btn successBtn" onclick="show('myRent')">Pay Now</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🔧 Maintenance Requests</h3>
+        <p>Active requests: <b>${myOpenMaint}</b></p>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn successBtn" onclick="show('myMaintenance')">+ New Request</button>
+          <button class="btn" onclick="show('myMaintenance')">View Requests</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>🧾 Receipts</h3>
+        <p>Issued receipts: <b>${cache.receipts.filter(r => r.tenant_id === t.id).length}</b></p>
+        <div style="margin-top:14px">
+          <button class="btn" onclick="show('myReceipts')">View My Receipts</button>
+        </div>
+      </div>
+
+      <div class="card mavAiPromoCard">
+        <h3>✨ Mav AI Assistant</h3>
+        <p>Ask anything about your rent, payments, maintenance, or due dates.</p>
+        <div class="mavAiQuickPrompts">
+          <button type="button" class="btn" onclick="openMavAIPrompt('How much do I owe?')">How much do I owe?</button>
+          <button type="button" class="btn" onclick="openMavAIPrompt('When is my rent due?')">When is rent due?</button>
+          <button type="button" class="btn" onclick="openMavAIFromDashboard()">Open Mav AI →</button>
+        </div>
+      </div>
+    </div>
+    ` : `
+    <div class="card">
+      <h3>No Rental Assigned</h3>
+      <p>Your landlord has not assigned a rental unit to your account yet. When assigned, your unit details, rent schedule, and PRN payments will appear here.</p>
+    </div>
+    `}
+  </section>`;
 }
 function tenantPaymentsPage(){
  const t=cache.tenants[0], rows=cache.payments.filter(p=>p.tenant_id===t?.id);return `<section><div class="title"><h1>💳 My Payments</h1><p>Your submitted and confirmed payments.</p></div><div class="card">${table(['Date','Amount','Method','Status','Reference','Rent Month'],rows,p=>`<tr><td>${esc(p.payment_date)}</td><td>${money(p.amount)}</td><td>${esc(p.payment_method)}</td><td><span class="badge ${esc(p.status)}">${esc(p.status)}</span></td><td>${esc(p.transaction_reference||'—')}</td><td>${monthLabel(cache.rent_records.find(r=>r.id===p.rent_record_id)?.period_month)}</td></tr>`)}</div></section>`;

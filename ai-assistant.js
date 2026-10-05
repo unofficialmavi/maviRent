@@ -1,40 +1,77 @@
 /* Mav AI Assistant V3 — visible AI + confirmed actions */
 (function(){
   const STYLE = `
-    #mavAiButton{position:fixed;right:18px;bottom:88px;z-index:260;border:0;border-radius:999px;padding:13px 17px;background:linear-gradient(135deg,#087cff,#00b8ff);color:#fff;font-weight:900;box-shadow:0 14px 35px #087cff55;display:none}
-    #mavAiButton.show{display:block}
-    #mavAiModal{position:fixed;inset:0;z-index:1000;display:none;background:#0008;align-items:center;justify-content:center;padding:15px}
+    #mavAiButton{position:fixed;right:20px;bottom:88px;z-index:260;border:0;border-radius:999px;padding:12px 18px;background:linear-gradient(135deg,#0284c7,#0ea5e9);color:#fff;font-weight:800;font-size:14px;box-shadow:0 10px 25px rgba(2,132,199,0.35);display:none;align-items:center;gap:7px;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+    #mavAiButton:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(2,132,199,0.45)}
+    #mavAiButton.show{display:inline-flex}
+    #mavAiModal{position:fixed;inset:0;z-index:1000;display:none;background:rgba(15,23,42,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px}
     #mavAiModal.open{display:flex}
-    .mavAiBox{width:min(700px,100%);height:min(820px,94vh);background:#fff;border-radius:20px;box-shadow:0 25px 90px #0006;display:flex;flex-direction:column;overflow:hidden}
-    .mavAiHead{padding:15px 17px;background:#111827;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .mavAiHead strong{font-size:17px}.mavAiHead small{display:block;opacity:.7;margin-top:2px}
-    .mavAiClose{border:0;background:#273244;color:#fff;border-radius:9px;padding:8px 11px}
-    .mavAiMessages{flex:1;overflow:auto;padding:15px;background:#f6f8fb}
-    .mavAiMsg{max-width:90%;padding:11px 13px;border-radius:14px;margin-bottom:10px;line-height:1.45;font-size:14px;white-space:pre-wrap}
-    .mavAiMsg.bot{background:#fff;border:1px solid #e3e6ea}.mavAiMsg.user{margin-left:auto;background:#087cff;color:#fff}
-    .mavAiComposer{padding:12px;border-top:1px solid #e5e7eb;display:flex;gap:8px}
-    .mavAiComposer textarea{flex:1;resize:none;min-height:48px;max-height:120px;padding:12px;border:1px solid #d9dde3;border-radius:12px;font:inherit}
-    .mavAiSend{border:0;border-radius:12px;padding:0 16px;background:#111827;color:#fff;font-weight:800}
-    .mavAiHint{font-size:11px;color:#6b7280;padding:0 12px 9px}
-    .mavAiActions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-    .mavAiAction{border:1px solid #d9dde3;background:#fff;border-radius:12px;padding:11px;text-align:left;font-weight:800}
-    .mavAiPanel{background:#fff;border:1px solid #dfe4ea;border-radius:14px;padding:14px;margin-bottom:12px}
-    .mavAiPanel h3{margin:0 0 10px}.mavAiPanel label{display:block;color:#4b5563;font-size:12px;margin:8px 0 5px}
-    .mavAiPanel input,.mavAiPanel select{width:100%;padding:11px;border:1px solid #d9dde3;border-radius:10px;background:#fff;color:#111827}
-    .mavAiGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .mavAiBox{width:min(680px,100%);height:min(780px,92vh);background:#ffffff;border:1px solid #e2e8f0;border-radius:22px;box-shadow:0 25px 60px -15px rgba(15,23,42,0.25);display:flex;flex-direction:column;overflow:hidden;transition:background-color .25s ease,border-color .25s ease}
+    .mavAiHead{padding:14px 18px;background:#0c182c;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #1e293b}
+    .mavAiHeadTitle strong{font-size:16px;letter-spacing:-.01em;display:flex;align-items:center;gap:6px}
+    .mavAiHeadTitle small{display:block;color:#94a3b8;font-size:11px;margin-top:2px}
+    .mavAiHeadActions{display:flex;align-items:center;gap:8px}
+    .mavAiVoiceSelect{background:#1e293b;color:#f1f5f9;border:1px solid #334155;border-radius:9px;padding:6px 9px;font-size:11px;font-weight:700;outline:0;cursor:pointer}
+    .mavAiVoiceSelect:focus{border-color:#38bdf8}
+    .mavAiClose{border:0;background:#1e293b;color:#94a3b8;border-radius:9px;padding:7px 11px;font-weight:800;cursor:pointer;transition:color .15s,background .15s}
+    .mavAiClose:hover{color:#fff;background:#334155}
+    .mavAiMessages{flex:1;overflow:auto;padding:16px;background:#f8fafc;display:flex;flex-direction:column;gap:10px}
+    .mavAiMsg{max-width:88%;padding:11px 14px;border-radius:16px;line-height:1.5;font-size:13.5px;white-space:pre-wrap;word-break:break-word}
+    .mavAiMsg.bot{background:#ffffff;color:#0f172a;border:1px solid #e2e8f0;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(15,23,42,0.04)}
+    .mavAiMsg.user{margin-left:auto;background:#0284c7;color:#fff;border-bottom-right-radius:4px}
+    .mavAiSuggestionsSection{padding:0 14px 10px;background:#f8fafc}
+    .mavAiSuggestionsTitle{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#64748b;margin-bottom:6px}
+    .mavAiSuggestionsGrid{display:flex;flex-wrap:wrap;gap:6px}
+    .mavAiChip{border:1px solid #cbd5e1;background:#ffffff;color:#0f172a;border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;transition:border-color .15s,background .15s}
+    .mavAiChip:hover{border-color:#0284c7;background:#f0f9ff;color:#0369a1}
+    .mavAiComposer{padding:12px 14px;border-top:1px solid #e2e8f0;background:#fff;display:flex;align-items:flex-end;gap:8px}
+    .mavAiComposer textarea{flex:1;resize:none;min-height:44px;max-height:110px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:12px;font:inherit;font-size:13.5px;outline:0;transition:border-color .2s}
+    .mavAiComposer textarea:focus{border-color:#0284c7;box-shadow:0 0 0 3px rgba(2,132,199,0.12)}
+    .mavAiSend{border:0;border-radius:12px;padding:10px 16px;background:#0c182c;color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:background .2s}
+    .mavAiSend:hover{background:#0284c7}
+    .mavAiMic{border:1px solid #cbd5e1;border-radius:12px;padding:10px 12px;background:#f8fafc;color:#0f172a;font-weight:800;cursor:pointer;transition:.2s}
+    .mavAiMic.listening{background:#fee2e2;color:#991b1b;border-color:#fca5a5;animation:mavAiPulse 1.2s infinite}
+    .mavAiVoiceState{font-size:11px;color:#64748b;padding:0 14px 6px;min-height:16px;background:#fff}
+    .mavAiTools{display:flex;gap:6px;flex-wrap:wrap;padding:6px 14px 8px;background:#fff;border-top:1px solid #f1f5f9}
+    .mavAiTool{border:1px solid #e2e8f0;background:#f8fafc;color:#0f172a;border-radius:9px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer}
+    .mavAiTool:hover{border-color:#0284c7;background:#f0f9ff}
+    .mavAiPanel{background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:14px;margin:8px 0}
+    .mavAiSummary{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:11px;margin-top:8px;font-size:12.5px;line-height:1.55}
     .mavAiConfirm{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .mavAiConfirm button{border:0;border-radius:10px;padding:11px;font-weight:900}
-    .mavAiConfirm .ok{background:#087cff;color:#fff}.mavAiConfirm .cancel{background:#eef1f5;color:#111827}
-    .mavAiSummary{background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:11px;margin-top:10px;font-size:13px;line-height:1.6}.mavAiBulk{border:0;border-radius:10px;padding:11px 14px;background:#111827;color:#fff;font-weight:900;margin:10px 0}.mavAiVoiceToggle{border:0;border-radius:10px;padding:8px 10px;background:#eef1f5;color:#111827;font-weight:800}
-    .mavAiTools{display:flex;gap:7px;flex-wrap:wrap;padding:0 12px 8px}
-    .mavAiTool{border:1px solid #d9dde3;background:#fff;color:#111827;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:800}
-    .mavAiMic{border:0;border-radius:12px;padding:0 13px;background:#eef1f5;color:#111827;font-weight:900}
-    .mavAiMic.listening{background:#fee2e2;color:#991b1b;animation:mavAiPulse 1.2s infinite}
-    .mavAiVoiceState{font-size:11px;color:#667085;padding:0 12px 7px;min-height:15px}
-    @keyframes mavAiPulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px #ef444422}}
+    .mavAiConfirm button{border:0;border-radius:10px;padding:10px;font-weight:800;font-size:12.5px;cursor:pointer}
+    .mavAiConfirm .ok{background:#0284c7;color:#fff}.mavAiConfirm .cancel{background:#f1f5f9;color:#0f172a}
+    @keyframes mavAiPulse{50%{transform:scale(1.04);box-shadow:0 0 0 6px rgba(239,68,68,0.18)}}
 
-    @media(max-width:600px){.mavAiActions,.mavAiGrid,.mavAiConfirm{grid-template-columns:1fr}.mavAiBox{height:96vh}#mavAiButton{right:12px;bottom:78px}}
+    /* CARE MODE ACTIVE — MAV AI ADAPTATION */
+    body.care-mode-active .mavAiBox{background:#0c1527;border-color:#1a2947;box-shadow:0 25px 60px -15px rgba(0,0,0,0.6)}
+    body.care-mode-active .mavAiHead{background:#050a12;border-color:#1a2947}
+    body.care-mode-active .mavAiMessages{background:#070d18}
+    body.care-mode-active .mavAiMsg.bot{background:#0f1c33;border-color:#1a2a46;color:#f1f5f9;box-shadow:none}
+    body.care-mode-active .mavAiSuggestionsSection{background:#070d18}
+    body.care-mode-active .mavAiSuggestionsTitle{color:#94a3b8}
+    body.care-mode-active .mavAiChip{background:#0c1527;border-color:#1a2947;color:#38bdf8}
+    body.care-mode-active .mavAiChip:hover{background:#101e38;border-color:#38bdf8;color:#7dd3fc}
+    body.care-mode-active .mavAiComposer{background:#0c1527;border-color:#1a2947}
+    body.care-mode-active .mavAiComposer textarea{background:#070e1c;border-color:#1e3256;color:#f8fafc}
+    body.care-mode-active .mavAiComposer textarea:focus{border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,0.15)}
+    body.care-mode-active .mavAiSend{background:#0284c7}
+    body.care-mode-active .mavAiMic{background:#101c34;border-color:#1e3256;color:#f1f5f9}
+    body.care-mode-active .mavAiVoiceState{background:#0c1527;color:#94a3b8}
+    body.care-mode-active .mavAiTools{background:#0c1527;border-color:#1a2947}
+    body.care-mode-active .mavAiTool{background:#101c34;border-color:#1e3256;color:#f1f5f9}
+    body.care-mode-active .mavAiTool:hover{border-color:#38bdf8;color:#38bdf8}
+    body.care-mode-active .mavAiPanel{background:#0f1c33;border-color:#1a2a46;color:#f1f5f9}
+    body.care-mode-active .mavAiSummary{background:#070e1c;border-color:#1a2a46;color:#cbd5e1}
+    body.care-mode-active .mavAiConfirm .cancel{background:#101c34;color:#f1f5f9}
+
+    @media(max-width:600px){
+      .mavAiBox{height:96vh;border-radius:18px}
+      #mavAiButton{right:14px;bottom:76px;padding:10px 15px;font-size:13px}
+      .mavAiHeadTitle small{display:none}
+      .mavAiConfirm{grid-template-columns:1fr}
+    }
   `;
+
 
   function boot(){
     if(document.getElementById('mavAiButton'))return;
@@ -47,26 +84,35 @@
     button.id='mavAiButton';
     button.setAttribute('aria-label','Open Mav AI');
     button.type='button';
-    button.textContent='✨ Mav AI';
+    button.innerHTML='<span>✨</span><span>Mav AI</span>';
     document.body.appendChild(button);
 
     const modal=document.createElement('div');
     modal.id='mavAiModal';
     modal.innerHTML=
-      '<div class="mavAiBox">'+
-        '<div class="mavAiHead"><div><strong>✨ Mav AI</strong><small>Ask questions, prepare actions, confirm important changes</small></div><button class="mavAiClose" type="button">✕</button></div>'+
-        '<div class="mavAiMessages" id="mavAiMessages">'+
-          '<div class="mavAiMsg bot">Hi. I am Mav AI. I can read your rental data, answer questions, and prepare management actions. Important changes always require your final confirmation.</div>'+
-          '<div class="mavAiActions" id="mavAiActions">'+
-            '<button class="mavAiAction" id="mavAiAddTenant">👤 Assign new tenant</button>'+
-            '<button class="mavAiAction" id="mavAiReceipt">🧾 Create receipt</button><button class="mavAiAction" id="mavAiPrn">💳 Payment PRN</button>'+
-            '<button class="mavAiAction" id="mavAiOverdue">🔴 Show overdue</button>'+
-            '<button class="mavAiAction" id="mavAiMaintenance">🔧 Open maintenance</button><button class="mavAiAction" id="mavAiBrief">📋 Daily brief</button><button class="mavAiAction" id="mavAiContact">📲 Contact overdue</button><button class="mavAiAction" id="mavAiPhone">📱 My phone number</button>'+
+      '<div class="mavAiBox" role="dialog" aria-modal="true" aria-label="Mav AI Assistant">'+
+        '<div class="mavAiHead">'+
+          '<div class="mavAiHeadTitle"><strong>✨ Mav AI</strong><small>Rental Management Assistant</small></div>'+
+          '<div class="mavAiHeadActions">'+
+            '<select id="mavAiVoiceMode" class="mavAiVoiceSelect" aria-label="Mav AI Voice Settings">'+
+              '<option value="calm_male">🎙️ Calm Male</option>'+
+              '<option value="natural_male">🎙️ Natural Male</option>'+
+              '<option value="system_default">🎙️ System Default</option>'+
+              '<option value="off">🔇 Voice Off</option>'+
+            '</select>'+
+            '<button class="mavAiClose" type="button" aria-label="Close Mav AI">✕</button>'+
           '</div>'+
         '</div>'+
-        '<div class="mavAiHint">Try: “Who is overdue?” or “Assign Sarah to Room B12, rent 450000, deposit 450000.”</div>'+
-        '<div class="mavAiTools"><button class="mavAiTool" id="mavAiOps" type="button">🧠 Operations Center</button><button class="mavAiTool" id="mavAiAuto" type="button">🟢 Care Mode</button><button class="mavAiTool" id="mavAiCareTasks" type="button">🛡️ Approval Center</button><button class="mavAiTool" id="mavAiAudit" type="button">🧾 AI activity</button></div>'+
-        '<div class="mavAiVoiceState" id="mavAiVoiceState"></div><div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask Mav AI..." maxlength="4000"></textarea><button class="mavAiMic" id="mavAiMic" type="button" title="Talk to Mav AI">🎤</button><button class="mavAiVoiceToggle" id="mavAiVoiceToggle" type="button" title="Toggle spoken replies">🔊</button><button class="mavAiSend" id="mavAiSend" type="button">Send</button></div>'+
+        '<div class="mavAiMessages" id="mavAiMessages">'+
+          '<div class="mavAiMsg bot">Hi. I am Mav AI, your rental management assistant. How can I help you today?</div>'+
+        '</div>'+
+        '<div class="mavAiSuggestionsSection">'+
+          '<div class="mavAiSuggestionsTitle">Suggested prompts</div>'+
+          '<div class="mavAiSuggestionsGrid" id="mavAiSuggestions"></div>'+
+        '</div>'+
+        '<div class="mavAiTools" id="mavAiTools"><button class="mavAiTool" id="mavAiOps" type="button">🧠 Operations Center</button><button class="mavAiTool" id="mavAiAuto" type="button">🟢 Care Mode</button><button class="mavAiTool" id="mavAiCareTasks" type="button">🛡️ Approval Center</button><button class="mavAiTool" id="mavAiAudit" type="button">🧾 AI activity</button></div>'+
+        '<div class="mavAiVoiceState" id="mavAiVoiceState"></div>'+
+        '<div class="mavAiComposer"><textarea id="mavAiInput" placeholder="Ask Mav AI..." maxlength="4000" aria-label="Ask Mav AI"></textarea><button class="mavAiMic" id="mavAiMic" type="button" title="Talk to Mav AI" aria-label="Voice input">🎤</button><button class="mavAiSend" id="mavAiSend" type="button" aria-label="Send message">Send</button></div>'+
       '</div>';
     document.body.appendChild(modal);
 
@@ -74,17 +120,19 @@
     const input=document.getElementById('mavAiInput');
     const send=document.getElementById('mavAiSend');
     const mic=document.getElementById('mavAiMic');
-    const voiceToggle=document.getElementById('mavAiVoiceToggle');
+    const voiceSelect=document.getElementById('mavAiVoiceMode');
     const voiceState=document.getElementById('mavAiVoiceState');
     const opsBtn=document.getElementById('mavAiOps');
     const autoBtn=document.getElementById('mavAiAuto');
     const auditBtn=document.getElementById('mavAiAudit');
     const careTasksBtn=document.getElementById('mavAiCareTasks');
-    const prnBtn=document.getElementById('mavAiPrn');
+    const suggestionsGrid=document.getElementById('mavAiSuggestions');
+    const toolsBar=document.getElementById('mavAiTools');
 
-    const close=function(){modal.classList.remove('open');};
-    button.onclick=function(){modal.classList.add('open');};
-    modal.querySelector('.mavAiClose').onclick=close;
+    const close=function(){modal.classList.remove('open');stopSpeaking();};
+    if(button)button.onclick=function(){modal.classList.add('open');configureRoleUI();setTimeout(function(){if(input)input.focus();},80);};
+    const closeBtn=modal.querySelector('.mavAiClose');
+    if(closeBtn)closeBtn.onclick=close;
     modal.addEventListener('click',function(e){if(e.target===modal)close();});
 
     function addMessage(text,who){
@@ -93,7 +141,7 @@
       el.textContent=String(text||'');
       messages.appendChild(el);
       messages.scrollTop=messages.scrollHeight;
-      if(who==='bot' && voiceEnabled && String(text||'').trim() && !String(text).startsWith('Hi. I am Mav AI')) speak(text);
+      if(who==='bot' && voiceMode!=='off' && String(text||'').trim() && !String(text).startsWith('Hi. I am Mav AI')) speak(text);
     }
 
     function panel(html){
@@ -186,6 +234,7 @@
         addMessage(next
           ? '🟢 MavRent Care Mode is ON. Routine monitoring and reminder tasks can be prepared automatically. Financial, tenant, property and irreversible changes still require your confirmation.'
           : '⚪ MavRent Care Mode is now OFF.','bot');
+        if(typeof window.updateCareModeVisuals==='function') window.updateCareModeVisuals(next);
       }catch(e){addMessage('Care Mode error: '+(e.message||e),'bot');}
     }
 
@@ -670,42 +719,65 @@
         const r=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({message:question})});
         const data=await r.json().catch(function(){return {};});
         if(!r.ok)throw new Error(data.error||'Mav AI request failed.');
-        addMessage(data.answer||'No answer returned.','bot'); speakMavRent(data.answer||'');
+        addMessage(data.answer||'No answer returned.','bot');
       }catch(e){addMessage('AI error: '+(e.message||'Unknown error'),'bot');aiAudit('AI question','failed',e.message||'Unknown error');}
       finally{send.disabled=false;send.textContent='Send';input.focus();}
     }
 
     function configureRoleUI(){
-      const tenant=(typeof role!=='undefined'&&role==='tenant');
-      const add=document.getElementById('mavAiAddTenant');
-      const brief=document.getElementById('mavAiBrief');
-      const contact=document.getElementById('mavAiContact');
-      if(tenant){
-        if(add)add.style.display='none';
-        if(brief)brief.textContent='💰 My rent summary';
-        if(contact)contact.textContent='📱 My phone number';
-      }else{
-        if(add)add.style.display='';
-        if(brief)brief.textContent='📋 Daily brief';
-        if(contact)contact.textContent='📲 Contact overdue';
+      const isTenant=(typeof role!=='undefined'&&role==='tenant');
+      if(toolsBar){
+        toolsBar.style.display=isTenant?'none':'flex';
+      }
+      if(suggestionsGrid){
+        const prompts=isTenant?[
+          'How much do I owe?',
+          'When is my rent due?',
+          'Show my payments',
+          'Show my receipts',
+          'Report maintenance'
+        ]:[
+          'Who is overdue?',
+          'What needs attention?',
+          'How much rent was collected this month?',
+          'Show vacant units',
+          'Show late payers',
+          'Record a payment'
+        ];
+        suggestionsGrid.innerHTML=prompts.map(p=>`<button type="button" class="mavAiChip" data-prompt="${escLocal(p)}">${escLocal(p)}</button>`).join('');
+        suggestionsGrid.querySelectorAll('.mavAiChip').forEach(btn=>{
+          btn.onclick=function(){
+            input.value=this.dataset.prompt;
+            ask();
+          };
+        });
       }
     }
 
-    opsBtn.onclick=operationsCenter;
-    autoBtn.onclick=setCareMode;
-    auditBtn.onclick=showAudit;
+    if(opsBtn)opsBtn.onclick=operationsCenter;
+    if(autoBtn)autoBtn.onclick=setCareMode;
+    if(auditBtn)auditBtn.onclick=showAudit;
     if(careTasksBtn)careTasksBtn.onclick=careTasksCenter;
 
-    let mavRentSpeakEnabled=true;
-    function speakMavRent(text){
-      if(!mavRentSpeakEnabled || !('speechSynthesis' in window) || !String(text||'').trim())return;
-      try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text).replace(/[*_#]/g,''));u.lang='en-UG';u.rate=.96;window.speechSynthesis.speak(u);}catch(e){}
+    // Mav AI voice: Calm Male SpeechSynthesis + Speech Recognition
+    let recognition=null, voiceFinal='', conversationMode=false, speaking=false, voices=[];
+    let voiceMode=localStorage.getItem('mav_voice_mode')||'calm_male';
+
+    if(voiceSelect){
+      voiceSelect.value=voiceMode;
+      voiceSelect.onchange=function(){
+        voiceMode=this.value;
+        localStorage.setItem('mav_voice_mode',voiceMode);
+        stopSpeaking();
+        if(voiceMode!=='off'){
+          speak('I am Mav AI. Calm spoken replies are active.');
+        }else{
+          setVoiceState('Spoken replies off');
+          setTimeout(()=>setVoiceState(''),1800);
+        }
+      };
     }
-    // Mav AI voice: speech-to-text + spoken replies + hands-free conversation.
-    // This is an in-app voice mode. Browser security does not allow a PWA to own a
-    // system-wide hotword such as Siri/Bixby/Alexa; microphone listening must begin
-    // from a user gesture.
-    let recognition=null, voiceFinal='', voiceEnabled=localStorage.getItem('mav_ai_voice_enabled')!=='0', conversationMode=false, speaking=false, voices=[];
+
     const setVoiceState=function(t){if(voiceState)voiceState.textContent=t||'';};
     const refreshVoices=function(){try{voices=window.speechSynthesis?window.speechSynthesis.getVoices():[]}catch(e){voices=[]}};
     refreshVoices();
@@ -715,33 +787,77 @@
       try{if(window.speechSynthesis)window.speechSynthesis.cancel()}catch(e){}
       speaking=false;
     }
+
+    function findCalmMaleVoice(mode){
+      if(!voices.length)refreshVoices();
+      if(!voices.length)return null;
+      if(mode==='system_default'){
+        return voices.find(v=>v.default&&v.lang.startsWith('en'))||voices.find(v=>v.lang.startsWith('en'))||voices[0];
+      }
+      // Preferred order:
+      // 1. Google UK English Male
+      // 2. Microsoft David
+      // 3. Microsoft Mark
+      // 4. another English male voice
+      // 5. system English voice fallback
+      const malePatterns=[
+        /Google.*UK.*English.*Male/i,
+        /Microsoft.*David/i,
+        /Microsoft.*Mark/i,
+        /Google.*English.*Male/i,
+        /en[-_]GB.*Male/i,
+        /en[-_]US.*Male/i,
+        /Daniel/i,
+        /Oliver/i,
+        /Arthur/i,
+        /George/i,
+        /Guy/i,
+        /Ryan/i,
+        /James/i
+      ];
+      for(const p of malePatterns){
+        const f=voices.find(v=>p.test(v.name)&&v.lang.startsWith('en'));
+        if(f)return f;
+      }
+      const anyMale=voices.find(v=>/\bmale\b/i.test(v.name)&&v.lang.startsWith('en'));
+      if(anyMale)return anyMale;
+      const enUK=voices.find(v=>/^en[-_]GB$/i.test(v.lang));
+      if(enUK)return enUK;
+      const enUS=voices.find(v=>/^en[-_]US$/i.test(v.lang));
+      if(enUS)return enUS;
+      const anyEn=voices.find(v=>v.lang.startsWith('en'));
+      return anyEn||voices[0];
+    }
+
     function speak(text){
-      if(!voiceEnabled||!('speechSynthesis' in window))return;
-      const value=String(text||'').replace(/[🧠🟢🛡️🧾📋🔴🔧🏠👥💰📅💳📱🎤✨✓✅⚪]/g,'').trim();
+      if(voiceMode==='off'||!('speechSynthesis' in window))return;
+      const value=String(text||'').replace(/[🧠🟢🛡️🧾📋🔴🔧🏠👥💰📅💳📱🎤✨✓✅⚪✕⚠️]/g,'').replace(/[*_#`~]/g,'').trim();
       if(!value)return;
       stopSpeaking();
       try{
-        const u=new SpeechSynthesisUtterance(value.slice(0,1800));
-        u.lang=(navigator.language||'en-UG').startsWith('en')?'en-UG':(navigator.language||'en');
-        u.rate=.98;u.pitch=1;
-        const preferred=voices.find(function(v){return /^en(-GB|-UG|-US)?$/i.test(v.lang)})||voices.find(function(v){return /^en/i.test(v.lang)});
-        if(preferred)u.voice=preferred;
-        u.onstart=function(){speaking=true;setVoiceState('🔊 Mav AI is speaking…')};
-        u.onend=function(){speaking=false;setVoiceState(conversationMode?'🎙️ Hands-free mode is ready.':'')};
+        const u=new SpeechSynthesisUtterance(value.slice(0,1600));
+        const target=findCalmMaleVoice(voiceMode);
+        if(target){
+          u.voice=target;
+          u.lang=target.lang||'en-GB';
+        }else{
+          u.lang='en-US';
+        }
+        if(voiceMode==='calm_male'){
+          u.rate=0.94;u.pitch=0.93;u.volume=1.0;
+        }else if(voiceMode==='natural_male'){
+          u.rate=0.98;u.pitch=0.97;u.volume=1.0;
+        }else{
+          u.rate=1.0;u.pitch=1.0;u.volume=1.0;
+        }
+        u.onstart=function(){speaking=true;setVoiceState('🔊 Mav AI speaking…')};
+        u.onend=function(){speaking=false;setVoiceState(conversationMode?'🎙️ Ready for next query.':'')};
         u.onerror=function(){speaking=false;setVoiceState('')};
         window.speechSynthesis.speak(u);
-      }catch(e){}
-    }
-    function toggleVoice(){
-      voiceEnabled=!voiceEnabled;
-      localStorage.setItem('mav_ai_voice_enabled',voiceEnabled?'1':'0');
-      if(!voiceEnabled)stopSpeaking();
-      if(voiceToggle){voiceToggle.textContent=voiceEnabled?'🔊':'🔇';voiceToggle.title=voiceEnabled?'Spoken replies ON':'Spoken replies OFF';}
-      if(voiceEnabled)speak('Spoken replies are on. I am Mav AI.');
-      else setVoiceState('');
+      }catch(e){console.warn('Speech error:',e);}
     }
     function setupVoice(){
-      if(voiceToggle){voiceToggle.textContent=voiceEnabled?'🔊':'🔇';voiceToggle.onclick=toggleVoice;}
+      if(!mic)return;
       const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
       if(!SR){
         mic.onclick=function(){addMessage('🎤 Voice input is not available in this browser. You can still type and receive spoken replies.','bot')};
@@ -808,28 +924,36 @@
     }
     const handsFree=document.createElement('button');
     handsFree.type='button';handsFree.className='mavAiTool';handsFree.id='mavAiHandsFree';handsFree.textContent='🎙️ Hands-free';handsFree.onclick=toggleHandsFree;
-    const toolsRow=document.querySelector('.mavAiTools');
+    const toolsRow=toolsBar || modal.querySelector('.mavAiTools');
     if(toolsRow)toolsRow.appendChild(handsFree);
     setupVoice();
 
-    document.getElementById('mavAiAddTenant').onclick=function(){showAddTenant();};
-    document.getElementById('mavAiReceipt').onclick=function(){
-      if(typeof role!=='undefined'&&role==='tenant'){input.value='Show my latest receipt';ask();}else showReceipt();
+    const addTenantBtn=document.getElementById('mavAiAddTenant');
+    if(addTenantBtn)addTenantBtn.onclick=function(){showAddTenant();};
+    const receiptBtn=document.getElementById('mavAiReceipt');
+    if(receiptBtn)receiptBtn.onclick=function(){
+      if(typeof role!=='undefined'&&role==='tenant'){if(input)input.value='Show my latest receipt';ask();}else showReceipt();
     };
-    document.getElementById('mavAiOverdue').onclick=function(){
-      input.value=(typeof role!=='undefined'&&role==='tenant')?'What is my rent balance?':'Who is overdue?';ask();
+    const overdueBtn=document.getElementById('mavAiOverdue');
+    if(overdueBtn)overdueBtn.onclick=function(){
+      if(input)input.value=(typeof role!=='undefined'&&role==='tenant')?'What is my rent balance?':'Who is overdue?';ask();
     };
-    document.getElementById('mavAiMaintenance').onclick=function(){input.value=(typeof role!=='undefined'&&role==='tenant')?'Show my maintenance requests.':'Show open maintenance.';ask();};
-    document.getElementById('mavAiBrief').onclick=function(){
-      if(typeof role!=='undefined'&&role==='tenant'){input.value='Give me my rent and payment summary.';ask();}else dailyBrief();
+    const maintBtn=document.getElementById('mavAiMaintenance');
+    if(maintBtn)maintBtn.onclick=function(){if(input)input.value=(typeof role!=='undefined'&&role==='tenant')?'Show my maintenance requests.':'Show open maintenance.';ask();};
+    const briefBtn=document.getElementById('mavAiBrief');
+    if(briefBtn)briefBtn.onclick=function(){
+      if(typeof role!=='undefined'&&role==='tenant'){if(input)input.value='Give me my rent and payment summary.';ask();}else dailyBrief();
     };
-    document.getElementById('mavAiContact').onclick=function(){
+    const contactBtn=document.getElementById('mavAiContact');
+    if(contactBtn)contactBtn.onclick=function(){
       if(typeof role!=='undefined'&&role==='tenant'){saveTenantPhone();}else contactOverdue();
     };
-    document.getElementById('mavAiPhone').onclick=saveTenantPhone;
+    const phoneBtn=document.getElementById('mavAiPhone');
+    if(phoneBtn)phoneBtn.onclick=saveTenantPhone;
+
     configureRoleUI();
-    send.onclick=ask;
-    input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
+    if(send)send.onclick=ask;
+    if(input)input.addEventListener('keydown',function(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ask();}});
 
     function syncVisibility(){
       const app=document.getElementById('app');
