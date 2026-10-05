@@ -1,5 +1,5 @@
 // Mav AI production health check. Never returns secret values.
-const SUPABASE_URL=(process.env.SUPABASE_URL||'').replace(/\/$/,'');
+const SUPABASE_URL=(process.env.SUPABASE_URL||'https://wborvbuqdiscoasnsrwa.supabase.co').replace(/\/$/,'');
 const SERVICE_KEY=process.env.SUPABASE_SERVICE_ROLE_KEY||process.env.SUPABASE_SECRET_KEY||'';
 module.exports=async(req,res)=>{
   const checks={supabase_url:!!SUPABASE_URL,service_role_configured:!!SERVICE_KEY};

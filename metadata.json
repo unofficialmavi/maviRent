@@ -1,0 +1,8 @@
+{
+  "name": "MavRent",
+  "description": "MavRent rental management platform with tenant/landlord portal, Care Mode, and AI assistance",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

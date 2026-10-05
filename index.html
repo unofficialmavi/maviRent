@@ -3548,7 +3548,7 @@ ${esc(x.status)}
 <td>
 ${
 x.media_url
-?`<a href="${esc(x.media_url)}" target="_blank">View Media</a>`
+?`<a href="#" onclick="viewMedia(event,'${esc(x.media_url)}');return false;">View Media</a>`
 :'—'
 }
 </td>
@@ -3951,7 +3951,7 @@ async function createRentForTenant(id){
 
 function maintenanceLandlord(){
  const rows=cache.maintenance_requests;
- return `<section><div class="title"><h1>🔧 Maintenance</h1><p>Review tenant requests, open attachments and update status.</p></div><div class="card">${rows.length?table(['Date','Tenant','Issue','Priority','Status','Attachment','Actions'],rows,x=>{const t=cache.tenants.find(t=>t.id===x.tenant_id);const media=x.media_url||x.attachment_url;return `<tr><td>${esc((x.created_at||'').slice(0,10))}</td><td>${esc(tenantName(t))}</td><td class="wrap"><strong>${esc(x.title||x.subject||'Maintenance')}</strong><br><small>${esc(x.description||'')}</small></td><td><span class="badge ${esc(x.priority||'medium')}">${esc(x.priority||'medium')}</span></td><td><span class="badge ${esc(x.status||'pending')}">${esc(x.status||'pending')}</span></td><td>${media?`<a class="btn" href="${esc(media)}" target="_blank" rel="noopener">View</a>`:'—'}</td><td><div class="actions"><button class="btn success" onclick="updateMaintenanceStatus('${x.id}','completed')">Complete</button><button class="btn warn" onclick="updateMaintenanceStatus('${x.id}','in_progress')">In progress</button><button class="btn danger" onclick="updateMaintenanceStatus('${x.id}','rejected')">Close</button></div></td></tr>`;}):'<div class="empty">No maintenance requests.</div>'}</div></section>`;
+  return `<section><div class="title"><h1>🔧 Maintenance</h1><p>Review tenant requests, open attachments and update status.</p></div><div class="card">${rows.length?table(['Date','Tenant','Issue','Priority','Status','Attachment','Actions'],rows,x=>{const t=cache.tenants.find(t=>t.id===x.tenant_id);const media=x.media_url||x.attachment_url;return `<tr><td>${esc((x.created_at||'').slice(0,10))}</td><td>${esc(tenantName(t))}</td><td class="wrap"><strong>${esc(x.title||x.subject||'Maintenance')}</strong><br><small>${esc(x.description||'')}</small></td><td><span class="badge ${esc(x.priority||'medium')}">${esc(x.priority||'medium')}</span></td><td><span class="badge ${esc(x.status||'pending')}">${esc(x.status||'pending')}</span></td><td>${media?`<a class="btn" href="#" onclick="viewMedia(event,'${esc(media)}');return false;">View</a>`:'—'}</td><td><div class="actions"><button class="btn success" onclick="updateMaintenanceStatus('${x.id}','completed')">Complete</button><button class="btn warn" onclick="updateMaintenanceStatus('${x.id}','in_progress')">In progress</button><button class="btn danger" onclick="updateMaintenanceStatus('${x.id}','rejected')">Close</button></div></td></tr>`;}):'<div class="empty">No maintenance requests.</div>'}</div></section>`;
 }
 
 /* =====================================================
@@ -4060,10 +4060,30 @@ async function removeTenant(id,unitId){
  if(!confirm('Remove this tenant from the unit? Their historical payments and rent records will remain.'))return;
  const r=await sb.from('tenants').update({status:'inactive'}).eq('id',id).eq('landlord_id',user.id);if(r.error)return alert(r.error.message);if(unitId)await sb.from('units').update({status:'vacant'}).eq('id',unitId);await refresh();show('tenants',false);
 }
+async function viewMedia(event,pathOrUrl){
+ if(event&&event.preventDefault)event.preventDefault();
+ if(!pathOrUrl)return alert('No media attached.');
+ try{
+  const session=sb?.auth?(await sb.auth.getSession())?.data?.session:null;
+  const token=session?.access_token;
+  if(!token)return alert('Please log in to view private media.');
+  const r=await fetch('/api/media-url',{
+   method:'POST',
+   headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+   body:JSON.stringify({media:pathOrUrl})
+  });
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok||!d.signed_url)throw new Error(d.error||'Could not load private media.');
+  window.open(d.signed_url,'_blank','noopener,noreferrer');
+ }catch(err){alert('Media error: '+(err.message||err));}
+}
 async function updateMaintenanceStatus(id,status){const r=await sb.from('maintenance_requests').update({status}).eq('id',id);if(r.error)return alert(r.error.message);await refresh();show('maintenance',false);}
 function printReceipt(id){
  const r=cache.receipts.find(x=>x.id===id);if(!r)return; const p=cache.payments.find(x=>x.id===r.payment_id); const t=cache.tenants.find(x=>x.id===p?.tenant_id); const prof=cache.registeredTenants.find(x=>x.id===t?.profile_id); const w=window.open('','_blank'); if(!w)return alert('Please allow pop-ups to print the receipt.');
- w.document.write(`<html><head><title>${esc(r.receipt_number||'MavRent Receipt')}</title><style>body{font-family:Arial;padding:35px;max-width:700px;margin:auto}h1{color:#111827}.box{border:1px solid #ddd;border-radius:12px;padding:20px}hr{border:0;border-top:1px solid #ddd;margin:18px 0}</style></head><body><h1>MavRent — Rent Receipt</h1><div class="box"><p><b>Receipt:</b> ${esc(r.receipt_number||shortId(r.id))}</p><p><b>Tenant:</b> ${esc(prof?.full_name||prof?.email||'Tenant')}</p><p><b>Amount:</b> ${money(p?.amount)}</p><p><b>Payment date:</b> ${esc(p?.payment_date||'—')}</p><p><b>Method:</b> ${esc(p?.payment_method||'—')}</p><p><b>Reference:</b> ${esc(p?.transaction_reference||'—')}</p><p><b>Issued:</b> ${esc(r.issued_at?new Date(r.issued_at).toLocaleString():'—')}</p></div><hr><p>Thank you for your payment.</p><script>window.onload=()=>window.print()<\/script><script>
+ w.document.write(`<html><head><title>${esc(r.receipt_number||'MavRent Receipt')}</title><style>body{font-family:Arial;padding:35px;max-width:700px;margin:auto}h1{color:#111827}.box{border:1px solid #ddd;border-radius:12px;padding:20px}hr{border:0;border-top:1px solid #ddd;margin:18px 0}</style></head><body><h1>MavRent — Rent Receipt</h1><div class="box"><p><b>Receipt:</b> ${esc(r.receipt_number||shortId(r.id))}</p><p><b>Tenant:</b> ${esc(prof?.full_name||prof?.email||'Tenant')}</p><p><b>Amount:</b> ${money(p?.amount)}</p><p><b>Payment date:</b> ${esc(p?.payment_date||'—')}</p><p><b>Method:</b> ${esc(p?.payment_method||'—')}</p><p><b>Reference:</b> ${esc(p?.transaction_reference||'—')}</p><p><b>Issued:</b> ${esc(r.issued_at?new Date(r.issued_at).toLocaleString():'—')}</p></div><hr><p>Thank you for your payment.</p>` + '<' + 'script>window.onload=()=>window.print()<' + '/script>' + `</body></html>`);
+ w.document.close();
+}
+
 /* Mav AI dashboard launcher: independent of the floating button/watchdog. */
 (function(){
   window.openMavAIFromDashboard=function(){
@@ -4097,8 +4117,6 @@ function printReceipt(id){
     }
   };
 })();
-</script></body></html>`);w.document.close();
-}
 
 function attach(){
   const phoneForm=$('phoneProfileForm');

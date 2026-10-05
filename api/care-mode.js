@@ -1,5 +1,5 @@
 // MavRent Care Mode settings API
-const SUPABASE_URL=(process.env.SUPABASE_URL||'').replace(/\/$/,'');
+const SUPABASE_URL=(process.env.SUPABASE_URL||'https://wborvbuqdiscoasnsrwa.supabase.co').replace(/\/$/,'');
 const ANON_KEY=process.env.SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||'';
 const SERVICE_KEY=process.env.SUPABASE_SERVICE_ROLE_KEY||process.env.SUPABASE_SECRET_KEY||'';
 function sbh(k){return {apikey:k,Authorization:'Bearer '+k,'Content-Type':'application/json'};}

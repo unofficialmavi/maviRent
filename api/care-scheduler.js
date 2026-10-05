@@ -1,6 +1,6 @@
 // MavRent Care Mode scheduler
 // Runs from Vercel Cron. It never performs financial or irreversible actions.
-const SUPABASE_URL=(process.env.SUPABASE_URL||'').replace(/\/$/,'');
+const SUPABASE_URL=(process.env.SUPABASE_URL||'https://wborvbuqdiscoasnsrwa.supabase.co').replace(/\/$/,'');
 const SERVICE_KEY=process.env.SUPABASE_SERVICE_ROLE_KEY||process.env.SUPABASE_SECRET_KEY||'';
 function headers(){return {apikey:SERVICE_KEY,Authorization:'Bearer '+SERVICE_KEY,'Content-Type':'application/json'};}
 async function sb(path,opts={}){
