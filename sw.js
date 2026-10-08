@@ -3,7 +3,7 @@
    V14.5 - PUSH NOTIFICATIONS + OFFLINE SUPPORT
    ========================================================= */
 
-const CACHE_NAME = "mavrent-v15-8";
+const CACHE_NAME = "mavrent-v15-9";
 
 const APP_FILES = [
   "./",
