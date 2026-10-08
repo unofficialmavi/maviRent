@@ -4446,7 +4446,7 @@ async function assignTenant(e){
  const profileId=$('tprofile').value,unitId=$('tunit').value,rent=Number($('trent').value||0),deposit=Number($('tdeposit').value||0),due=Number($('tdue').value||1),move=$('tmove').value||today(),advance=Number($('tadvance')?.value||3);
  if(!profileId||!unitId||rent<=0)return alert('Complete tenant, unit and rent amount.');
  const unit=cache.units.find(x=>x.id===unitId);
- const r=await sb.from('tenants').insert({landlord_id:user.id,profile_id:profileId,unit_id:unitId,rent_amount:rent,deposit_amount:deposit,rent_due_day:due,move_in_date:move,status:'active'}).select('*').single();
+ const r=await sb.from('tenants').insert({landlord_id:user.id,profile_id:profileId,unit_id:unitId,rent_amount:rent,deposit_amount:deposit,rent_due_day:due,move_in_date:move,status:'active',advance_months:advance,first_rent_month:monthStart(move),next_due_date:dueDateFor(monthStart(move),due)}).select('*').single();
  if(r.error)return alert(r.error.message);
  await sb.from('units').update({status:'occupied'}).eq('id',unitId);
  cache.tenants.push(r.data);
