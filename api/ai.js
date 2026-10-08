@@ -139,6 +139,19 @@ async function getMavRentContext(token, userId) {
     context.data.receipts = Array.isArray(context.data.receipts)
       ? context.data.receipts.filter(r => myTenantId && String(r.tenant_id) === myTenantId)
       : [];
+
+    // Defense in depth: tenant AI must not carry unrelated property/unit rows
+    // even if a future RLS policy is accidentally too broad.
+    const myUnitId = myTenant?.unit_id ? String(myTenant.unit_id) : null;
+    context.data.units = Array.isArray(context.data.units)
+      ? context.data.units.filter(u => myUnitId && String(u.id) === myUnitId)
+      : [];
+    const myUnit = context.data.units[0] || null;
+    const myPropertyId = myUnit?.property_id ? String(myUnit.property_id) : null;
+    context.data.properties = Array.isArray(context.data.properties)
+      ? context.data.properties.filter(p => myPropertyId && String(p.id) === myPropertyId)
+      : [];
+
     delete context.data.expenses;
   }
 
@@ -536,8 +549,7 @@ async function askGemini(message, context) {
         }
       ],
       generationConfig: {
-        maxOutputTokens: 1200,
-        temperature: 0.2
+        maxOutputTokens: 1200
       }
     })
   });
