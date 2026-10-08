@@ -75,6 +75,8 @@ async function recordPayment(userId,body){
       payment_date:paymentDate,
       payment_method:body.payment_method||'other',
       status:'confirmed',
+      confirmed_by:userId,
+      confirmed_at:new Date().toISOString(),
       notes:body.notes||'Recorded by MavRent AI Permission Engine'
     }
   });
@@ -133,13 +135,38 @@ async function assignTenant(userId,body){
   if(!props.length)throw new Error('This unit does not belong to the landlord.');
   const existing=await sb('/rest/v1/tenants?select=id&unit_id=eq.'+encodeURIComponent(unitId)+'&status=eq.active&limit=1');
   if(existing.length)throw new Error('This unit is already occupied.');
+  const advanceMonths=Math.min(12,Math.max(1,Number(body.initial_advance_months||3)));
+  const moveIn=body.move_in_date||new Date().toISOString().slice(0,10);
+  const dueDay=Math.min(28,Math.max(1,Number(body.rent_due_day||1)));
   const rows=await sb('/rest/v1/tenants',{method:'POST',headers:{Prefer:'return=representation'},body:{
     landlord_id:userId,profile_id:profId,unit_id:unitId,rent_amount:rent,
-    deposit_amount:Number(body.deposit_amount||0),rent_due_day:Number(body.rent_due_day||1),
-    move_in_date:body.move_in_date,status:'active'
+    deposit_amount:Number(body.deposit_amount||0),rent_due_day:dueDay,
+    move_in_date:moveIn,status:'active',advance_months:advanceMonths,
+    first_rent_month:moveIn.slice(0,7)+'-01'
   }});
+  const tenant=rows[0];
+  const monthStart=new Date(moveIn+'T00:00:00');
+  monthStart.setDate(1);
+  const horizon=new Date();
+  horizon.setDate(1);
+  horizon.setMonth(horizon.getMonth()+11);
+  const rentRows=[];
+  for(let d=new Date(monthStart);d<=horizon;d.setMonth(d.getMonth()+1)){
+    const y=d.getFullYear(),m=d.getMonth();
+    const lastDay=new Date(y,m+1,0).getDate();
+    const day=Math.min(dueDay,lastDay);
+    const due=new Date(y,m,day);
+    rentRows.push({
+      landlord_id:userId,tenant_id:tenant.id,unit_id:unitId,
+      period_month:y+'-'+String(m+1).padStart(2,'0')+'-01',
+      due_date:due.toISOString().slice(0,10),
+      amount_due:rent,amount_paid:0,
+      status:due.toISOString().slice(0,10)<new Date().toISOString().slice(0,10)?'overdue':'pending'
+    });
+  }
+  if(rentRows.length)await sb('/rest/v1/rent_records',{method:'POST',headers:{Prefer:'return=minimal'},body:rentRows});
   await sb('/rest/v1/units?id=eq.'+encodeURIComponent(unitId),{method:'PATCH',body:{status:'occupied'}});
-  return rows[0];
+  return {...tenant,rent_schedule_created:rentRows.length};
 }
 
 module.exports=async(req,res)=>{
