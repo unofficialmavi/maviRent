@@ -4737,7 +4737,7 @@ async function submitTenantMaintenance(e){
  try{
   const file=$('tmedia')?.files?.[0];let media_url=null;
   if(file){if(file.size>25*1024*1024)throw new Error('Maximum file size is 25 MB.');const path=`${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;const up=await sb.storage.from(MEDIA_BUCKET).upload(path,file,{upsert:false});if(up.error)throw up.error;const pub=sb.storage.from(MEDIA_BUCKET).getPublicUrl(path);media_url=pub.data.publicUrl;}
-  const r=await sb.from('maintenance_requests').insert({landlord_id:t.landlord_id||user.id,tenant_id:t.id,title:$('tsubject').value.trim(),subject:$('tsubject').value.trim(),description:$('tdesc').value.trim(),priority:$('tpriority').value,status:'pending',media_url}).select('*').single();if(r.error)throw r.error;
+  const r=await sb.from('maintenance_requests').insert({landlord_id:t.landlord_id||user.id,tenant_id:t.id,unit_id:t.unit_id||null,title:$('tsubject').value.trim(),description:$('tdesc').value.trim(),priority:$('tpriority').value,status:'pending',media_url}).select('*').single();if(r.error)throw r.error;
   e.target.reset();alert('Maintenance request submitted.');await refresh();show('myMaintenance',false);
  }catch(err){alert(err.message||err);}finally{if(btn){btn.disabled=false;btn.textContent='Submit request';}}
 }
