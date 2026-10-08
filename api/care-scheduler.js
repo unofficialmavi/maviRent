@@ -19,7 +19,7 @@ module.exports=async(req,res)=>{
    const landlordId=mode.user_id;
    const settings=mode.settings||{};
    const overdue=await sb('/rest/v1/rent_records?select=id,tenant_id,amount_due,amount_paid,due_date,status&period_month&landlord_id=eq.'+encodeURIComponent(landlordId)+'&limit=500');
-   const open=await sb('/rest/v1/maintenance_requests?select=id,tenant_id,title,subject,status,priority,created_at&landlord_id=eq.'+encodeURIComponent(landlordId)+'&limit=500');
+   const open=await sb('/rest/v1/maintenance_requests?select=id,tenant_id,title,status,priority,created_at&landlord_id=eq.'+encodeURIComponent(landlordId)+'&limit=500');
    const today=new Date().toISOString().slice(0,10);
    for(const r of overdue||[]){
     const due=Number(r.amount_due||0)-Number(r.amount_paid||0);
